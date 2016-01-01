@@ -1,50 +1,67 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout
-    android:id="@+id/drawer_layout"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:openDrawer="start"
-    tools:context="com.lue.laoyoutiao.MainActivity">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:popupTheme="@style/AppTheme.PopupOverlay"/>
-
-        <Button
-            android:id="@+id/button_testapi"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="测试按钮"
-            android:textSize="30sp"/>
-
-        <ListView
-            android:id="@+id/topten_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context="com.lue.laoyoutiao.activity.MainActivity">
 
 
-    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/main_content"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
-    <android.support.design.widget.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer"/>
+    <RadioGroup
+        android:id="@+id/tab_menu"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:background="@mipmap/my_tab_menu"
+        android:orientation="horizontal">
 
-</android.support.v4.widget.DrawerLayout>
+        <RadioButton
+            android:id="@+id/topten"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:button="@null"
+            android:checked="true"
+            android:drawableTop="@drawable/tab_selector_topten"
+            android:gravity="center_horizontal|bottom"
+            android:text="十大"
+            android:textSize="20sp"
+            android:textColor="@drawable/tab_selector_tv_color"/>
+
+        <RadioButton
+            android:id="@+id/borad"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:button="@null"
+            android:drawableTop="@drawable/tab_selector_board"
+            android:gravity="center_horizontal|bottom"
+            android:text="版面"
+            android:textSize="20sp"
+            android:textColor="@drawable/tab_selector_tv_color"/>
+
+
+        <RadioButton
+            android:id="@+id/mine"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:button="@null"
+            android:drawableTop="@drawable/tab_selector_mine"
+            android:gravity="center_horizontal|bottom"
+            android:text="我的"
+            android:textSize="20sp"
+            android:textColor="@drawable/tab_selector_tv_color"
+            />
+    </RadioGroup>
+
+
+</LinearLayout>
+
