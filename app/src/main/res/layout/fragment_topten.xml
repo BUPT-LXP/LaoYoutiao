@@ -6,6 +6,7 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/topten_text_test"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="这里是十大"

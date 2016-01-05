@@ -4,12 +4,21 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Base64;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.fragment.BoardFragment;
 import com.lue.laoyoutiao.fragment.MineFragment;
 import com.lue.laoyoutiao.fragment.ToptenFragment;
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+
+import java.io.IOException;
 
 
 public class MainActivity extends FragmentActivity
@@ -23,7 +32,8 @@ public class MainActivity extends FragmentActivity
     private FragmentManager fragmentManager;
     private FragmentTransaction fragmentTransaction;
 
-    public static final String APP_KEY = "5773baf6666c1282849bb006db21da1c";
+//    public static final String APP_KEY = "5773baf6666c1282849bb006db21da1c";
+    public static final String APP_KEY = "7a282a1a9de5b450";
     public static final String CLIENT_SECRET = "9e75be7878e3e488ad4cc09d937d8408";
     public static final String API_HEADER = "http://api.byr.cn";
 
@@ -38,11 +48,49 @@ public class MainActivity extends FragmentActivity
         initView();
 
 
-//        Intent intent = getIntent();
-//        String username = intent.getStringExtra("username");
-//        String password = intent.getStringExtra("password");
+        HttpTest();
+
 
     }
+
+    public void HttpTest()
+    {
+        final TextView textView = (TextView)findViewById(R.id.topten_text_test);
+        OkHttpClient okHttpClient = new OkHttpClient();
+
+
+        String username = "guest";
+        String password = "";
+        byte[] encodepassword = (username + ":" + password).getBytes();
+
+        //传入的参数中flags一定要用Base64.NO_WRAP
+        String string = Base64.encodeToString(encodepassword, Base64.NO_WRAP);
+
+
+        Request request = new Request.Builder()
+                .url("http://api.byr.cn/widget/topten.json?appkey=5773baf6666c1282849bb006db21da1c")
+                .addHeader("Authorization", "Basic " + string)
+                .build();
+        Call call = okHttpClient.newCall(request);
+
+        call.enqueue(new Callback()
+        {
+            @Override
+            public void onFailure(Request request, IOException e)
+            {
+
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException
+            {
+                String string = response.body().string();
+                textView.setText(string);
+            }
+        });
+
+    }
+
 
     public void initView()
     {
