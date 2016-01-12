@@ -1,41 +1,39 @@
 package com.lue.laoyoutiao.activity;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Base64;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.widget.RadioGroup;
-import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.fragment.BoardFragment;
 import com.lue.laoyoutiao.fragment.MineFragment;
 import com.lue.laoyoutiao.fragment.ToptenFragment;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import com.lue.laoyoutiao.helper.WidgetHelper;
+import com.lue.laoyoutiao.metadata.Article;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import de.greenrobot.event.EventBus;
 
 
 public class MainActivity extends FragmentActivity
 {
-    private final String TAG = "MainActivity";
+    private static final String TAG = "MainActivity";
+
     private ToptenFragment toptenFragment;
     private BoardFragment boardFragment;
     private MineFragment mineFragment;
+
+
     private RadioGroup radioGroup;
 
     private FragmentManager fragmentManager;
-    private FragmentTransaction fragmentTransaction;
-
-//    public static final String APP_KEY = "5773baf6666c1282849bb006db21da1c";
-    public static final String APP_KEY = "7a282a1a9de5b450";
-    public static final String CLIENT_SECRET = "9e75be7878e3e488ad4cc09d937d8408";
-    public static final String API_HEADER = "http://api.byr.cn";
 
 
     @Override
@@ -44,59 +42,52 @@ public class MainActivity extends FragmentActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //设置默认fragment
+        Intent intent1 = getIntent();
+        String username = intent1.getStringExtra("username");
+        String password = intent1.getStringExtra("password");
+
+
+        SharedPreferences MysharedPreferences = getSharedPreferences("My_SharePreference", MODE_PRIVATE);
+        SharedPreferences.Editor editor = MysharedPreferences.edit();
+        editor.putString("username", username);
+        editor.putString("password", password);
+        editor.apply();
+
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+
+        /*设置默认fragment，注意这里必须在onStart()里，不然会造成Fragment中的onCreateView不执行，不知道是怎么回事
+            参考http://stackoverflow.com/questions/17229500/
+            oncreateview-in-fragment-is-not-called-immediately-even-after-fragmentmanager#  解决的 */
         initView();
 
-
-        HttpTest();
-
-
+        getTopten();
     }
 
-    public void HttpTest()
+
+    @Override
+    public void onDestroy()
     {
-        final TextView textView = (TextView)findViewById(R.id.topten_text_test);
-        OkHttpClient okHttpClient = new OkHttpClient();
+        super.onDestroy();
 
-
-        String username = "guest";
-        String password = "";
-        byte[] encodepassword = (username + ":" + password).getBytes();
-
-        //传入的参数中flags一定要用Base64.NO_WRAP
-        String string = Base64.encodeToString(encodepassword, Base64.NO_WRAP);
-
-
-        Request request = new Request.Builder()
-                .url("http://api.byr.cn/widget/topten.json?appkey=5773baf6666c1282849bb006db21da1c")
-                .addHeader("Authorization", "Basic " + string)
-                .build();
-        Call call = okHttpClient.newCall(request);
-
-        call.enqueue(new Callback()
-        {
-            @Override
-            public void onFailure(Request request, IOException e)
-            {
-
-            }
-
-            @Override
-            public void onResponse(Response response) throws IOException
-            {
-                String string = response.body().string();
-                textView.setText(string);
-            }
-        });
-
+        //注销EventBus
+        EventBus.getDefault().unregister(this);
     }
 
 
+    /**
+     * 初始化布局
+     */
     public void initView()
     {
-        fragmentManager = getFragmentManager();
+        fragmentManager = getSupportFragmentManager();
 
-        setFragment(0);
+        showFragment(0);
 
         radioGroup = (RadioGroup) findViewById(R.id.tab_menu);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
@@ -107,13 +98,13 @@ public class MainActivity extends FragmentActivity
                 switch (checkedId)
                 {
                     case R.id.topten:
-                        setFragment(0);
+                        showFragment(0);
                         break;
                     case R.id.borad:
-                        setFragment(1);
+                        showFragment(1);
                         break;
                     case R.id.mine:
-                        setFragment(2);
+                        showFragment(2);
                         break;
                     default:
                         break;
@@ -122,35 +113,112 @@ public class MainActivity extends FragmentActivity
         });
     }
 
-    public void setFragment(int id)
+    /**
+     * 显隐藏所有的fragment，再显示本次需要显示的，使用“隐藏-显示”可以保存切换之前该fragment的状态
+     * @param id
+     */
+    public void showFragment(int id)
     {
-        fragmentTransaction = fragmentManager.beginTransaction();
+        // fragmentTransaction 必须是局部变量，若改成全局的话会造成
+        // java.lang.IllegalStateException: commit already called 异常
+        // 参考：http://blog.csdn.net/knxw0001/article/details/9363411
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        hideFragments(fragmentTransaction);
         switch (id)
         {
             case 0:
-                if (toptenFragment == null)
+                if(toptenFragment != null)
+                {
+                    fragmentTransaction.show(toptenFragment);
+                }
+                else
                 {
                     toptenFragment = new ToptenFragment();
+                    fragmentTransaction.add(R.id.main_content, toptenFragment);
                 }
-                //使用当前Fragment的布局替代main_content的控件
-                fragmentTransaction.replace(R.id.main_content, toptenFragment);
                 break;
             case 1:
-                if (boardFragment == null)
+                if (boardFragment != null)
+                {
+                    fragmentTransaction.show(boardFragment);
+
+                }
+                else
                 {
                     boardFragment = new BoardFragment();
+                    fragmentTransaction.add(R.id.main_content, boardFragment);
                 }
-                fragmentTransaction.replace(R.id.main_content, boardFragment);
+
                 break;
             case 2:
-                if (mineFragment == null)
+                if (mineFragment != null)
+                {
+                    fragmentTransaction.show(mineFragment);
+                }
+                else
                 {
                     mineFragment = new MineFragment();
+                    fragmentTransaction.add(R.id.main_content, mineFragment);
                 }
-                fragmentTransaction.replace(R.id.main_content, mineFragment);
+                break;
+            default:
                 break;
         }
         fragmentTransaction.commit();
+        fragmentManager.executePendingTransactions();
     }
+
+
+    /**
+     * 隐藏所有的fragment
+     * @param fragmentTransaction
+     */
+    public void hideFragments(FragmentTransaction fragmentTransaction)
+    {
+        if (toptenFragment != null)
+          fragmentTransaction.hide(toptenFragment);
+
+        if (boardFragment != null)
+          fragmentTransaction.hide(boardFragment);
+
+        if (mineFragment != null)
+           fragmentTransaction.hide(mineFragment);
+    }
+
+
+    /**
+     * 获取当天的十大热门话题
+     */
+    public void getTopten()
+    {
+        WidgetHelper widgetHelper = new WidgetHelper();
+
+        try
+        {
+            widgetHelper.getTopten();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 相应 WidgetHelper 发布的当天十大热门话题
+     * @param topten_article_list
+     */
+    public void onEventMainThread(List<Article> topten_article_list)
+    {
+        ArrayList<String> titles = new ArrayList<String>();
+
+        for(Article article : topten_article_list)
+        {
+            titles.add(article.getTitle());
+        }
+
+        toptenFragment.setToptenList(titles);
+    }
+
 }
+
+
 

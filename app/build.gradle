@@ -31,4 +31,7 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
     compile 'com.android.support:design:22.2.1'
+    compile 'com.google.code.gson:gson:2.4'
+    compile 'com.zhy:okhttputils:2.0.0'
+    compile 'de.greenrobot:eventbus:2.4.0'
 }
