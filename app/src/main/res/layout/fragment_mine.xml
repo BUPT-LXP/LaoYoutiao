@@ -5,14 +5,97 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
+
+    <LinearLayout
+        android:id="@+id/my_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="这里是我的"
-        android:textSize="40sp"/>
+        android:orientation="horizontal">
 
-    <ListView
-        android:id="@+id/mine_list"
+        <ImageView
+            android:id="@+id/my_face"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:contentDescription="@string/my_face_description"/>
+        <TextView
+            android:id="@+id/my_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:textSize="20sp"/>
+    </LinearLayout>
+
+
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="2sp"
+        android:background="@color/royalblue"/>
+
+
+    <TextView
+        android:id="@+id/textview_reply_me"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:drawableStart="@mipmap/reply_me"
+        android:text="@string/reply_me"
+        android:textSize="25sp"
+        android:textColor="@color/black"
+        android:gravity="center_vertical|start"
+        android:layout_marginStart="15dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2sp"
+        android:background="@color/royalblue"/>
+
+    <TextView
+        android:id="@+id/textview_my_secret_message"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:drawableStart="@mipmap/my_secret_message"
+        android:text="@string/my_secret_message"
+        android:textSize="25sp"
+        android:textColor="@color/black"
+        android:gravity="center_vertical|start"
+        android:layout_marginStart="15dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2sp"
+        android:background="@color/royalblue"/>
+
+    <TextView
+        android:id="@+id/textview_my_favorite"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:drawableStart="@mipmap/my_favorite"
+        android:text="@string/my_facorite"
+        android:textSize="25sp"
+        android:textColor="@color/black"
+        android:gravity="center_vertical|start"
+        android:layout_marginStart="15dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2sp"
+        android:background="@color/royalblue"/>
+
+    <TextView
+        android:id="@+id/textview_my_settings"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:drawableStart="@mipmap/my_settings"
+        android:text="@string/my_settings"
+        android:textSize="25sp"
+        android:textColor="@color/black"
+        android:gravity="center_vertical|start"
+        android:layout_marginStart="15dp"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2sp"
+        android:background="@color/royalblue"/>
+
+
 </LinearLayout>

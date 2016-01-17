@@ -2,6 +2,7 @@ package com.lue.laoyoutiao.helper;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
@@ -22,8 +23,8 @@ public class WidgetHelper
     private List<Article> articleList;
 
     private static final String TAG = "WidgetHelper";
-    private static final String WIDGET_STRING = "widget";
-    private static final String TOPTEN_STRING = "topten";
+    private static final String STRING_WIDGET = "widget";
+    private static final String STRING_TOPTEN = "topten";
 
 
     public WidgetHelper()
@@ -40,7 +41,7 @@ public class WidgetHelper
      */
     public void getTopten() throws IOException
     {
-        final String url = BYR_BBS_API.buildUrl(WIDGET_STRING, TOPTEN_STRING);
+        final String url = BYR_BBS_API.buildUrl(STRING_WIDGET, STRING_TOPTEN);
 
         new Thread()
         {
@@ -56,7 +57,7 @@ public class WidgetHelper
 
                     articleList = new Gson().fromJson(response_result, new TypeToken<List<Article>>() {}.getType());
 
-                    EventBus.getDefault().post(articleList);
+                    EventBus.getDefault().post(new Event.Topten_ArticleList(articleList));
                 }
                 catch (IOException e)
                 {
@@ -75,7 +76,7 @@ public class WidgetHelper
 
         articleList = new Gson().fromJson(response_result, new TypeToken<List<Article>>() {}.getType());
 
-        EventBus.getDefault().post(articleList);
+        EventBus.getDefault().post(new Event.Topten_ArticleList(articleList));
     }
 
 

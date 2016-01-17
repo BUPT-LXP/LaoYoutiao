@@ -11,9 +11,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.lue.laoyoutiao.R;
+import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.WidgetHelper;
+import com.lue.laoyoutiao.metadata.Article;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by Lue on 2015/12/30.
@@ -30,6 +36,12 @@ public class ToptenFragment extends Fragment
         view = inflater.inflate(R.layout.fragment_topten, container, false);
 
         listview_topten = (ListView)view.findViewById(R.id.topten_list);
+
+        getTopten();
+
+        //注册EventBus
+        EventBus.getDefault().register(this);
+
         return view;
     }
 
@@ -42,5 +54,47 @@ public class ToptenFragment extends Fragment
                 R.layout.article_list_item, titles);
 
         listview_topten.setAdapter(arrayAdapter);
+    }
+
+    /**
+     * 获取当天的十大热门话题
+     */
+    public void getTopten()
+    {
+        WidgetHelper widgetHelper = new WidgetHelper();
+
+        try
+        {
+            widgetHelper.getTopten();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 相应 WidgetHelper 发布的当天十大热门话题
+     * @param topten_article_list
+     */
+    public void onEventMainThread(Event.Topten_ArticleList topten_article_list)
+    {
+        ArrayList<String> titles = new ArrayList<String>();
+
+        for(Article article : topten_article_list.getTopten_list())
+        {
+            titles.add(article.getTitle());
+        }
+
+        setToptenList(titles);
+    }
+
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+
+        //注销EventBus
+        EventBus.getDefault().unregister(this);
     }
 }

@@ -3,10 +3,12 @@
 <TextView android:id="@android:id/text1"
           xmlns:android="http://schemas.android.com/apk/res/android"
           android:layout_width="match_parent"
-          android:layout_height="?android:attr/listPreferredItemHeight"
+          android:layout_height="wrap_content"
           android:gravity="center_vertical"
           android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
+          android:paddingEnd="?android:attr/expandableListPreferredItemPaddingLeft"
           android:textAppearance="?android:attr/textAppearanceListItem"
           android:textColor="@color/black"
+          android:textSize="20sp"
     />
 

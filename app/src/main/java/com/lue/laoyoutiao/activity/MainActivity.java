@@ -1,28 +1,18 @@
 package com.lue.laoyoutiao.activity;
 
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.RadioGroup;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.fragment.BoardFragment;
 import com.lue.laoyoutiao.fragment.MineFragment;
 import com.lue.laoyoutiao.fragment.ToptenFragment;
-import com.lue.laoyoutiao.helper.WidgetHelper;
-import com.lue.laoyoutiao.metadata.Article;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import de.greenrobot.event.EventBus;
 
 
-public class MainActivity extends FragmentActivity
+public class MainActivity extends AppCompatActivity
 {
     private static final String TAG = "MainActivity";
 
@@ -40,20 +30,9 @@ public class MainActivity extends FragmentActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
-        Intent intent1 = getIntent();
-        String username = intent1.getStringExtra("username");
-        String password = intent1.getStringExtra("password");
-
-
-        SharedPreferences MysharedPreferences = getSharedPreferences("My_SharePreference", MODE_PRIVATE);
-        SharedPreferences.Editor editor = MysharedPreferences.edit();
-        editor.putString("username", username);
-        editor.putString("password", password);
-        editor.apply();
-
-        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -66,7 +45,7 @@ public class MainActivity extends FragmentActivity
             oncreateview-in-fragment-is-not-called-immediately-even-after-fragmentmanager#  解决的 */
         initView();
 
-        getTopten();
+//        getTopten();
     }
 
 
@@ -76,7 +55,7 @@ public class MainActivity extends FragmentActivity
         super.onDestroy();
 
         //注销EventBus
-        EventBus.getDefault().unregister(this);
+//        EventBus.getDefault().unregister(this);
     }
 
 
@@ -86,6 +65,10 @@ public class MainActivity extends FragmentActivity
     public void initView()
     {
         fragmentManager = getSupportFragmentManager();
+
+        toptenFragment = new ToptenFragment();
+        boardFragment = new BoardFragment();
+        mineFragment = new MineFragment();
 
         showFragment(0);
 
@@ -189,34 +172,34 @@ public class MainActivity extends FragmentActivity
     /**
      * 获取当天的十大热门话题
      */
-    public void getTopten()
-    {
-        WidgetHelper widgetHelper = new WidgetHelper();
-
-        try
-        {
-            widgetHelper.getTopten();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 相应 WidgetHelper 发布的当天十大热门话题
-     * @param topten_article_list
-     */
-    public void onEventMainThread(List<Article> topten_article_list)
-    {
-        ArrayList<String> titles = new ArrayList<String>();
-
-        for(Article article : topten_article_list)
-        {
-            titles.add(article.getTitle());
-        }
-
-        toptenFragment.setToptenList(titles);
-    }
+//    public void getTopten()
+//    {
+//        WidgetHelper widgetHelper = new WidgetHelper();
+//
+//        try
+//        {
+//            widgetHelper.getTopten();
+//        } catch (IOException e)
+//        {
+//            e.printStackTrace();
+//        }
+//    }
+//
+//    /**
+//     * 相应 WidgetHelper 发布的当天十大热门话题
+//     * @param topten_article_list
+//     */
+//    public void onEventMainThread(List<Article> topten_article_list)
+//    {
+//        ArrayList<String> titles = new ArrayList<String>();
+//
+//        for(Article article : topten_article_list)
+//        {
+//            titles.add(article.getTitle());
+//        }
+//
+//        toptenFragment.setToptenList(titles);
+//    }
 
 }
 
