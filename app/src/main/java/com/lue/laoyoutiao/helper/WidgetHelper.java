@@ -30,8 +30,6 @@ public class WidgetHelper
     public WidgetHelper()
     {
         okHttpHelper = new OkHttpHelper();
-
-        EventBus.getDefault().register(this);
     }
 
 
@@ -39,7 +37,7 @@ public class WidgetHelper
      * 获取当日十大热门话题内容
      * @throws IOException
      */
-    public void getTopten() throws IOException
+    public void getTopten()
     {
         final String url = BYR_BBS_API.buildUrl(STRING_WIDGET, STRING_TOPTEN);
 
@@ -69,15 +67,15 @@ public class WidgetHelper
 //        okHttpHelper.getEnqueue(url);
     }
 
-    public void onEventMainThread(String response_result)
-    {
-        int article_index = response_result.indexOf("[");
-        response_result = response_result.substring(article_index , response_result.length() -1);
-
-        articleList = new Gson().fromJson(response_result, new TypeToken<List<Article>>() {}.getType());
-
-        EventBus.getDefault().post(new Event.Topten_ArticleList(articleList));
-    }
+//    public void onEventMainThread(String response_result)
+//    {
+//        int article_index = response_result.indexOf("[");
+//        response_result = response_result.substring(article_index , response_result.length() -1);
+//
+//        articleList = new Gson().fromJson(response_result, new TypeToken<List<Article>>() {}.getType());
+//
+//        EventBus.getDefault().post(new Event.Topten_ArticleList(articleList));
+//    }
 
 
 }

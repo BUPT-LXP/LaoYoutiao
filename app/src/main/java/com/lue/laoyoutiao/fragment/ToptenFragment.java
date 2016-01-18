@@ -16,7 +16,6 @@ import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.WidgetHelper;
 import com.lue.laoyoutiao.metadata.Article;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import de.greenrobot.event.EventBus;
@@ -63,13 +62,7 @@ public class ToptenFragment extends Fragment
     {
         WidgetHelper widgetHelper = new WidgetHelper();
 
-        try
-        {
-            widgetHelper.getTopten();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+        widgetHelper.getTopten();
     }
 
     /**

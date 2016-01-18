@@ -2,6 +2,10 @@ package com.lue.laoyoutiao.fragment;
 
 //import android.app.Fragment;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,7 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
-import com.lue.laoyoutiao.eventtype.Event;
+import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.UserHelper;
+
+import java.io.File;
 
 import de.greenrobot.event.EventBus;
 
@@ -31,6 +38,8 @@ public class MineFragment extends Fragment
     private TextView tv_my_favorite;
     private TextView tv_my_settings;
 
+    private static final String MY_INFO_LOCAL = "/LaoYoutiao";
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
@@ -40,7 +49,12 @@ public class MineFragment extends Fragment
         init();
 
         //注册EventBus
-        EventBus.getDefault().register(this);
+//        EventBus.getDefault().register(this);
+
+//        UserHelper userHelper = new UserHelper();
+//        userHelper.user_Login();
+
+        read_My_Local_Info();
 
         return view;
     }
@@ -56,14 +70,38 @@ public class MineFragment extends Fragment
         tv_my_settings = (TextView)view.findViewById(R.id.textview_my_settings);
     }
 
-
-    public void onEventMainThread(Event.My_User_Info user_me)
+    public void read_My_Local_Info()
     {
-        if (user_me.getMe().getUser_name() != null)
+        String file_path = ContextApplication.getLocal_filepath()+ UserHelper.getMyInfoLocalPath()+ UserHelper.getMyFaceName();
+//        String file_path = ContextApplication.getLocal_filepath()+MY_INFO_LOCAL+"/my_face.png";
+        File file = new File(file_path);
+        if(file.exists())
         {
-            tv_my_username.setText(user_me.getMe().getUser_name());
+            Bitmap bitmap = BitmapFactory.decodeFile(file_path);
+            iv_my_face.setImageBitmap(bitmap);
         }
+        SharedPreferences sp = ContextApplication.getAppContext().getSharedPreferences("My_SharePreference", Context.MODE_PRIVATE);
+        String my_username = sp.getString("username", "guset");
+        tv_my_username.setText(my_username);
     }
+
+
+
+//    public void onEventMainThread(Event.My_User_Info user_me)
+//    {
+//        if (user_me.getMe().getUser_name() != null)
+//        {
+//            UserHelper userHelper = new UserHelper();
+//            userHelper.save_UserFace_to_Local(user_me.getMe().getFace_url());
+//
+//            tv_my_username.setText(user_me.getMe().getUser_name());
+//        }
+//    }
+//
+//    public void onEventMainThread(Bitmap my_face)
+//    {
+//        iv_my_face.setImageBitmap(my_face);
+//    }
 
     @Override
     public void onDestroy()

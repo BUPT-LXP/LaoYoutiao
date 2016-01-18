@@ -66,9 +66,9 @@ public class MainActivity extends AppCompatActivity
     {
         fragmentManager = getSupportFragmentManager();
 
-        toptenFragment = new ToptenFragment();
-        boardFragment = new BoardFragment();
-        mineFragment = new MineFragment();
+//        toptenFragment = new ToptenFragment();
+//        boardFragment = new BoardFragment();
+//        mineFragment = new MineFragment();
 
         showFragment(0);
 

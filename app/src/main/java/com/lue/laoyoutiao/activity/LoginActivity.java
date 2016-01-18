@@ -19,8 +19,6 @@ import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.helper.UserHelper;
 
-import java.io.IOException;
-
 import de.greenrobot.event.EventBus;
 
 
@@ -176,14 +174,7 @@ public class LoginActivity extends AppCompatActivity
             editor.apply();
 
             UserHelper userHelper = new UserHelper();
-            try
-            {
-                userHelper.UserLogin();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            userHelper.user_Login();
         }
     }
 

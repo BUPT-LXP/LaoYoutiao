@@ -3,34 +3,46 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="#ffffff">
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="20sp"
+        android:background="#e3e1e1"/>
 
     <LinearLayout
         android:id="@+id/my_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:background="@color/white">
 
         <ImageView
             android:id="@+id/my_face"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_height="80sp"
+            android:layout_width="80sp"
+            android:layout_marginStart="15sp"
             android:contentDescription="@string/my_face_description"/>
         <TextView
             android:id="@+id/my_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/black"
-            android:textSize="20sp"/>
+            android:textSize="20sp"
+            android:layout_marginStart="15dp"
+            android:layout_gravity="center_vertical|start"/>
     </LinearLayout>
-
 
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2sp"
-        android:background="@color/royalblue"/>
+        android:layout_height="20sp"
+        android:background="#e3e1e1"/>
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1sp"-->
+        <!--android:background="@color/royalblue"/>-->
 
 
     <TextView
@@ -42,11 +54,16 @@
         android:textSize="25sp"
         android:textColor="@color/black"
         android:gravity="center_vertical|start"
-        android:layout_marginStart="15dp"/>
+        android:layout_marginStart="15dp"
+        android:background="@color/white"/>
 
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="20sp"-->
+        <!--android:background="#f5f5f5"/>-->
     <View
         android:layout_width="match_parent"
-        android:layout_height="2sp"
+        android:layout_height="1sp"
         android:background="@color/royalblue"/>
 
     <TextView
@@ -58,12 +75,17 @@
         android:textSize="25sp"
         android:textColor="@color/black"
         android:gravity="center_vertical|start"
-        android:layout_marginStart="15dp"/>
+        android:layout_marginStart="15dp"
+        android:background="@color/white"/>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2sp"
-        android:background="@color/royalblue"/>
+        android:layout_height="20sp"
+        android:background="#e3e1e1"/>
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1sp"-->
+        <!--android:background="@color/royalblue"/>-->
 
     <TextView
         android:id="@+id/textview_my_favorite"
@@ -74,11 +96,16 @@
         android:textSize="25sp"
         android:textColor="@color/black"
         android:gravity="center_vertical|start"
-        android:layout_marginStart="15dp"/>
+        android:layout_marginStart="15dp"
+        android:background="@color/white"/>
 
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="20sp"-->
+        <!--android:background="#f5f5f5"/>-->
     <View
         android:layout_width="match_parent"
-        android:layout_height="2sp"
+        android:layout_height="1sp"
         android:background="@color/royalblue"/>
 
     <TextView
@@ -90,12 +117,18 @@
         android:textSize="25sp"
         android:textColor="@color/black"
         android:gravity="center_vertical|start"
-        android:layout_marginStart="15dp"/>
+        android:layout_marginStart="15dp"
+        android:background="@color/white"/>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2sp"
-        android:background="@color/royalblue"/>
+        android:layout_height="match_parent"
+        android:background="#e3e1e1"/>
+
+    <!--<View-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="1sp"-->
+        <!--android:background="@color/royalblue"/>-->
 
 
 </LinearLayout>
