@@ -1,6 +1,8 @@
 package com.lue.laoyoutiao.eventtype;
 
 import com.lue.laoyoutiao.metadata.Article;
+import com.lue.laoyoutiao.metadata.Board;
+import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.metadata.User;
 
 import java.util.List;
@@ -10,6 +12,9 @@ import java.util.List;
  */
 public class Event
 {
+    /**
+     * 封装好的十大热门话题事件
+     */
     public static class Topten_ArticleList
     {
         private List<Article> topten_list;
@@ -25,6 +30,9 @@ public class Event
         }
     }
 
+    /**
+     * 封装好的登录用户详细信息事件
+     */
     public static class My_User_Info
     {
         private User me;
@@ -37,6 +45,42 @@ public class Event
         public User getMe()
         {
             return me;
+        }
+    }
+
+    /**
+     * 封装好的所有根分区事件
+     */
+    public static class All_Root_Sections
+    {
+        private List<Section> sections;
+
+        public All_Root_Sections(List<Section> sections)
+        {
+            this.sections = sections;
+        }
+
+        public List<Section> getSections()
+        {
+            return sections;
+        }
+    }
+
+    /**
+     * 封装好的所有根分区事件
+     */
+    public static class My_Favorite_Boards
+    {
+        private List<Board> boards;
+
+        public My_Favorite_Boards(List<Board> boards)
+        {
+            this.boards = boards;
+        }
+
+        public List<Board> getBoards()
+        {
+            return boards;
         }
     }
 }

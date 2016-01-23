@@ -1,14 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TextView android:id="@android:id/text1"
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:gravity="center_vertical"
-          android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
-          android:paddingEnd="?android:attr/expandableListPreferredItemPaddingLeft"
-          android:textAppearance="?android:attr/textAppearanceListItem"
-          android:textColor="@color/black"
-          android:textSize="20sp"
-    />
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/textview_article_board"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textAppearance="?android:attr/textAppearanceListItem"/>
+
+
+    <TextView
+        android:id="@+id/textview_article_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="0dp"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:textColor="@color/black"
+        android:textSize="20sp"/>
+
+</LinearLayout>
+
+
 

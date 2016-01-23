@@ -29,11 +29,11 @@
             android:layout_weight="1"
             android:button="@null"
             android:checked="true"
-            android:drawableTop="@drawable/tab_selector_topten"
+            android:drawableTop="@drawable/main_tab_selector_topten"
             android:gravity="center_horizontal|bottom"
             android:text="十大"
             android:textSize="20sp"
-            android:textColor="@drawable/tab_selector_tv_color"/>
+            android:textColor="@drawable/main_tab_selector_tv_color"/>
 
         <RadioButton
             android:id="@+id/borad"
@@ -42,11 +42,11 @@
             android:layout_gravity="bottom"
             android:layout_weight="1"
             android:button="@null"
-            android:drawableTop="@drawable/tab_selector_board"
+            android:drawableTop="@drawable/main_tab_selector_board"
             android:gravity="center_horizontal|bottom"
             android:text="版面"
             android:textSize="20sp"
-            android:textColor="@drawable/tab_selector_tv_color"/>
+            android:textColor="@drawable/main_tab_selector_tv_color"/>
 
 
         <RadioButton
@@ -55,11 +55,11 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:button="@null"
-            android:drawableTop="@drawable/tab_selector_mine"
+            android:drawableTop="@drawable/main_tab_selector_mine"
             android:gravity="center_horizontal|bottom"
             android:text="我的"
             android:textSize="20sp"
-            android:textColor="@drawable/tab_selector_tv_color"
+            android:textColor="@drawable/main_tab_selector_tv_color"
             />
     </RadioGroup>
 

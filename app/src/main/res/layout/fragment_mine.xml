@@ -9,7 +9,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="20sp"
-        android:background="#e3e1e1"/>
+        android:background="@color/my_default_background"/>
 
     <LinearLayout
         android:id="@+id/my_info"
@@ -38,7 +38,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="20sp"
-        android:background="#e3e1e1"/>
+        android:background="@color/my_default_background"/>
     <!--<View-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="1sp"-->
@@ -81,7 +81,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="20sp"
-        android:background="#e3e1e1"/>
+        android:background="@color/my_default_background"/>
     <!--<View-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="1sp"-->
@@ -123,7 +123,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#e3e1e1"/>
+        android:background="@color/my_default_background"/>
 
     <!--<View-->
         <!--android:layout_width="match_parent"-->

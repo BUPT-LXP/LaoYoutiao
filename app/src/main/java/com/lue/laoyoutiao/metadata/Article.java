@@ -54,8 +54,6 @@ public class Article implements Parcelable
     //该文章最后回复的时间 unxitmestamp
     private int last_reply_time = -1;
 
-
-
     @Override
     public int describeContents()
     {

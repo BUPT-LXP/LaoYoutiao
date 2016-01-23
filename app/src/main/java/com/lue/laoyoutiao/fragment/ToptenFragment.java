@@ -1,6 +1,5 @@
 package com.lue.laoyoutiao.fragment;
 
-//import android.app.Fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,12 +10,16 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.lue.laoyoutiao.R;
+import com.lue.laoyoutiao.adapter.ArticleListAdapter;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.WidgetHelper;
 import com.lue.laoyoutiao.metadata.Article;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
@@ -44,9 +47,13 @@ public class ToptenFragment extends Fragment
         return view;
     }
 
+    /**
+     * 根据得到的title数组，设置十大标题
+     * @param titles
+     */
     public void setToptenList(ArrayList<String> titles)
     {
-        listview_topten = (ListView)view.findViewById(R.id.topten_list);
+//        listview_topten = (ListView)view.findViewById(R.id.topten_list);
 
         final ArrayAdapter<String> arrayAdapter;
         arrayAdapter = new ArrayAdapter<String>(ContextApplication.getAppContext(),
@@ -66,19 +73,33 @@ public class ToptenFragment extends Fragment
     }
 
     /**
-     * 相应 WidgetHelper 发布的当天十大热门话题
+     * 响应 WidgetHelper 发布的当天十大热门话题
      * @param topten_article_list
      */
     public void onEventMainThread(Event.Topten_ArticleList topten_article_list)
     {
-        ArrayList<String> titles = new ArrayList<String>();
-
+        List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
         for(Article article : topten_article_list.getTopten_list())
         {
-            titles.add(article.getTitle());
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("board", article.getBoard_name());
+            map.put("title", article.getTitle());
+            listItems.add(map);
         }
 
-        setToptenList(titles);
+        ArticleListAdapter adapter = new ArticleListAdapter(ContextApplication.getAppContext(), listItems);
+
+        listview_topten.setAdapter(adapter);
+
+
+//        ArrayList<String> titles = new ArrayList<String>();
+//
+//        for(Article article : topten_article_list.getTopten_list())
+//        {
+//            titles.add(article.getTitle());
+//        }
+//
+//        setToptenList(titles);
     }
 
 

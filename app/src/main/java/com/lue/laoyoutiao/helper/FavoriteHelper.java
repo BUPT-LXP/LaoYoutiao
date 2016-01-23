@@ -1,11 +1,13 @@
 package com.lue.laoyoutiao.helper;
 
+import android.util.Log;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lue.laoyoutiao.eventtype.Event;
-import com.lue.laoyoutiao.metadata.Article;
+import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.squareup.okhttp.Response;
@@ -16,29 +18,24 @@ import java.util.List;
 import de.greenrobot.event.EventBus;
 
 /**
- * Created by Lue on 2016/1/6.
+ * Created by Lue on 2016/1/23.
  */
-public class WidgetHelper
+public class FavoriteHelper
 {
     private OkHttpHelper okHttpHelper;
 
-    private List<Article> articleList;
+    private List<Board> boards;
 
-    private static final String TAG = "WidgetHelper";
+    private static final String TAG = "FavoriteHelper";
 
-    public WidgetHelper()
+    public FavoriteHelper()
     {
         okHttpHelper = new OkHttpHelper();
     }
 
-
-    /**
-     * 获取当日十大热门话题内容
-     * @throws IOException
-     */
-    public void getTopten()
+    public void getFavoriteBoards()
     {
-        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_WIDGET, BYR_BBS_API.STRING_TOPTEN);
+        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_FAVORITE, "0");
 
         new Thread()
         {
@@ -48,14 +45,11 @@ public class WidgetHelper
                 {
                     Response response = okHttpHelper.getExecute(url);
                     String response_result = response.body().string();
-
+                    Log.d(TAG, response_result);
                     JSONObject jsonObject = JSON.parseObject(response_result);
-                    response_result = jsonObject.getString("article");
-
-                    //为了得到包含在[]中的Article数组，不然使用Gson.fromJson时会报错。后续会看看有没有优化的方法。
-                    articleList = new Gson().fromJson(response_result, new TypeToken<List<Article>>(){}.getType());
-
-                    EventBus.getDefault().post(new Event.Topten_ArticleList(articleList));
+                    response_result = jsonObject.getString("board");
+                    boards = new Gson().fromJson(response_result, new TypeToken<List<Board>>(){}.getType());
+                    EventBus.getDefault().post(new Event.My_Favorite_Boards(boards));
                 }
                 catch (IOException e)
                 {
@@ -64,5 +58,4 @@ public class WidgetHelper
             }
         }.start();
     }
-
 }

@@ -3,17 +3,64 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/my_default_background">
 
-    <TextView
+    <RadioGroup
+        android:id="@+id/borad_show_model"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="这里是版面"
-        android:textSize="40sp"/>
+        android:layout_height="50dp"
+        android:background="@mipmap/my_tab_menu"
+        android:orientation="horizontal"
+        android:layoutMode="opticalBounds">
+
+        <RadioButton
+            android:id="@+id/radiobutton_all_sections"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:background="@drawable/board_tab_selector_background"
+            android:button="@null"
+            android:checked="false"
+            android:text="@string/all_sections"
+            android:textSize="24sp"
+            android:textColor="@drawable/board_tab_selector_textview"
+            android:gravity="center"/>
+
+        <RadioButton
+            android:id="@+id/radiobutton_favorite_boards"
+            android:layout_width="0dp"
+            android:layout_height="fill_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:background="@drawable/board_tab_selector_background"
+            android:button="@null"
+            android:checked="true"
+            android:text="@string/favorite_boards"
+            android:textSize="24sp"
+            android:textColor="@drawable/board_tab_selector_textview"
+            android:gravity="center"/>
+    </RadioGroup>
+
 
     <ListView
-        android:id="@+id/board_list"
+        android:id="@+id/listview_all_sections"
+        android:background="@color/my_default_background"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+    <GridView
+        android:id="@+id/grdiview_favorite_boards"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/my_default_background"
+        android:paddingTop="4dp"
+        android:numColumns="2"
+        android:verticalSpacing="10dp"
+        android:horizontalSpacing="10dp"
+        android:layout_gravity="center_horizontal"
+        android:visibility="visible"/>
 
 </LinearLayout>

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.RadioGroup;
 
 import com.lue.laoyoutiao.R;
@@ -19,11 +20,11 @@ public class MainActivity extends AppCompatActivity
     private ToptenFragment toptenFragment;
     private BoardFragment boardFragment;
     private MineFragment mineFragment;
-
+    private FragmentManager fragmentManager;
 
     private RadioGroup radioGroup;
 
-    private FragmentManager fragmentManager;
+    private int checked_id = 0;
 
 
     @Override
@@ -36,16 +37,37 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.v(TAG, "onRestoreInstanceState");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt("checked_id", checked_id);
+        Log.v(TAG, "onSaveInstanceState");
+    }
+
+    @Override
     public void onStart()
     {
         super.onStart();
-
+        Log.v(TAG, "onStart");
         /*设置默认fragment，注意这里必须在onStart()里，不然会造成Fragment中的onCreateView不执行，不知道是怎么回事
             参考http://stackoverflow.com/questions/17229500/
             oncreateview-in-fragment-is-not-called-immediately-even-after-fragmentmanager#  解决的 */
         initView();
+    }
 
-//        getTopten();
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        Log.v(TAG, "onResume");
     }
 
 
@@ -53,10 +75,30 @@ public class MainActivity extends AppCompatActivity
     public void onDestroy()
     {
         super.onDestroy();
-
-        //注销EventBus
-//        EventBus.getDefault().unregister(this);
+        Log.v(TAG, "onDestroy");
     }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        Log.v(TAG, "onPause");
+    }
+
+    @Override
+    protected void onRestart()
+    {
+        super.onRestart();
+        Log.v(TAG, "onRestart");
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        Log.v(TAG, "onStop");
+    }
+
 
 
     /**
@@ -66,11 +108,7 @@ public class MainActivity extends AppCompatActivity
     {
         fragmentManager = getSupportFragmentManager();
 
-//        toptenFragment = new ToptenFragment();
-//        boardFragment = new BoardFragment();
-//        mineFragment = new MineFragment();
-
-        showFragment(0);
+        showFragment(checked_id);
 
         radioGroup = (RadioGroup) findViewById(R.id.tab_menu);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
@@ -82,12 +120,15 @@ public class MainActivity extends AppCompatActivity
                 {
                     case R.id.topten:
                         showFragment(0);
+                        checked_id = 0;
                         break;
                     case R.id.borad:
                         showFragment(1);
+                        checked_id = 1;
                         break;
                     case R.id.mine:
                         showFragment(2);
+                        checked_id = 2;
                         break;
                     default:
                         break;
@@ -167,39 +208,6 @@ public class MainActivity extends AppCompatActivity
         if (mineFragment != null)
            fragmentTransaction.hide(mineFragment);
     }
-
-
-    /**
-     * 获取当天的十大热门话题
-     */
-//    public void getTopten()
-//    {
-//        WidgetHelper widgetHelper = new WidgetHelper();
-//
-//        try
-//        {
-//            widgetHelper.getTopten();
-//        } catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    /**
-//     * 相应 WidgetHelper 发布的当天十大热门话题
-//     * @param topten_article_list
-//     */
-//    public void onEventMainThread(List<Article> topten_article_list)
-//    {
-//        ArrayList<String> titles = new ArrayList<String>();
-//
-//        for(Article article : topten_article_list)
-//        {
-//            titles.add(article.getTitle());
-//        }
-//
-//        toptenFragment.setToptenList(titles);
-//    }
 
 }
 

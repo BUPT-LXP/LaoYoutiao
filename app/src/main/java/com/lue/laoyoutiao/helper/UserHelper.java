@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lue.laoyoutiao.eventtype.Event;
-import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.metadata.User;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
@@ -30,34 +29,19 @@ public class UserHelper
 
     private static final String TAG = "UserHelper";
 
-    private static final String STRING_User = "user";
-    private static final String STRING_LOGIN = "login";
-    private static final String STRING_LOGOUT = "logout";
-
-    private static final String MY_INFO_LOCAL_PATH = "/my_user_info";
-    private static final String MY_FACE_NAME = "/my_face.png";
 
     public UserHelper()
     {
         okHttpHelper = new OkHttpHelper();
     }
 
-    public static String getMyFaceName()
-    {
-        return MY_FACE_NAME;
-    }
-
-    public static String getMyInfoLocalPath()
-    {
-        return MY_INFO_LOCAL_PATH;
-    }
 
     /**
      * 用户登录，使用EventBus返回登录用户的元数据
      */
     public void user_Login()
     {
-        final String url = BYR_BBS_API.buildUrl(STRING_User, STRING_LOGIN);
+        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_USER, BYR_BBS_API.STRING_LOGIN);
 
         new Thread()
         {
@@ -67,9 +51,7 @@ public class UserHelper
                 {
                     Response response = okHttpHelper.getExecute(url);
                     String response_result = response.body().string();
-                    User user_me = new Gson().fromJson(response_result, new TypeToken<User>()
-                    {
-                    }.getType());
+                    User user_me = new Gson().fromJson(response_result, new TypeToken<User>() {}.getType());
 
                     save_UserFace_to_Local(user_me.getFace_url());
 
@@ -83,7 +65,10 @@ public class UserHelper
         }.start();
     }
 
-
+    /**
+     * 根据用户头像的url，获取用户的头像bitmap，并将该图片保存到本地
+     * @param face_url
+     */
     public void save_UserFace_to_Local(final String face_url)
     {
         new Thread()
@@ -92,36 +77,30 @@ public class UserHelper
             {
                 try
                 {
+                    //获取 Response
                     OkHttpClient okHttpClient = new OkHttpClient();
                     Request request = new Request.Builder().url(face_url).build();
                     Response response = okHttpClient.newCall(request).execute();
 
+                    //将 Response 转换成输入流
                     InputStream inputStream = response.body().byteStream();
-
                     Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-
                     inputStream.close();
 
-                    String root_dic = ContextApplication.getLocal_filepath();
-
-                    File dirFile = new File(root_dic);
+                    //创建本地储存文件夹及对应文件
+                    String root_dic = BYR_BBS_API.LOCAL_FILEPATH;
+                    File dirFile = new File(root_dic+ BYR_BBS_API.MY_INFO_FOLDER);
                     if (!dirFile.exists())
                         dirFile.mkdirs();
+                    File file = new File(dirFile+ BYR_BBS_API.MY_FACE_NAME);
 
-                    File sub_dic = new File(root_dic+MY_INFO_LOCAL_PATH);
-                    if(!sub_dic.exists())
-                        sub_dic.mkdirs();
-
-//                    File file = new File(path + MY_INFO_LOCAL_PATH+ MY_FACE_NAME);
-                    File file = new File(sub_dic+ MY_FACE_NAME);
-
+                    //将bitmap保存到本地文件中
                     FileOutputStream fout = new FileOutputStream(file);
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, fout);
                     fout.flush();
                     fout.close();
-
-//                    EventBus.getDefault().post(bitmap);
-                } catch (IOException e)
+                }
+                catch (IOException e)
                 {
                     e.printStackTrace();
                 }

@@ -19,6 +19,8 @@ public class Board implements Parcelable
     private String boardclass = null;
     //版面所属分区号
     private String section = null;
+    //今日发帖总数
+    private int threads_today_count;
     //今日发文总数
     private int post_today_count = -1;
     //版面主题总数
@@ -61,6 +63,7 @@ public class Board implements Parcelable
         dest.writeString(description);
         dest.writeString(boardclass);
         dest.writeString(section);
+        dest.writeInt(threads_today_count);
         dest.writeInt(post_today_count);
         dest.writeInt(post_threads_count);
         dest.writeInt(post_all_count);
@@ -82,6 +85,7 @@ public class Board implements Parcelable
         description = in.readString();
         boardclass = in.readString();
         section = in.readString();
+        threads_today_count = in.readInt();
         post_today_count = in.readInt();
         post_threads_count = in.readInt();
         post_all_count = in.readInt();
@@ -279,5 +283,15 @@ public class Board implements Parcelable
     public void setUser_online_max_time(int user_online_max_time)
     {
         this.user_online_max_time = user_online_max_time;
+    }
+
+    public int getThreads_today_count()
+    {
+        return threads_today_count;
+    }
+
+    public void setThreads_today_count(int threads_today_count)
+    {
+        this.threads_today_count = threads_today_count;
     }
 }

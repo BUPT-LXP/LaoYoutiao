@@ -14,6 +14,8 @@
     <string name="my_secret_message">\t我的私信</string>
     <string name="my_facorite">\t我的收藏</string>
     <string name="my_settings">\t我的设置</string>
+    <string name="all_sections">所有分区</string>
+    <string name="favorite_boards">收藏版面</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
