@@ -44,7 +44,7 @@ public class BoardFragment extends Fragment
 
         initRadioGroup();
 
-        getRootSection();
+//        getRootSection();
 
         getFavoriteBoards();
 
@@ -106,6 +106,12 @@ public class BoardFragment extends Fragment
         arrayAdapter = new ArrayAdapter<String>(ContextApplication.getAppContext(),
                 R.layout.section_list_item, section_titles);
         listview_all_sections.setAdapter(arrayAdapter);
+    }
+
+
+    public void ShowSections()
+    {
+
     }
 
     /**

@@ -3,6 +3,9 @@ package com.lue.laoyoutiao.metadata;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Section 分区元数据
  * https://github.com/xw2423/nForum/wiki/nForum-API-Meta-Section
  * Created by Lue on 2015/12/20.
@@ -18,6 +21,10 @@ public class Section implements Parcelable
     //该分区所属根分区名称
     private String parent = null;
 
+    private List<String> sub_section_names = new ArrayList<>();
+
+    private List<String> boards_names = new ArrayList<>();
+
 
     protected Section(Parcel in)
     {
@@ -25,6 +32,8 @@ public class Section implements Parcelable
         description = in.readString();
         is_root = in.readByte() != 0;
         parent = in.readString();
+        in.readStringList(sub_section_names);
+        in.readStringList(boards_names);
     }
 
     public static final Creator<Section> CREATOR = new Creator<Section>()
@@ -56,6 +65,8 @@ public class Section implements Parcelable
         dest.writeString(description);
         dest.writeInt(is_root? 1:0);
         dest.writeString(parent);
+        dest.writeStringList(sub_section_names);
+        dest.writeStringList(boards_names);
     }
 
     public String getDescription()
@@ -68,7 +79,7 @@ public class Section implements Parcelable
         this.description = description;
     }
 
-    public boolean is_root()
+    public boolean getIs_root()
     {
         return is_root;
     }
@@ -96,5 +107,53 @@ public class Section implements Parcelable
     public void setParent(String parent)
     {
         this.parent = parent;
+    }
+
+    public List<String> getBoards_names()
+    {
+        return boards_names;
+    }
+
+
+
+    public List<String> getSub_section_names()
+    {
+        return sub_section_names;
+    }
+
+    public String getSub_section_name(int position)
+    {
+        return sub_section_names.get(position);
+    }
+
+    public int getSub_section_size()
+    {
+        return sub_section_names.size();
+    }
+
+    public void setBoards_names(String board_name)
+    {
+        if(this.boards_names == null)
+            this.boards_names = new ArrayList<>();
+        this.boards_names.add(board_name);
+    }
+
+    public String getBoard_name(int position)
+    {
+        return boards_names.get(position);
+    }
+
+
+    public int getBoards_size()
+    {
+        return boards_names.size();
+    }
+
+
+    public void setSub_section_names(String sub_section_names)
+    {
+        if(this.sub_section_names == null)
+            this.sub_section_names = new ArrayList<>();
+        this.sub_section_names.add(sub_section_names);
     }
 }

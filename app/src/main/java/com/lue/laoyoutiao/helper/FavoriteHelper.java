@@ -1,7 +1,5 @@
 package com.lue.laoyoutiao.helper;
 
-import android.util.Log;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
@@ -45,7 +43,7 @@ public class FavoriteHelper
                 {
                     Response response = okHttpHelper.getExecute(url);
                     String response_result = response.body().string();
-                    Log.d(TAG, response_result);
+//                    Log.d(TAG, response_result);
                     JSONObject jsonObject = JSON.parseObject(response_result);
                     response_result = jsonObject.getString("board");
                     boards = new Gson().fromJson(response_result, new TypeToken<List<Board>>(){}.getType());

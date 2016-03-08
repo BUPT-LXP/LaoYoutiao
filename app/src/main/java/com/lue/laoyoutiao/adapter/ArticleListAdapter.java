@@ -1,6 +1,9 @@
 package com.lue.laoyoutiao.adapter;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,9 +11,11 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
+import com.lue.laoyoutiao.global.ContextApplication;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Created by Lue on 2016/1/9.
@@ -20,6 +25,9 @@ public class ArticleListAdapter extends BaseAdapter
     private Context context;
     private List<Map<String, Object>> listItems;
     private LayoutInflater listContainer;
+
+    //本地 SharedPreferences
+    private SharedPreferences My_SharedPreferences;
 
     public final class ListItemView
     {
@@ -32,6 +40,8 @@ public class ArticleListAdapter extends BaseAdapter
         this.context = context;
         listContainer = LayoutInflater.from(context);
         this.listItems = listItems;
+
+        My_SharedPreferences = ContextApplication.getAppContext().getSharedPreferences("My_SharePreference", Context.MODE_PRIVATE);
     }
 
 
@@ -80,9 +90,21 @@ public class ArticleListAdapter extends BaseAdapter
         }
 
         String board = (String)listItems.get(position).get("board");
-        board = board.substring(0, 1);
+        board = My_SharedPreferences.getString(board, board);
 
+        board = board.substring(0, 1);
         listItemView.article_board.setText(board);
+
+        Random random = new Random();
+        int r = random.nextInt(256);
+        int g= random.nextInt(256);
+        int b = random.nextInt(256);
+        int mColor = Color.rgb(r, g, b);                    // 随机生成颜色
+
+        GradientDrawable drawable = (GradientDrawable)listItemView.article_board.getBackground();
+        drawable.setColor(mColor);
+
+
         listItemView.article_title.setText((String)listItems.get(position).get("title"));
 
         return convertView;

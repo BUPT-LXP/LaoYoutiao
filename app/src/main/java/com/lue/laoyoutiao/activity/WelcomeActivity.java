@@ -9,6 +9,7 @@ import android.view.Window;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.SectionHelper;
 
 public class WelcomeActivity extends Activity
 {
@@ -27,13 +28,20 @@ public class WelcomeActivity extends Activity
             public void run()
             {
 
+                /**
+                 * 获取所有根分区
+                 */
+                SectionHelper sectionHelper = new SectionHelper();
+                sectionHelper.getRootSections();
+
                 try
                 {
-                    Thread.sleep(2000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e)
                 {
                     e.printStackTrace();
                 }
+
 
                 My_SharedPreferences = ContextApplication.getAppContext().getSharedPreferences("My_SharePreference", Context.MODE_PRIVATE);
 

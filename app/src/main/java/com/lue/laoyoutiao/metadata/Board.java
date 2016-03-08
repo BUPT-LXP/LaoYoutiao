@@ -20,7 +20,7 @@ public class Board implements Parcelable
     //版面所属分区号
     private String section = null;
     //今日发帖总数
-    private int threads_today_count;
+    private int threads_today_count = -1;
     //今日发文总数
     private int post_today_count = -1;
     //版面主题总数

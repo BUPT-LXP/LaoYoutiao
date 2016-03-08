@@ -91,15 +91,6 @@ public class ToptenFragment extends Fragment
 
         listview_topten.setAdapter(adapter);
 
-
-//        ArrayList<String> titles = new ArrayList<String>();
-//
-//        for(Article article : topten_article_list.getTopten_list())
-//        {
-//            titles.add(article.getTitle());
-//        }
-//
-//        setToptenList(titles);
     }
 
 

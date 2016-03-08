@@ -31,6 +31,9 @@ public class SectionHelper
         okHttpHelper = new OkHttpHelper();
     }
 
+    /**
+     * 获取所有根分区
+     */
     public void getRootSections()
     {
         final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION);
@@ -45,14 +48,16 @@ public class SectionHelper
                     String response_result = response.body().string();
                     JSONObject jsonObject = JSON.parseObject(response_result);
                     response_result = jsonObject.getString("section");
-                    sections = new Gson().fromJson(response_result, new TypeToken<List<Section>>(){}.getType());
+                    sections = new Gson().fromJson(response_result, new TypeToken<List<Section>>()
+                    {
+                    }.getType());
                     EventBus.getDefault().post(new Event.All_Root_Sections(sections));
-                }
-                catch (IOException e)
+                } catch (IOException e)
                 {
                     e.printStackTrace();
                 }
             }
         }.start();
     }
+
 }

@@ -209,6 +209,15 @@ public class MainActivity extends AppCompatActivity
            fragmentTransaction.hide(mineFragment);
     }
 
+    /**
+     * 重写按下返回键的响应
+     */
+    @Override
+    public void onBackPressed()
+    {
+        moveTaskToBack(true);//true对任何Activity都适用
+    }
+
 }
 
 

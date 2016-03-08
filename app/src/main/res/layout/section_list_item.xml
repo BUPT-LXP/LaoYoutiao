@@ -1,15 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TextView android:id="@+id/textview_section"
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:gravity="center_vertical"
-          android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
-          android:paddingEnd="0dp"
-          android:paddingTop="8dp"
-          android:paddingBottom="8dp"
-          android:textAppearance="?android:attr/textAppearanceListItem"
-          android:textColor="@color/black"
-          android:textSize="20sp"
-    />
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/textview_section_description"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp"
+        android:paddingEnd="0dp"
+        android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"
+        android:paddingTop="8dp"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:textColor="@color/black"
+        android:textSize="20sp"/>
+
+    <ImageView
+        android:id="@+id/imageview_favorite"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@android:drawable/btn_star_big_off"
+        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical"/>
+
+</LinearLayout>
+
+
+    <!--<TextView android:id="@+id/textview_section"-->
+    <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:gravity="center_vertical"-->
+    <!--android:paddingStart="?android:attr/expandableListPreferredItemPaddingLeft"-->
+    <!--android:paddingEnd="0dp"-->
+    <!--android:paddingTop="8dp"-->
+    <!--android:paddingBottom="8dp"-->
+    <!--android:textAppearance="?android:attr/textAppearanceListItem"-->
+    <!--android:textColor="@color/black"-->
+    <!--android:textSize="20sp"-->
+    <!--/>-->

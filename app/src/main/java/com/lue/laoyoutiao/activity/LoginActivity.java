@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity
     private String username;
     private String password;
 
-    private SharedPreferences MysharedPreferences;
+    private SharedPreferences My_sharedPreferences;
     private SharedPreferences.Editor editor;
 
     @Override
@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity
         setContentView(R.layout.activity_login);
 
         //获取 My_SharePreference
-        MysharedPreferences = getSharedPreferences("My_SharePreference", MODE_PRIVATE);
+        My_sharedPreferences = getSharedPreferences("My_SharePreference", MODE_PRIVATE);
 
         // Set up the login form.
         UsernameView = (EditText) findViewById(R.id.username);
@@ -82,16 +82,9 @@ public class LoginActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                //startActivity(new Intent(LoginActivity_plus.this, MainActivity.class));
-//                Intent intent = new Intent();
-//                intent.setClass(LoginActivity.this, MainActivity.class);
-//                intent.putExtra("username", "guest");
-//                intent.putExtra("password", "");
-//                startActivity(intent);
-
                 startActivity(new Intent(LoginActivity.this, MainActivity.class));
 
-                editor = MysharedPreferences.edit();
+                editor = My_sharedPreferences.edit();
                 editor.putString("username", "guest");
                 editor.putString("password", "");
                 editor.apply();
@@ -168,7 +161,7 @@ public class LoginActivity extends AppCompatActivity
             showProgress(true);
 
 
-            editor = MysharedPreferences.edit();
+            editor = My_sharedPreferences.edit();
             editor.putString("username", username);
             editor.putString("password", password);
             editor.apply();
