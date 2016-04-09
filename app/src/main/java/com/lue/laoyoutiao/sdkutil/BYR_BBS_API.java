@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Base64;
+import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -75,10 +76,15 @@ public class BYR_BBS_API
 
     public static final Map<String, Board> All_Boards = new HashMap<>();
 
-    public static final List<String> Root_Sections_Name = new ArrayList<>();
+    public static final List<Section> ROOT_SECTIONS = new ArrayList<>();
 
 
-    public BYR_BBS_API()
+    //BYR_BBS_API使用单例模式，该类在JVM中仅允许创建一个实例
+    //在没有使用单例模式时，发现因为存在很对对象，在EventBus仅发布一次事件时，会导致订阅事件函数被多次触发，但实际上只需要触发一次即可
+    private volatile static BYR_BBS_API m_byr_bbs_api;
+
+    //构造函数为private
+    private BYR_BBS_API()
     {
         My_SharedPreferences = ContextApplication.getAppContext().getSharedPreferences("My_SharePreference", Context.MODE_PRIVATE);
         editor = My_SharedPreferences.edit();
@@ -87,17 +93,27 @@ public class BYR_BBS_API
         String password = My_SharedPreferences.getString("password", "");
         setAuth(username, password);
 
+        editor.apply();
+
         //注册EventBus
         EventBus.getDefault().register(this);
     }
 
-
-
-    public static Section getSectionfromRoot(int root_section_name_position)
+    //获取该类的唯一实例，注意需要使用双重校验锁检测，这样可以线程同步
+    public static BYR_BBS_API getM_byr_bbs_api()
     {
-        return All_Sections.get(Root_Sections_Name.get(root_section_name_position));
+        if(m_byr_bbs_api == null)
+        {
+            synchronized (BYR_BBS_API.class)
+            {
+                if(m_byr_bbs_api == null)
+                {
+                    m_byr_bbs_api = new BYR_BBS_API();
+                }
+            }
+        }
+        return m_byr_bbs_api;
     }
-
 
 
     /**
@@ -145,167 +161,91 @@ public class BYR_BBS_API
      */
     public void onEventMainThread(final Event.All_Root_Sections Root_Sections)
     {
+        Log.d(TAG, "Receive Event All_Root_Sections");
+
+        for(Section section : Root_Sections.getSections())
+        {
+            ROOT_SECTIONS.add(section);
+
+            getSectionsAndBoards(section.getName());
+        }
+    }
+
+
+    public void getSectionsAndBoards(final String section_name)
+    {
+        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION, section_name);
+
         new Thread()
         {
             public void run()
             {
-                for (Section section : Root_Sections.getSections())
+                try
                 {
-                    Root_Sections_Name.add(section.getName());
+                    Response response = new OkHttpHelper().getExecute(url);
+                    String response_result = response.body().string();
 
-                    if (section.getIs_root())
+                    //版面所属类别, 原接口中为class，但class为保留字，因此使用boardclass
+                    response_result = response_result.replace("\"class\"", "\"boardclass\"");
+
+                    JSONObject jsonObject = JSON.parseObject(response_result);
+
+                    //储存分区信息
+                    Section section = new Gson().fromJson(response_result, new TypeToken<Section>()
                     {
-                        try
+                    }.getType());
+
+                    if (section.getParent() != null)
+                    {
+                        Section parent_section = BYR_BBS_API.All_Sections.get(section.getParent());
+                        parent_section.setSub_section_names(section.getName());
+                        BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
+                    }
+                    BYR_BBS_API.All_Sections.put(section.getName(), section);
+                    editor.putString(section.getName(), section.getDescription());
+
+                    //储存版面信息
+                    String Boards_String = jsonObject.getString("board");
+                    List<Board> boards = new Gson().fromJson(Boards_String, new TypeToken<List<Board>>()
+                    {
+                    }.getType());
+                    for (Board board : boards)
+                    {
+                        BYR_BBS_API.All_Boards.put(board.getName(), board);
+                        editor.putString(board.getName(), board.getDescription());
+
+                        Section parent_section = BYR_BBS_API.All_Sections.get(section.getName());
+                        parent_section.setBoards_names(board.getName());
+                        BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
+
+                        if (section.getParent() == null)
+                            ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoards_names(board.getName());
+                    }
+
+
+                    //判断是否有子分区，若有，则查找子分区信息
+                    String Sub_Section_String = jsonObject.getString("sub_section");
+                    if (Sub_Section_String.length() > 2)
+                    {
+                        Sub_Section_String = Sub_Section_String.substring(Sub_Section_String.indexOf("[") + 1, Sub_Section_String.lastIndexOf("]"));
+                        String Sub_Section_Name[] = Sub_Section_String.split(",");
+                        for (int i = 0; i < Sub_Section_Name.length; i++)
                         {
-                            getSectionsAndBoards(section.getName());
-                        }
-                        catch (IOException e)
-                        {
-                            e.printStackTrace();
+                            Sub_Section_Name[i] = Sub_Section_Name[i].substring(Sub_Section_Name[i].indexOf("\"") + 1, Sub_Section_Name[i].lastIndexOf("\""));
+                            getSectionsAndBoards(Sub_Section_Name[i]);
+
+                            ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_names(Sub_Section_Name[i]);
                         }
                     }
                 }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+
+                editor.commit();
             }
         }.start();
 
-
-//        for(Section section : Root_Sections.getSections())
-//        {
-//            if(section.getIs_root())
-//            {
-//                getSectionsAndBoards(section.getName());
-//            }
-//        }
-    }
-
-
-    public void getSectionsAndBoards(final String section_name) throws IOException
-    {
-        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION, section_name);
-
-        Response response = new OkHttpHelper().getExecute(url);
-        String response_result = response.body().string();
-
-        //版面所属类别, 原接口中为class，但class为保留字，因此使用boardclass
-        response_result = response_result.replace("\"class\"", "\"boardclass\"");
-
-        JSONObject jsonObject = JSON.parseObject(response_result);
-
-        //储存分区信息
-        Section section = new Gson().fromJson(response_result, new TypeToken<Section>() {}.getType());
-
-        if (section.getParent() != null)
-        {
-            Section parent_section = BYR_BBS_API.All_Sections.get(section.getParent());
-            parent_section.setSub_section_names(section.getName());
-            BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-        }
-        BYR_BBS_API.All_Sections.put(section.getName(), section);
-        editor.putString(section.getName(), section.getDescription());
-
-        //储存版面信息
-        String Boards_String = jsonObject.getString("board");
-        List<Board> boards = new Gson().fromJson(Boards_String, new TypeToken<List<Board>>() {}.getType());
-        for (Board board : boards)
-        {
-            BYR_BBS_API.All_Boards.put(board.getName(), board);
-            editor.putString(board.getName(), board.getDescription());
-
-
-            Section parent_section = BYR_BBS_API.All_Sections.get(section.getName());
-            parent_section.setBoards_names(board.getName());
-            BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-        }
-
-
-        //判断是否有子分区，若有，则查找子分区信息
-        String Sub_Section_String = jsonObject.getString("sub_section");
-        if (Sub_Section_String.length() > 2)
-        {
-            Sub_Section_String = Sub_Section_String.substring(Sub_Section_String.indexOf("[") + 1, Sub_Section_String.lastIndexOf("]"));
-            String Sub_Section_Name[] = Sub_Section_String.split(",");
-            for (int i = 0; i < Sub_Section_Name.length; i++)
-            {
-                Sub_Section_Name[i] = Sub_Section_Name[i].substring(Sub_Section_Name[i].indexOf("\"") + 1, Sub_Section_Name[i].lastIndexOf("\""));
-                getSectionsAndBoards(Sub_Section_Name[i]);
-            }
-        }
-
-        editor.commit();
     }
 }
-
-/**
- * 给定根分区名称，获取该根分区目录下所有的子分区以及所有版面，并将分区“名称-描述”和版面“名称-描述”键值对保存到sharedprefrence中
- *
- * @param section_name
- */
-//    public void getSectionsAndBoards(final String section_name)
-//    {
-//        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION, section_name);
-//
-//        new Thread()
-//        {
-//            public void run()
-//            {
-//                try
-//                {
-//                    Response response = new OkHttpHelper().getExecute(url);
-//                    String response_result = response.body().string();
-//
-//                    //版面所属类别, 原接口中为class，但class为保留字，因此使用boardclass
-//                    response_result = response_result.replace("\"class\"","\"boardclass\"");
-//
-//                    JSONObject jsonObject = JSON.parseObject(response_result);
-//
-//                    //储存分区信息
-//                    Section section = new Gson().fromJson(response_result, new TypeToken<Section>(){}.getType());
-//
-//                    if(section.getParent() != null)
-//                    {
-//                        Section parent_section = BYR_BBS_API.All_Sections.get(section.getParent());
-//                        parent_section.setSub_section_names(section.getName());
-//                        BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-////                        BYR_BBS_API.All_Sections.put(section.getParent(), parent_section);
-//                    }
-//                    BYR_BBS_API.All_Sections.put(section.getName(), section);
-//                    editor.putString(section.getName(), section.getDescription());
-//
-//                    //储存版面信息
-//                    String Boards_String = jsonObject.getString("board");
-//                    List<Board> boards = new Gson().fromJson(Boards_String, new TypeToken<List<Board>>(){}.getType());
-//                    for(Board board : boards)
-//                    {
-//                        BYR_BBS_API.All_Boards.put(board.getName(), board);
-//                        editor.putString(board.getName(), board.getDescription());
-//
-//
-//
-//                        Section parent_section = BYR_BBS_API.All_Sections.get(section.getName());
-//                        parent_section.setBoards_names(board.getName());
-//                        BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-//                    }
-//
-//
-//                    //判断是否有子分区，若有，则查找子分区信息
-//                    String Sub_Section_String = jsonObject.getString("sub_section");
-//                    if(Sub_Section_String.length() > 2)
-//                    {
-//                        Sub_Section_String = Sub_Section_String.substring(Sub_Section_String.indexOf("[")+1, Sub_Section_String.lastIndexOf("]"));
-//                        String Sub_Section_Name[] = Sub_Section_String.split(",");
-//                        for(int i=0; i<Sub_Section_Name.length; i++)
-//                        {
-//                            Sub_Section_Name[i] = Sub_Section_Name[i].substring(Sub_Section_Name[i].indexOf("\"")+1, Sub_Section_Name[i].lastIndexOf("\""));
-//                            getSectionsAndBoards(Sub_Section_Name[i]);
-//                        }
-//                    }
-//
-//                    editor.commit();
-//                }
-//                catch (IOException e)
-//                {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }.start();
-//    }

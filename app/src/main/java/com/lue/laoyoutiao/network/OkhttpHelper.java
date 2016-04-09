@@ -32,7 +32,7 @@ public class OkHttpHelper
         okHttpClient.setConnectTimeout(5, TimeUnit.SECONDS);
         okHttpClient.setWriteTimeout(3, TimeUnit.SECONDS);
 
-        byr_bbs_api = new BYR_BBS_API();
+        byr_bbs_api = BYR_BBS_API.getM_byr_bbs_api();
     }
 
 

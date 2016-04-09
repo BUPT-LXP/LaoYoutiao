@@ -9,7 +9,6 @@ import android.view.Window;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.global.ContextApplication;
-import com.lue.laoyoutiao.helper.SectionHelper;
 
 public class WelcomeActivity extends Activity
 {
@@ -19,7 +18,6 @@ public class WelcomeActivity extends Activity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-//        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_welcome);
 
@@ -27,13 +25,6 @@ public class WelcomeActivity extends Activity
         {
             public void run()
             {
-
-                /**
-                 * 获取所有根分区
-                 */
-                SectionHelper sectionHelper = new SectionHelper();
-                sectionHelper.getRootSections();
-
                 try
                 {
                     Thread.sleep(3000);

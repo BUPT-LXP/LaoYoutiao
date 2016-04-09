@@ -24,7 +24,7 @@ public class SectionHelper
 
     private List<Section> sections;
 
-    private static final String TAG = "WidgetHelper";
+    private static final String TAG = "SectionHelper";
 
     public SectionHelper()
     {
@@ -48,9 +48,10 @@ public class SectionHelper
                     String response_result = response.body().string();
                     JSONObject jsonObject = JSON.parseObject(response_result);
                     response_result = jsonObject.getString("section");
-                    sections = new Gson().fromJson(response_result, new TypeToken<List<Section>>()
-                    {
-                    }.getType());
+                    sections = new Gson().fromJson(response_result, new TypeToken<List<Section>>() {}.getType());
+
+
+
                     EventBus.getDefault().post(new Event.All_Root_Sections(sections));
                 } catch (IOException e)
                 {

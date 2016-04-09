@@ -1,5 +1,6 @@
 package com.lue.laoyoutiao.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -11,6 +12,8 @@ import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.fragment.BoardFragment;
 import com.lue.laoyoutiao.fragment.MineFragment;
 import com.lue.laoyoutiao.fragment.ToptenFragment;
+import com.lue.laoyoutiao.helper.SectionHelper;
+import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 
 
 public class MainActivity extends AppCompatActivity
@@ -34,6 +37,11 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
+
+
+//        //获取所有根分区
+        SectionHelper sectionHelper = new SectionHelper();
+        sectionHelper.getRootSections();
     }
 
     @Override
@@ -67,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume()
     {
         super.onResume();
+//        startService(new Intent(this, BYR_BBS_API.class));
         Log.v(TAG, "onResume");
     }
 
@@ -215,6 +224,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed()
     {
+        stopService(new Intent(this, BYR_BBS_API.class));
         moveTaskToBack(true);//true对任何Activity都适用
     }
 

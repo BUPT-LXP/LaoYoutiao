@@ -123,12 +123,12 @@ public class Section implements Parcelable
 
     public String getSub_section_name(int position)
     {
-        return sub_section_names.get(position);
+        return sub_section_names != null? sub_section_names.get(position) : null;
     }
 
     public int getSub_section_size()
     {
-        return sub_section_names.size();
+        return sub_section_names != null? sub_section_names.size() : 0;
     }
 
     public void setBoards_names(String board_name)
@@ -140,13 +140,13 @@ public class Section implements Parcelable
 
     public String getBoard_name(int position)
     {
-        return boards_names.get(position);
+        return boards_names != null? boards_names.get(position) : null;
     }
 
 
     public int getBoards_size()
     {
-        return boards_names.size();
+        return boards_names != null? boards_names.size() : 0;
     }
 
 

@@ -43,7 +43,6 @@ public class FavoriteHelper
                 {
                     Response response = okHttpHelper.getExecute(url);
                     String response_result = response.body().string();
-//                    Log.d(TAG, response_result);
                     JSONObject jsonObject = JSON.parseObject(response_result);
                     response_result = jsonObject.getString("board");
                     boards = new Gson().fromJson(response_result, new TypeToken<List<Board>>(){}.getType());
