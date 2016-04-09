@@ -134,6 +134,7 @@ public class SectionListAdapter extends BaseExpandableListAdapter
     }
 
 
+
     @Override
     public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
     {
