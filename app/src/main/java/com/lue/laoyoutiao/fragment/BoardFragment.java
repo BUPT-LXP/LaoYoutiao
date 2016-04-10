@@ -14,11 +14,13 @@ import android.widget.Toast;
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.adapter.FavoriteBoardListAdapter;
 import com.lue.laoyoutiao.adapter.SectionListAdapter;
+import com.lue.laoyoutiao.dialog.LoadingDialog;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.FavoriteHelper;
 import com.lue.laoyoutiao.helper.SectionHelper;
 import com.lue.laoyoutiao.metadata.Board;
+import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 
 import java.util.ArrayList;
@@ -40,6 +42,8 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     private GridView gridview_favorite_boards;
     private RadioGroup viewGroup;
     private boolean is_sectionlist_showed = false ;
+
+    private LoadingDialog loading_dialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -67,9 +71,10 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         listview_all_sections = (ExpandableListView)view.findViewById(R.id.expandablelistview_section);
         gridview_favorite_boards = (GridView)view.findViewById(R.id.grdiview_favorite_boards);
 
-
-
         listview_all_sections.setOnGroupExpandListener(this);
+
+        loading_dialog = new LoadingDialog(getActivity());
+        loading_dialog.setCanceledOnTouchOutside(false);
 
         viewGroup = (RadioGroup)view.findViewById(R.id.borad_show_model);
         viewGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
@@ -85,7 +90,19 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
 
                         //显示分区列表
                         if(!is_sectionlist_showed)
-                            ShowSections();
+                        {
+                            if(BYR_BBS_API.Is_GetSections_Finished)
+                                ShowSections();
+                            else
+                            {
+                                loading_dialog.show();
+//                                while (!BYR_BBS_API.Is_GetSections_Finished)
+//                                    Log.d(TAG, "Is_GetSections_Finished is false");
+//                                loading_dialog.dismiss();
+//                                ShowSections();
+                            }
+                        }
+
                         break;
                     case R.id.radiobutton_favorite_boards:
                         listview_all_sections.setVisibility(View.GONE);
@@ -108,23 +125,30 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     }
 
 
+    /**
+     * 获取由 BYR_BBS_API 在获取所有分区信息之后发送的消息，表示取消加载页面的显示
+     * @param Get_Sections_Finished
+     */
+    public void onEventMainThread(final Event.Get_Sections_Finished Get_Sections_Finished)
+    {
+        if(loading_dialog.isShowing())
+            loading_dialog.dismiss();
+        ShowSections();
+    }
+
+
     /*
     *显示分区列表
      */
     public void ShowSections()
     {
-        final SectionListAdapter adapter= new SectionListAdapter(ContextApplication.getAppContext(), BYR_BBS_API.ROOT_SECTIONS);
+//        List<Section> root_sections = BYR_BBS_API.getM_byr_bbs_api().db_root_sections.getSections();
+
+        List<Section> root_sections = BYR_BBS_API.ROOT_SECTIONS;
+
+        final SectionListAdapter adapter= new SectionListAdapter(ContextApplication.getAppContext(), root_sections);
 
         listview_all_sections.setAdapter(adapter);
-
-//        ViewGroup.LayoutParams layoutParams = this.listview_all_sections.getLayoutParams();
-//        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-//        layoutParams.height = (int) ContextApplication.getAppContext().getResources().getDimension(R.dimen.parent_expandable_list_height);
-//        listview_all_sections.setLayoutParams(layoutParams);
-
-//        AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-//                (int) ContextApplication.getAppContext().getResources().getDimension(R.dimen.parent_expandable_list_height));
-//        listview_all_sections.setLayoutParams(lp);
 
         adapter.setOnChildViewClickListener(this);
 

@@ -20,7 +20,7 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +42,6 @@ public class BYR_BBS_API
 
     //由用户名及密码组成的认证信息
     private static String auth;
-
     /**
      * 主要用到的API
      **/
@@ -67,16 +66,27 @@ public class BYR_BBS_API
     public final static String LOCAL_FILEPATH = Environment.getExternalStorageDirectory().getPath() + ROOT_FOLDER;
     public static final String MY_INFO_FOLDER = "/my_user_info";
     public static final String MY_FACE_NAME = "/my_face.png";
+    public static final String DB_FOLDER = "/database";
+    public static final String DB_ROOT_SECTIONS = "/root_sections.db4o";
+    public static final String DB_ALL_SECTIONS = "/all_sections.db4o";
+    public static final String DB_ALL_BOARDS = "/all_boards.db4o";
 
     //本地 SharedPreferences
     private SharedPreferences My_SharedPreferences;
     private SharedPreferences.Editor editor;
 
-    public static final Map<String, Section> All_Sections = new HashMap<>();
+    public static final Map<String, Section> All_Sections = new Hashtable<>();
 
-    public static final Map<String, Board> All_Boards = new HashMap<>();
+    public static final Map<String, Board> All_Boards = new Hashtable<>();
 
     public static final List<Section> ROOT_SECTIONS = new ArrayList<>();
+
+
+//    public DBHelper db_root_sections = null;
+//    public DBHelper db_all_sections = null;
+//    public DBHelper db_all_boards = null;
+
+    public static boolean Is_GetSections_Finished = false;
 
 
     //BYR_BBS_API使用单例模式，该类在JVM中仅允许创建一个实例
@@ -95,6 +105,10 @@ public class BYR_BBS_API
 
         editor.apply();
 
+//        db_root_sections = new DBHelper(DB_ROOT_SECTIONS);
+//        db_all_sections = new DBHelper(DB_ALL_SECTIONS);
+//        db_all_boards = new DBHelper(DB_ALL_BOARDS);
+
         //注册EventBus
         EventBus.getDefault().register(this);
     }
@@ -102,11 +116,11 @@ public class BYR_BBS_API
     //获取该类的唯一实例，注意需要使用双重校验锁检测，这样可以线程同步
     public static BYR_BBS_API getM_byr_bbs_api()
     {
-        if(m_byr_bbs_api == null)
+        if (m_byr_bbs_api == null)
         {
             synchronized (BYR_BBS_API.class)
             {
-                if(m_byr_bbs_api == null)
+                if (m_byr_bbs_api == null)
                 {
                     m_byr_bbs_api = new BYR_BBS_API();
                 }
@@ -159,93 +173,130 @@ public class BYR_BBS_API
      *
      * @param Root_Sections
      */
-    public void onEventMainThread(final Event.All_Root_Sections Root_Sections)
+    public void onEventBackgroundThread(final Event.All_Root_Sections Root_Sections)
     {
         Log.d(TAG, "Receive Event All_Root_Sections");
 
-        for(Section section : Root_Sections.getSections())
+        try
         {
-            ROOT_SECTIONS.add(section);
+            for (Section section : Root_Sections.getSections())
+            {
+//                ROOT_SECTIONS.add(section);
 
-            getSectionsAndBoards(section.getName());
+//                db_root_sections.addSection(section);
+
+                getSectionsAndBoards(section.getName());
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
         }
+
     }
 
 
-    public void getSectionsAndBoards(final String section_name)
+    public void getSectionsAndBoards(final String section_name) throws IOException
     {
         final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION, section_name);
 
-        new Thread()
+        String last_section_name = ROOT_SECTIONS.get(ROOT_SECTIONS.size() -1).getName();
+
+        if( section_name.equals(last_section_name))
         {
-            public void run()
+            Is_GetSections_Finished = true;
+
+            //向BoardFragment发送消息，告诉它可以取消加载页面的显示
+            EventBus.getDefault().post(new Event.Get_Sections_Finished(true));
+//            Log.d(TAG, "Is_GetSections_Finished is true");
+        }
+
+        Response response = new OkHttpHelper().getExecute(url);
+        String response_result = response.body().string();
+
+        //版面所属类别, 原接口中为class，但class为保留字，因此使用boardclass
+        response_result = response_result.replace("\"class\"", "\"boardclass\"");
+
+        JSONObject jsonObject = JSON.parseObject(response_result);
+
+        //储存分区信息
+        Section section = new Gson().fromJson(response_result, new TypeToken<Section>()
+        {
+        }.getType());
+
+        if (section.getParent() != null)
+        {
+            Section parent_section = BYR_BBS_API.All_Sections.get(section.getParent());
+            parent_section.setSub_section_names(section.getName());
+            BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
+
+//            //更新数据库中相关分区的子分区列表
+//            if (db_all_sections.getSection(parent_section.getName()) == null)
+//                db_all_sections.addSection(parent_section);
+//            else
+//                db_all_sections.updateSection_SubsectionName(parent_section.getName(), section.getName());
+        }
+        BYR_BBS_API.All_Sections.put(section.getName(), section);
+
+//        //新增数据库中的分区信息
+//        if (db_all_sections.getSection(section.getName()) == null)
+//            db_all_sections.addSection(section);
+
+        editor.putString(section.getName(), section.getDescription());
+
+        //储存版面信息
+        String Boards_String = jsonObject.getString("board");
+        List<Board> boards = new Gson().fromJson(Boards_String, new TypeToken<List<Board>>()
+        {
+        }.getType());
+        for (Board board : boards)
+        {
+            BYR_BBS_API.All_Boards.put(board.getName(), board);
+
+//            db_all_boards.addBoard(board);
+
+            editor.putString(board.getName(), board.getDescription());
+
+            Section parent_section = BYR_BBS_API.All_Sections.get(section.getName());
+            parent_section.setBoards_names(board.getName());
+            BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
+
+//            //更新数据库中相关分区的版面列表
+//            if (db_all_sections.getSection(parent_section.getName()) == null)
+//                db_all_sections.addSection(parent_section);
+//            else
+//                db_all_sections.updateSection_BoardName(parent_section.getName(), board.getName());
+
+            if (section.getParent() == null)
             {
-                try
-                {
-                    Response response = new OkHttpHelper().getExecute(url);
-                    String response_result = response.body().string();
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoards_names(board.getName());
 
-                    //版面所属类别, 原接口中为class，但class为保留字，因此使用boardclass
-                    response_result = response_result.replace("\"class\"", "\"boardclass\"");
-
-                    JSONObject jsonObject = JSON.parseObject(response_result);
-
-                    //储存分区信息
-                    Section section = new Gson().fromJson(response_result, new TypeToken<Section>()
-                    {
-                    }.getType());
-
-                    if (section.getParent() != null)
-                    {
-                        Section parent_section = BYR_BBS_API.All_Sections.get(section.getParent());
-                        parent_section.setSub_section_names(section.getName());
-                        BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-                    }
-                    BYR_BBS_API.All_Sections.put(section.getName(), section);
-                    editor.putString(section.getName(), section.getDescription());
-
-                    //储存版面信息
-                    String Boards_String = jsonObject.getString("board");
-                    List<Board> boards = new Gson().fromJson(Boards_String, new TypeToken<List<Board>>()
-                    {
-                    }.getType());
-                    for (Board board : boards)
-                    {
-                        BYR_BBS_API.All_Boards.put(board.getName(), board);
-                        editor.putString(board.getName(), board.getDescription());
-
-                        Section parent_section = BYR_BBS_API.All_Sections.get(section.getName());
-                        parent_section.setBoards_names(board.getName());
-                        BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-
-                        if (section.getParent() == null)
-                            ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoards_names(board.getName());
-                    }
-
-
-                    //判断是否有子分区，若有，则查找子分区信息
-                    String Sub_Section_String = jsonObject.getString("sub_section");
-                    if (Sub_Section_String.length() > 2)
-                    {
-                        Sub_Section_String = Sub_Section_String.substring(Sub_Section_String.indexOf("[") + 1, Sub_Section_String.lastIndexOf("]"));
-                        String Sub_Section_Name[] = Sub_Section_String.split(",");
-                        for (int i = 0; i < Sub_Section_Name.length; i++)
-                        {
-                            Sub_Section_Name[i] = Sub_Section_Name[i].substring(Sub_Section_Name[i].indexOf("\"") + 1, Sub_Section_Name[i].lastIndexOf("\""));
-                            getSectionsAndBoards(Sub_Section_Name[i]);
-
-                            ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_names(Sub_Section_Name[i]);
-                        }
-                    }
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-
-                editor.commit();
+                //更新数据库中相关分区的版面列表
+//                db_root_sections.updateSection_BoardName(section.getName(), board.getName());
             }
-        }.start();
+        }
+
+
+        //判断是否有子分区，若有，则查找子分区信息
+        String Sub_Section_String = jsonObject.getString("sub_section");
+        if (Sub_Section_String.length() > 2)
+        {
+            Sub_Section_String = Sub_Section_String.substring(Sub_Section_String.indexOf("[") + 1, Sub_Section_String.lastIndexOf("]"));
+            String Sub_Section_Name[] = Sub_Section_String.split(",");
+            for (int i = 0; i < Sub_Section_Name.length; i++)
+            {
+                Sub_Section_Name[i] = Sub_Section_Name[i].substring(Sub_Section_Name[i].indexOf("\"") + 1, Sub_Section_Name[i].lastIndexOf("\""));
+                getSectionsAndBoards(Sub_Section_Name[i]);
+
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_names(Sub_Section_Name[i]);
+
+                //更新数据库中相关分区的子分区列表
+//                db_root_sections.updateSection_SubsectionName(section.getName(), Sub_Section_Name[i]);
+            }
+        }
+
+        editor.commit();
+
 
     }
 }
+

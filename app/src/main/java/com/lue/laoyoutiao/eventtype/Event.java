@@ -83,4 +83,18 @@ public class Event
             return boards;
         }
     }
+
+    /**
+     * BYR_BBS_API 在获取所有分区信息之后，向BoardFragment发送消息，告诉它可以取消加载页面的显示
+     */
+    public static class Get_Sections_Finished
+    {
+        public  boolean is_finished = false;
+
+        public Get_Sections_Finished(boolean is_finished)
+        {
+            this.is_finished = is_finished;
+        }
+    }
+
 }

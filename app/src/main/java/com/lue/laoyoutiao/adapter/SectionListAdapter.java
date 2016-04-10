@@ -20,6 +20,7 @@ import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import java.util.ArrayList;
 import java.util.List;
 
+
 /**
  * Created by Lue on 2016/1/26.
  */
@@ -59,6 +60,7 @@ public class SectionListAdapter extends BaseExpandableListAdapter
         public void setBoard(Board board)
         {
             description.setText(board.getDescription());
+            image_favorite.setBackgroundResource(R.mipmap.board_favorite_unpressed);
             image_favorite.setVisibility(View.VISIBLE);
         }
     }

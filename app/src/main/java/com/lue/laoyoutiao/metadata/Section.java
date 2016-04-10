@@ -26,6 +26,12 @@ public class Section implements Parcelable
     private List<String> boards_names = new ArrayList<>();
 
 
+    public Section(String name)
+    {
+        this.name = name;
+    }
+
+
     protected Section(Parcel in)
     {
         name = in.readString();

@@ -182,12 +182,6 @@ public class LoginActivity extends AppCompatActivity
         {
             showProgress(false);
 
-//            Intent intent = new Intent();
-//            intent.setClass(LoginActivity.this, MainActivity.class);
-//            intent.putExtra("username", username);
-//            intent.putExtra("password", password);
-//            startActivity(intent);
-
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
 
             //存储 Login_Success

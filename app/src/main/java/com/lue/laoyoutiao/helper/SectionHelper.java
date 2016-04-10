@@ -50,7 +50,8 @@ public class SectionHelper
                     response_result = jsonObject.getString("section");
                     sections = new Gson().fromJson(response_result, new TypeToken<List<Section>>() {}.getType());
 
-
+                    for(Section section : sections)
+                        BYR_BBS_API.ROOT_SECTIONS.add(section);
 
                     EventBus.getDefault().post(new Event.All_Root_Sections(sections));
                 } catch (IOException e)

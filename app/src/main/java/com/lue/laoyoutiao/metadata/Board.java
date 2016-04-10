@@ -47,6 +47,11 @@ public class Board implements Parcelable
     private int user_online_max_time = -1;
 
 
+    public Board(String name)
+    {
+        this.name = name;
+    }
+
 
 
     @Override
