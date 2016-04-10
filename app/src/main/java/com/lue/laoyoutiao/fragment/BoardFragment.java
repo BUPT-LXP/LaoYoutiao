@@ -51,21 +51,20 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         //创建或者填充Fragment的UI，并且返回它。如果这个Fragment没有UI， 返回null
         view = inflater.inflate(R.layout.fragment_board, container, false);
 
+        //初始化显示界面
         initRadioGroup();
-
-        //获取所有根分区
-//        getRootSection();
 
         //获取所有收藏的版面
         getFavoriteBoards();
-
-
 
         //注册EventBus
         EventBus.getDefault().register(this);
         return view;
     }
 
+    /**
+     * 初始化显示界面
+     */
     private void initRadioGroup()
     {
         listview_all_sections = (ExpandableListView)view.findViewById(R.id.expandablelistview_section);
