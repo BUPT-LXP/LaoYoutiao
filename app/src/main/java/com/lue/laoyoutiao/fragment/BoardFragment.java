@@ -95,10 +95,6 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
                             else
                             {
                                 loading_dialog.show();
-//                                while (!BYR_BBS_API.Is_GetSections_Finished)
-//                                    Log.d(TAG, "Is_GetSections_Finished is false");
-//                                loading_dialog.dismiss();
-//                                ShowSections();
                             }
                         }
 
@@ -141,7 +137,6 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
      */
     public void ShowSections()
     {
-//        List<Section> root_sections = BYR_BBS_API.getM_byr_bbs_api().db_root_sections.getSections();
 
         List<Section> root_sections = BYR_BBS_API.ROOT_SECTIONS;
 
@@ -151,13 +146,50 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
 
         adapter.setOnChildViewClickListener(this);
 
+        listview_all_sections.setOnChildClickListener(new ExpandableListView.OnChildClickListener()
+        {
+
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id)
+            {
+                onClickPosition(groupPosition, childPosition, -1);
+                return false;
+            }
+        });
+
         is_sectionlist_showed = true;
     }
 
+    /**
+     * 实现 OnChildViewClickListener 中的 onClickPosition 方法
+     * @param parentPosition
+     * @param groupPosition
+     * @param childPosition
+     */
     @Override
     public void onClickPosition(int parentPosition, int groupPosition, int childPosition)
     {
-        Toast.makeText(ContextApplication.getAppContext(), "hehehe", Toast.LENGTH_SHORT).show();
+
+        String toast = null;
+        String root_section_description = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getDescription();
+        // childPosition == -1 表示点击的是根分区下的版面
+        if(childPosition == -1)
+        {
+            int sub_section_size = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getSub_section_size();
+            String board_name = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getBoard_name(groupPosition - sub_section_size);
+            toast = root_section_description + " : "
+                    + BYR_BBS_API.All_Boards.get(board_name).getDescription();
+
+        }
+        else
+        {
+            String sub_section_name = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getSub_section_name(groupPosition);
+            String board_name = BYR_BBS_API.All_Sections.get(sub_section_name).getBoard_name(childPosition);
+            toast = root_section_description + " : "
+                    + BYR_BBS_API.All_Sections.get(sub_section_name).getDescription() + " : "
+                    + BYR_BBS_API.All_Boards.get(board_name).getDescription();
+        }
+        Toast.makeText(ContextApplication.getAppContext(), toast, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -193,6 +225,9 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
             map.put("description", board.getDescription());
             map.put("threads_today_count", board.getThreads_today_count());
             listItems.add(map);
+
+            board.setIs_favorite(true);
+            BYR_BBS_API.All_Boards.put(board.getName(), board);
         }
 
         FavoriteBoardListAdapter adapter = new FavoriteBoardListAdapter(ContextApplication.getAppContext(), listItems);

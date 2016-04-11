@@ -60,7 +60,10 @@ public class SectionListAdapter extends BaseExpandableListAdapter
         public void setBoard(Board board)
         {
             description.setText(board.getDescription());
-            image_favorite.setBackgroundResource(R.mipmap.board_favorite_unpressed);
+            if( board.getIs_favorite() )
+                image_favorite.setBackgroundResource(R.mipmap.board_favorite_pressed);
+            else
+                image_favorite.setBackgroundResource(R.mipmap.board_favorite_unpressed);
             image_favorite.setVisibility(View.VISIBLE);
         }
     }
@@ -244,10 +247,7 @@ public class SectionListAdapter extends BaseExpandableListAdapter
         ExpandableListView mExpandableListView = new ExpandableListView(context);
         AbsListView.LayoutParams lp = new AbsListView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 (int) context.getResources().getDimension(R.dimen.parent_expandable_list_height));
-
         mExpandableListView.setLayoutParams(lp);
-
-//        mExpandableListView.setPadding((int) context.getResources().getDimension(R.dimen.child_expandable_list_group_padding_left),0,0,0);
 
         mExpandableListView.setDivider(new ColorDrawable(Color.RED));
         mExpandableListView.setDividerHeight(2);// 取消group项的分割线
@@ -267,7 +267,7 @@ public class SectionListAdapter extends BaseExpandableListAdapter
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition)
     {
-        return false;
+        return true;
     }
 
     public void setOnChildViewClickListener(OnChildViewClickListener childViewClickListener)
@@ -280,7 +280,6 @@ public class SectionListAdapter extends BaseExpandableListAdapter
      */
     public interface OnChildViewClickListener
     {
-
         void onClickPosition(int parentPosition, int groupPosition, int childPosition);
     }
 }

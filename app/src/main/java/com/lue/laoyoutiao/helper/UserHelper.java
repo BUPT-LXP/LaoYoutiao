@@ -32,7 +32,7 @@ public class UserHelper
 
     public UserHelper()
     {
-        okHttpHelper = new OkHttpHelper();
+        okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
     }
 
 

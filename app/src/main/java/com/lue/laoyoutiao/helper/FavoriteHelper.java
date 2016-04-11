@@ -28,7 +28,7 @@ public class FavoriteHelper
 
     public FavoriteHelper()
     {
-        okHttpHelper = new OkHttpHelper();
+        okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
     }
 
     public void getFavoriteBoards()

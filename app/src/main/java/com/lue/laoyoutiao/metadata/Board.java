@@ -46,6 +46,10 @@ public class Board implements Parcelable
     //版面历史最大在线用户数发生时间
     private int user_online_max_time = -1;
 
+    /**********************************自己新加的************************************/
+    //该板块是否被本用户收藏
+    private boolean is_favorite = false;
+
 
     public Board(String name)
     {
@@ -298,5 +302,15 @@ public class Board implements Parcelable
     public void setThreads_today_count(int threads_today_count)
     {
         this.threads_today_count = threads_today_count;
+    }
+
+    public boolean getIs_favorite()
+    {
+        return is_favorite;
+    }
+
+    public void setIs_favorite(boolean is_favorite)
+    {
+        this.is_favorite = is_favorite;
     }
 }

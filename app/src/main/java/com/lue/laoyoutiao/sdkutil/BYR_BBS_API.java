@@ -60,6 +60,8 @@ public class BYR_BBS_API
 
     //收藏夹接口
     public static final String STRING_FAVORITE = "favorite";
+    public static final String STRING_FAVORITE_ADD = "add";
+    public static final String STRING_FAVORITE_TOP_LEVEL = "0";
 
     //老邮条在本地的储存目录
     public static final String ROOT_FOLDER = "/LaoYouTiao";
@@ -181,10 +183,7 @@ public class BYR_BBS_API
         {
             for (Section section : Root_Sections.getSections())
             {
-//                ROOT_SECTIONS.add(section);
-
 //                db_root_sections.addSection(section);
-
                 getSectionsAndBoards(section.getName());
             }
         } catch (IOException e)
@@ -210,7 +209,7 @@ public class BYR_BBS_API
 //            Log.d(TAG, "Is_GetSections_Finished is true");
         }
 
-        Response response = new OkHttpHelper().getExecute(url);
+        Response response = OkHttpHelper.getM_OkHttpHelper().getExecute(url);
         String response_result = response.body().string();
 
         //版面所属类别, 原接口中为class，但class为保留字，因此使用boardclass

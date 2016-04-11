@@ -1,10 +1,14 @@
 package com.lue.laoyoutiao.network;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
+import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
@@ -25,7 +29,9 @@ public class OkHttpHelper
 
     private String response_result;
 
-    public OkHttpHelper()
+    private volatile static OkHttpHelper m_OkHttpHelper;
+
+    private OkHttpHelper()
     {
         okHttpClient = new OkHttpClient();
         okHttpClient.setReadTimeout(2, TimeUnit.SECONDS);
@@ -33,6 +39,26 @@ public class OkHttpHelper
         okHttpClient.setWriteTimeout(3, TimeUnit.SECONDS);
 
         byr_bbs_api = BYR_BBS_API.getM_byr_bbs_api();
+    }
+
+
+    /**
+     * •OkHttp官方文档并不建议我们创建多个OkHttpClient，因此使用单例模式。
+     * @return
+     */
+    public static OkHttpHelper getM_OkHttpHelper()
+    {
+        if(m_OkHttpHelper == null)
+        {
+            synchronized (OkHttpHelper.class)
+            {
+                if(m_OkHttpHelper == null)
+                {
+                    m_OkHttpHelper = new OkHttpHelper();
+                }
+            }
+        }
+        return m_OkHttpHelper;
     }
 
 
@@ -85,6 +111,28 @@ public class OkHttpHelper
                 .addHeader("Authorization", "Basic " + byr_bbs_api.getAuth())
                 .build();
         return okHttpClient.newCall(request).execute();
+    }
+
+
+    /**
+     *  OkHttp Post 请求
+     * @param url      /favorite/add/:level.(xml|json)  , level 为收藏夹层数，顶层为0
+     * @param name     新的版面或自定义目录，版面为版面name，如Flash
+     * @param dir      是否为自定义目录 0不是，1是
+     * @return
+     * @throws IOException
+     */
+    public Response postExecute(String url, String name, String dir) throws IOException
+    {
+        RequestBody body = new FormEncodingBuilder().add("name", name).add("dir", dir).build();
+        Request request = new Request.Builder().url(url).addHeader("Authorization", "Basic " + byr_bbs_api.getAuth()).post(body).build();
+
+        Response response = okHttpClient.newCall(request).execute();
+
+        String response_result = response.body().string();
+        JSONObject jsonObject = JSON.parseObject(response_result);
+
+        return response;
     }
 }
 

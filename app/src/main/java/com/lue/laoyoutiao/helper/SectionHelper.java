@@ -28,7 +28,7 @@ public class SectionHelper
 
     public SectionHelper()
     {
-        okHttpHelper = new OkHttpHelper();
+        okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
     }
 
     /**

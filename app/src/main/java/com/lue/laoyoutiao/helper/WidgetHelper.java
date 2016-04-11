@@ -28,7 +28,7 @@ public class WidgetHelper
 
     public WidgetHelper()
     {
-        okHttpHelper = new OkHttpHelper();
+        okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
     }
 
 
