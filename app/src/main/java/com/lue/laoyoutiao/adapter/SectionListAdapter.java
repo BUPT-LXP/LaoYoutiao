@@ -32,40 +32,80 @@ public class SectionListAdapter extends BaseExpandableListAdapter
     private int parent_size = 0;
 
     private OnChildViewClickListener childViewClickListener;  // 点击子ExpandableListView子项的监听
+    private OnChildFavoriteImageClickListener childFavoriteImageClickListener; //点击收藏按钮的监听
 
-    public SectionListAdapter(Context context, List<Section> sectionlist/*, List<Board> boardlist*/)
+    public SectionListAdapter(Context context, List<Section> sectionlist)
     {
         this.context = context;
         this.sectionlist = sectionlist;
         this.parent_size = sectionlist.size();
     }
 
+    /**
+     *
+     * @param childFavoriteImageClickListener 点击子ExpandableListView子项的监听
+     */
+    public void setChildFavoriteImageClickListener(OnChildFavoriteImageClickListener childFavoriteImageClickListener)
+    {
+        this.childFavoriteImageClickListener = childFavoriteImageClickListener;
+    }
+
+    /**
+     * 列表视图
+     */
     class ViewHolder
     {
-        public TextView description;
+        public TextView textview_description;
         public ImageView image_favorite;
 
         public ViewHolder(View v)
         {
-            description = (TextView)v.findViewById(R.id.textview_section_description);
+            textview_description = (TextView)v.findViewById(R.id.textview_section_description);
             image_favorite = (ImageView)v.findViewById(R.id.imageview_favorite);
+
+            image_favorite.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    if(childFavoriteImageClickListener != null)
+                    {
+                        String description = textview_description.getText().toString();
+                        //判断该版面是否已经被收藏
+                        boolean is_favorite = BYR_BBS_API.All_Boards.get(description).getIs_favorite();
+                        if(is_favorite)
+                        {
+                            image_favorite.setBackgroundResource(R.mipmap.board_favorite_unpressed);
+                            childFavoriteImageClickListener.onClickImagePosition(description, true);
+                        }
+                        else
+                        {
+                            image_favorite.setBackgroundResource(R.mipmap.board_favorite_pressed);
+                            childFavoriteImageClickListener.onClickImagePosition(description, false);
+                        }
+
+                    }
+                }
+            });
         }
 
         public void setSection(Section section)
         {
-            description.setText(section.getDescription());
+            textview_description.setText(section.getDescription());
             image_favorite.setVisibility(View.INVISIBLE);
         }
 
         public void setBoard(Board board)
         {
-            description.setText(board.getDescription());
+            textview_description.setText(board.getDescription());
             if( board.getIs_favorite() )
                 image_favorite.setBackgroundResource(R.mipmap.board_favorite_pressed);
             else
                 image_favorite.setBackgroundResource(R.mipmap.board_favorite_unpressed);
             image_favorite.setVisibility(View.VISIBLE);
         }
+
+
     }
 
     @Override
@@ -133,12 +173,11 @@ public class SectionListAdapter extends BaseExpandableListAdapter
         }
         else
         {
-            return BYR_BBS_API.All_Boards.get(section.getBoard_name(childPosition - sub_section_size));
+//            return BYR_BBS_API.All_Boards.get(section.getBoard_name(childPosition - sub_section_size));
+            return BYR_BBS_API.All_Boards.get(section.getBoard_description(childPosition - sub_section_size));
         }
 
     }
-
-
 
     @Override
     public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
@@ -155,6 +194,7 @@ public class SectionListAdapter extends BaseExpandableListAdapter
 
             final ExpandableListView sub_elview = getExpandableListView();
             final SectionListAdapter adapter = new SectionListAdapter(context, sub_section_list);
+            adapter.setChildFavoriteImageClickListener(childFavoriteImageClickListener);
             sub_elview.setAdapter(adapter);
 
             /**
@@ -275,6 +315,8 @@ public class SectionListAdapter extends BaseExpandableListAdapter
         this.childViewClickListener = childViewClickListener;
     }
 
+
+
     /**
      * 点击子ExpandableListView子项的回调接口
      */
@@ -282,4 +324,18 @@ public class SectionListAdapter extends BaseExpandableListAdapter
     {
         void onClickPosition(int parentPosition, int groupPosition, int childPosition);
     }
+
+    /**
+     *  点击收藏按钮的回调接口
+     */
+    public interface OnChildFavoriteImageClickListener
+    {
+        /**
+         *
+         * @param board_description 版面描述，BYR_BBS_API.All_Boards 的 key
+         * @param is_favorite 若为true，即表明已经被收藏，本次点击是要取消收藏该版面;若为false，即表明未被收藏，本次点击是要收藏该版面
+         */
+        void onClickImagePosition(String board_description, boolean is_favorite);
+    }
+
 }

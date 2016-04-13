@@ -1,7 +1,5 @@
 package com.lue.laoyoutiao.network;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
@@ -122,15 +120,12 @@ public class OkHttpHelper
      * @return
      * @throws IOException
      */
-    public Response postExecute(String url, String name, String dir) throws IOException
+    public Response postFavoriteBoard(String url, String name, String dir) throws IOException
     {
         RequestBody body = new FormEncodingBuilder().add("name", name).add("dir", dir).build();
         Request request = new Request.Builder().url(url).addHeader("Authorization", "Basic " + byr_bbs_api.getAuth()).post(body).build();
 
         Response response = okHttpClient.newCall(request).execute();
-
-        String response_result = response.body().string();
-        JSONObject jsonObject = JSON.parseObject(response_result);
 
         return response;
     }

@@ -22,8 +22,10 @@ public class Section implements Parcelable
     private String parent = null;
 
     private List<String> sub_section_names = new ArrayList<>();
+    private List<String> sub_section_descriptions = new ArrayList<>();
 
-    private List<String> boards_names = new ArrayList<>();
+    private List<String> board_names = new ArrayList<>();
+    private List<String> board_descriptions = new ArrayList<>();
 
 
     public Section(String name)
@@ -39,7 +41,7 @@ public class Section implements Parcelable
         is_root = in.readByte() != 0;
         parent = in.readString();
         in.readStringList(sub_section_names);
-        in.readStringList(boards_names);
+        in.readStringList(board_names);
     }
 
     public static final Creator<Section> CREATOR = new Creator<Section>()
@@ -72,7 +74,7 @@ public class Section implements Parcelable
         dest.writeInt(is_root? 1:0);
         dest.writeString(parent);
         dest.writeStringList(sub_section_names);
-        dest.writeStringList(boards_names);
+        dest.writeStringList(board_names);
     }
 
     public String getDescription()
@@ -115,16 +117,19 @@ public class Section implements Parcelable
         this.parent = parent;
     }
 
-    public List<String> getBoards_names()
+
+
+
+    public int getSub_section_size()
     {
-        return boards_names;
+        return sub_section_names != null? sub_section_names.size() : 0;
     }
 
-
-
-    public List<String> getSub_section_names()
+    public void setSub_section_names(String sub_section_names)
     {
-        return sub_section_names;
+        if(this.sub_section_names == null)
+            this.sub_section_names = new ArrayList<>();
+        this.sub_section_names.add(sub_section_names);
     }
 
     public String getSub_section_name(int position)
@@ -132,34 +137,55 @@ public class Section implements Parcelable
         return sub_section_names != null? sub_section_names.get(position) : null;
     }
 
-    public int getSub_section_size()
+    public List<String> getSub_section_names()
     {
-        return sub_section_names != null? sub_section_names.size() : 0;
+        return sub_section_names;
     }
 
-    public void setBoards_names(String board_name)
+    public void  setSub_section_descriptions(String sub_section_descriptions)
     {
-        if(this.boards_names == null)
-            this.boards_names = new ArrayList<>();
-        this.boards_names.add(board_name);
+        if(this.sub_section_descriptions == null)
+            this.sub_section_descriptions = new ArrayList<>();
+        this.sub_section_descriptions.add(sub_section_descriptions);
     }
 
-    public String getBoard_name(int position)
+    public String getSub_section_description(int position)
     {
-        return boards_names != null? boards_names.get(position) : null;
+        return sub_section_descriptions != null? sub_section_descriptions.get(position) : null;
     }
 
 
     public int getBoards_size()
     {
-        return boards_names != null? boards_names.size() : 0;
+        return board_names != null? board_names.size() : 0;
     }
 
-
-    public void setSub_section_names(String sub_section_names)
+    public void setBoard_names(String board_name)
     {
-        if(this.sub_section_names == null)
-            this.sub_section_names = new ArrayList<>();
-        this.sub_section_names.add(sub_section_names);
+        if(this.board_names == null)
+            this.board_names = new ArrayList<>();
+        this.board_names.add(board_name);
+    }
+
+    public String getBoard_name(int position)
+    {
+        return board_names != null? board_names.get(position) : null;
+    }
+
+    public List<String> getBoard_names()
+    {
+        return board_names;
+    }
+
+    public void setBoard_descriptions(String board_descriptions)
+    {
+        if(this.board_descriptions == null)
+            this.board_descriptions = new ArrayList<>();
+        this.board_descriptions.add(board_descriptions);
+    }
+
+    public String getBoard_description(int position)
+    {
+        return board_descriptions != null? board_descriptions.get(position) : null;
     }
 }

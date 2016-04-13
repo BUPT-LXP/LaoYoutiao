@@ -12,7 +12,7 @@ import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.fragment.BoardFragment;
 import com.lue.laoyoutiao.fragment.MineFragment;
 import com.lue.laoyoutiao.fragment.ToptenFragment;
-import com.lue.laoyoutiao.helper.SectionHelper;
+import com.lue.laoyoutiao.helper.FavoriteHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 
 
@@ -38,10 +38,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
 
-
-//        //获取所有根分区
-        SectionHelper sectionHelper = new SectionHelper();
-        sectionHelper.getRootSections();
+        //获取所有收藏的版面
+        FavoriteHelper favoriteHelper = new FavoriteHelper();
+        favoriteHelper.getFavoriteBoards();
     }
 
     @Override

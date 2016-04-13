@@ -89,11 +89,32 @@ public class Event
      */
     public static class Get_Sections_Finished
     {
-        public  boolean is_finished = false;
+        private boolean is_finished = false;
 
         public Get_Sections_Finished(boolean is_finished)
         {
             this.is_finished = is_finished;
+        }
+    }
+
+    public static class Post_Favorite_Finished
+    {
+        private String description = null;
+        private boolean is_favorite = false;
+
+        public Post_Favorite_Finished(String name, boolean is_favorite)
+        {
+            this.description = name;
+            this.is_favorite = is_favorite;
+        }
+
+        public String getDescription()
+        {
+            return description;
+        }
+        public boolean getIs_favorite()
+        {
+            return is_favorite;
         }
     }
 

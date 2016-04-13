@@ -42,9 +42,9 @@ public class BYR_BBS_API
 
     //由用户名及密码组成的认证信息
     private static String auth;
-    /**
-     * 主要用到的API
-     **/
+
+
+    /************************************* 主要用到的API***********************************/
 
     //用户接口
     public static final String STRING_USER = "user";
@@ -61,6 +61,7 @@ public class BYR_BBS_API
     //收藏夹接口
     public static final String STRING_FAVORITE = "favorite";
     public static final String STRING_FAVORITE_ADD = "add";
+    public static final String STRING_FAVORITE_DELETE = "delete";
     public static final String STRING_FAVORITE_TOP_LEVEL = "0";
 
     //老邮条在本地的储存目录
@@ -73,21 +74,25 @@ public class BYR_BBS_API
     public static final String DB_ALL_SECTIONS = "/all_sections.db4o";
     public static final String DB_ALL_BOARDS = "/all_boards.db4o";
 
+    /***********************************************************************************************/
+
     //本地 SharedPreferences
     private SharedPreferences My_SharedPreferences;
     private SharedPreferences.Editor editor;
 
+    //保存所有分区信息， key 为 Section.getName
     public static final Map<String, Section> All_Sections = new Hashtable<>();
 
+    //保存所有的版面信息, key 为 Board.getDescription
     public static final Map<String, Board> All_Boards = new Hashtable<>();
 
+    //保存所有根分区信息， key 为 Section.getName
     public static final List<Section> ROOT_SECTIONS = new ArrayList<>();
 
+    public static final Hashtable<String, Board> Favorite_Boards = new Hashtable<>();
 
-//    public DBHelper db_root_sections = null;
-//    public DBHelper db_all_sections = null;
-//    public DBHelper db_all_boards = null;
 
+    //是否所有分区及版面信息均以获取完毕，用以提示显示分区目录
     public static boolean Is_GetSections_Finished = false;
 
 
@@ -106,10 +111,6 @@ public class BYR_BBS_API
         setAuth(username, password);
 
         editor.apply();
-
-//        db_root_sections = new DBHelper(DB_ROOT_SECTIONS);
-//        db_all_sections = new DBHelper(DB_ALL_SECTIONS);
-//        db_all_boards = new DBHelper(DB_ALL_BOARDS);
 
         //注册EventBus
         EventBus.getDefault().register(this);
@@ -206,7 +207,6 @@ public class BYR_BBS_API
 
             //向BoardFragment发送消息，告诉它可以取消加载页面的显示
             EventBus.getDefault().post(new Event.Get_Sections_Finished(true));
-//            Log.d(TAG, "Is_GetSections_Finished is true");
         }
 
         Response response = OkHttpHelper.getM_OkHttpHelper().getExecute(url);
@@ -226,19 +226,11 @@ public class BYR_BBS_API
         {
             Section parent_section = BYR_BBS_API.All_Sections.get(section.getParent());
             parent_section.setSub_section_names(section.getName());
+            parent_section.setSub_section_descriptions(section.getDescription());
             BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
 
-//            //更新数据库中相关分区的子分区列表
-//            if (db_all_sections.getSection(parent_section.getName()) == null)
-//                db_all_sections.addSection(parent_section);
-//            else
-//                db_all_sections.updateSection_SubsectionName(parent_section.getName(), section.getName());
         }
         BYR_BBS_API.All_Sections.put(section.getName(), section);
-
-//        //新增数据库中的分区信息
-//        if (db_all_sections.getSection(section.getName()) == null)
-//            db_all_sections.addSection(section);
 
         editor.putString(section.getName(), section.getDescription());
 
@@ -249,31 +241,21 @@ public class BYR_BBS_API
         }.getType());
         for (Board board : boards)
         {
-            BYR_BBS_API.All_Boards.put(board.getName(), board);
-
-//            db_all_boards.addBoard(board);
+            BYR_BBS_API.All_Boards.put(board.getDescription(), board);
 
             editor.putString(board.getName(), board.getDescription());
 
             Section parent_section = BYR_BBS_API.All_Sections.get(section.getName());
-            parent_section.setBoards_names(board.getName());
+            parent_section.setBoard_names(board.getName());
+            parent_section.setBoard_descriptions(board.getDescription());
             BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-
-//            //更新数据库中相关分区的版面列表
-//            if (db_all_sections.getSection(parent_section.getName()) == null)
-//                db_all_sections.addSection(parent_section);
-//            else
-//                db_all_sections.updateSection_BoardName(parent_section.getName(), board.getName());
 
             if (section.getParent() == null)
             {
-                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoards_names(board.getName());
-
-                //更新数据库中相关分区的版面列表
-//                db_root_sections.updateSection_BoardName(section.getName(), board.getName());
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoard_names(board.getName());
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoard_descriptions(board.getDescription());
             }
         }
-
 
         //判断是否有子分区，若有，则查找子分区信息
         String Sub_Section_String = jsonObject.getString("sub_section");
@@ -287,15 +269,10 @@ public class BYR_BBS_API
                 getSectionsAndBoards(Sub_Section_Name[i]);
 
                 ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_names(Sub_Section_Name[i]);
-
-                //更新数据库中相关分区的子分区列表
-//                db_root_sections.updateSection_SubsectionName(section.getName(), Sub_Section_Name[i]);
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_descriptions(All_Sections.get(Sub_Section_Name[i]).getDescription());
             }
         }
-
         editor.commit();
-
-
     }
 }
 

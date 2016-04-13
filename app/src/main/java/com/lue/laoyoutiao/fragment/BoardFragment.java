@@ -18,8 +18,6 @@ import com.lue.laoyoutiao.dialog.LoadingDialog;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.FavoriteHelper;
-import com.lue.laoyoutiao.helper.SectionHelper;
-import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 
@@ -33,7 +31,8 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by Lue on 2015/12/30.
  */
-public class BoardFragment extends Fragment implements ExpandableListView.OnGroupExpandListener, SectionListAdapter.OnChildViewClickListener
+public class BoardFragment extends Fragment implements ExpandableListView.OnGroupExpandListener,
+        SectionListAdapter.OnChildViewClickListener, SectionListAdapter.OnChildFavoriteImageClickListener
 {
     private static final String TAG = "BoardFragment";
 
@@ -43,7 +42,12 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     private RadioGroup viewGroup;
     private boolean is_sectionlist_showed = false ;
 
+    //显示正在加载分区的对话框
     private LoadingDialog loading_dialog;
+
+    //收藏分区列表的数据源
+    List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
+    FavoriteBoardListAdapter favoriteBoardListAdapter = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -54,8 +58,8 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         //初始化显示界面
         initRadioGroup();
 
-        //获取所有收藏的版面
-        getFavoriteBoards();
+        //展示收藏版面列表
+        Show_Favorites();
 
         //注册EventBus
         EventBus.getDefault().register(this);
@@ -97,7 +101,6 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
                                 loading_dialog.show();
                             }
                         }
-
                         break;
                     case R.id.radiobutton_favorite_boards:
                         listview_all_sections.setVisibility(View.GONE);
@@ -109,16 +112,6 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
             }
         });
     }
-
-    /**
-     * 获取所有根分区
-     */
-    private void getRootSection()
-    {
-        SectionHelper sectionHelper = new SectionHelper();
-        sectionHelper.getRootSections();
-    }
-
 
     /**
      * 获取由 BYR_BBS_API 在获取所有分区信息之后发送的消息，表示取消加载页面的显示
@@ -145,6 +138,7 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         listview_all_sections.setAdapter(adapter);
 
         adapter.setOnChildViewClickListener(this);
+        adapter.setChildFavoriteImageClickListener(this);
 
         listview_all_sections.setOnChildClickListener(new ExpandableListView.OnChildClickListener()
         {
@@ -176,18 +170,18 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         if(childPosition == -1)
         {
             int sub_section_size = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getSub_section_size();
-            String board_name = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getBoard_name(groupPosition - sub_section_size);
+            String board_description = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getBoard_description(groupPosition - sub_section_size);
             toast = root_section_description + " : "
-                    + BYR_BBS_API.All_Boards.get(board_name).getDescription();
+                    + board_description;
 
         }
         else
         {
             String sub_section_name = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getSub_section_name(groupPosition);
-            String board_name = BYR_BBS_API.All_Sections.get(sub_section_name).getBoard_name(childPosition);
+            String board_description = BYR_BBS_API.All_Sections.get(sub_section_name).getBoard_description(childPosition);
             toast = root_section_description + " : "
                     + BYR_BBS_API.All_Sections.get(sub_section_name).getDescription() + " : "
-                    + BYR_BBS_API.All_Boards.get(board_name).getDescription();
+                    + board_description;
         }
         Toast.makeText(ContextApplication.getAppContext(), toast, Toast.LENGTH_SHORT).show();
     }
@@ -203,36 +197,75 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     }
 
     /**
-     * 获取所有收藏的版面
+     * 实现 OnChildFavoriteImageClickListener 接口
+     * @param board_description 版面描述，BYR_BBS_API.All_Boards 的 key
+     * @param is_favorite  若为true，即表明已经被收藏，本次点击是要取消收藏该版面;若为false，即表明未被收藏，本次点击是要收藏该版面
      */
-    private void getFavoriteBoards()
+    @Override
+    public void onClickImagePosition(String board_description, boolean is_favorite)
     {
-        FavoriteHelper favoriteHelper = new FavoriteHelper();
-        favoriteHelper.getFavoriteBoards();
+
+        String url = null;
+        if(is_favorite)
+        {
+            url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_FAVORITE, BYR_BBS_API.STRING_FAVORITE_DELETE, BYR_BBS_API.STRING_FAVORITE_TOP_LEVEL);
+        }
+        else
+        {
+            url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_FAVORITE, BYR_BBS_API.STRING_FAVORITE_ADD, BYR_BBS_API.STRING_FAVORITE_TOP_LEVEL);
+        }
+
+        String name = BYR_BBS_API.All_Boards.get(board_description).getName();
+        new FavoriteHelper().postFavorite(url, name, "0", is_favorite);
     }
 
     /**
-     * 响应 FavoriteHelper 发布的所有根分区信息
-     * @param myFavoriteBoards
+     * 响应 FavoriteHelper 发送的 添加/删除 收藏版面回馈通知
+     * @param post_favorite_finished
      */
-    public void onEventMainThread(Event.My_Favorite_Boards myFavoriteBoards)
+    public void onEventMainThread(Event.Post_Favorite_Finished post_favorite_finished)
     {
-        List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
 
-        for(Board board : myFavoriteBoards.getBoards())
+        boolean is_favorite = post_favorite_finished.getIs_favorite();
+        //若为true，即表明已经被收藏，本次点击是要取消收藏该版面;若为false，即表明未被收藏，本次点击是要收藏该版面
+        if(is_favorite)
+            Toast.makeText(ContextApplication.getAppContext(), R.string.favorite_boards_cancel, Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(ContextApplication.getAppContext(), R.string.favorite_boards_success, Toast.LENGTH_SHORT).show();
+
+        listItems.clear();
+        for (String key : BYR_BBS_API.Favorite_Boards.keySet())
         {
-            Map<String, Object> map = new HashMap<String, Object>();
-            map.put("description", board.getDescription());
-            map.put("threads_today_count", board.getThreads_today_count());
+            Map<String, Object> map = new HashMap<>();
+            map.put("description", key);
+            map.put("threads_today_count", BYR_BBS_API.Favorite_Boards.get(key).getThreads_today_count());
             listItems.add(map);
-
-            board.setIs_favorite(true);
-            BYR_BBS_API.All_Boards.put(board.getName(), board);
         }
 
-        FavoriteBoardListAdapter adapter = new FavoriteBoardListAdapter(ContextApplication.getAppContext(), listItems);
+        if(favoriteBoardListAdapter == null)
+            favoriteBoardListAdapter = new FavoriteBoardListAdapter(ContextApplication.getAppContext(), listItems);
+        favoriteBoardListAdapter.notifyDataSetChanged();
+    }
 
-        gridview_favorite_boards.setAdapter(adapter);
+
+    /**
+     * 展示收藏版面列表
+     */
+    public void Show_Favorites()
+    {
+//        Enumeration<Board> boardEnumeration = BYR_BBS_API.Favorite_Boards.elements();
+        for (String key : BYR_BBS_API.Favorite_Boards.keySet())
+        {
+            Map<String, Object> map = new HashMap<>();
+            map.put("description", key);
+            map.put("threads_today_count", BYR_BBS_API.Favorite_Boards.get(key).getThreads_today_count());
+            listItems.add(map);
+        }
+
+        favoriteBoardListAdapter = new FavoriteBoardListAdapter(ContextApplication.getAppContext(), listItems);
+
+        gridview_favorite_boards.setAdapter(favoriteBoardListAdapter);
+
     }
 
     @Override
@@ -243,4 +276,6 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         //注销EventBus
         EventBus.getDefault().unregister(this);
     }
+
+
 }

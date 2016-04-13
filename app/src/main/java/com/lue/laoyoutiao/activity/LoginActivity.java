@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.eventtype.Event;
+import com.lue.laoyoutiao.helper.SectionHelper;
 import com.lue.laoyoutiao.helper.UserHelper;
 
 import de.greenrobot.event.EventBus;
@@ -189,6 +190,10 @@ public class LoginActivity extends AppCompatActivity
             editor.apply();
 
             Toast.makeText(getApplicationContext(), "登陆成功", Toast.LENGTH_SHORT).show();
+
+            //获取所有根分区
+            SectionHelper sectionHelper = new SectionHelper();
+            sectionHelper.getRootSections();
 
             finish();
         }

@@ -9,6 +9,7 @@ import android.view.Window;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.SectionHelper;
 
 public class WelcomeActivity extends Activity
 {
@@ -25,6 +26,21 @@ public class WelcomeActivity extends Activity
         {
             public void run()
             {
+
+                My_SharedPreferences = ContextApplication.getAppContext().getSharedPreferences("My_SharePreference", Context.MODE_PRIVATE);
+
+                /*读取 My_SharedPreferences 中保存的Login_Success变量
+                若成功登陆过，则跳转至MainActivity
+                否则，则跳转至LoginActivity  */
+                boolean login_success = My_SharedPreferences.getBoolean("Login_Success", false);
+
+                if(login_success)
+                {
+                    //获取所有根分区
+                    SectionHelper sectionHelper = new SectionHelper();
+                    sectionHelper.getRootSections();
+                }
+
                 try
                 {
                     Thread.sleep(3000);
@@ -33,13 +49,6 @@ public class WelcomeActivity extends Activity
                     e.printStackTrace();
                 }
 
-
-                My_SharedPreferences = ContextApplication.getAppContext().getSharedPreferences("My_SharePreference", Context.MODE_PRIVATE);
-
-                /*读取 My_SharedPreferences 中保存的Login_Success变量
-                若成功登陆过，则跳转至MainActivity
-                否则，则跳转至LoginActivity  */
-                boolean login_success = My_SharedPreferences.getBoolean("Login_Success", false);
                 if(login_success)
                 {
                     String username = My_SharedPreferences.getString("username", "guset");
@@ -58,7 +67,5 @@ public class WelcomeActivity extends Activity
                 finish();
             }
         }.start();
-
-
     }
 }

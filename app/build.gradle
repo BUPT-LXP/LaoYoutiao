@@ -35,5 +35,4 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.alibaba:fastjson:latest.integration'
     compile 'nl.qbusict:cupboard:2.1.4'
-    compile files('libs/db4o-8.0.249.16098-core-java5.jar')
 }
