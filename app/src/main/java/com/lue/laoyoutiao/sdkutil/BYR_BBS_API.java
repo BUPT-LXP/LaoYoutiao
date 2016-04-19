@@ -19,7 +19,9 @@ import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +60,9 @@ public class BYR_BBS_API
     //分区接口
     public static final String STRING_SECTION = "section";
 
+    //版面接口
+    public static final String STRING_BOARD = "board";
+
     //收藏夹接口
     public static final String STRING_FAVORITE = "favorite";
     public static final String STRING_FAVORITE_ADD = "add";
@@ -75,6 +80,12 @@ public class BYR_BBS_API
     public static final String DB_ALL_BOARDS = "/all_boards.db4o";
 
     /***********************************************************************************************/
+
+    private static final String MINUTES_AGO = "分钟前";
+    private static final String HOUR = "小时前";
+    private static final String DATE = "日";
+    private static final String JUST_NOW = "刚刚";
+    private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     //本地 SharedPreferences
     private SharedPreferences My_SharedPreferences;
@@ -135,7 +146,6 @@ public class BYR_BBS_API
 
     /**
      * 根据用户名和密码设置认证信息，使用Base64进行编码
-     *
      * @param username
      * @param password
      */
@@ -153,7 +163,6 @@ public class BYR_BBS_API
 
     /**
      * 构建URL
-     *
      * @param strings
      * @return 构建好的URL
      * Example: param   : widget topten
@@ -172,6 +181,48 @@ public class BYR_BBS_API
 
 
     /**
+     * 将服务器返回的unixtimestamp时间戳转化成可读的日期标识
+     * @param timestamp_int  unixtimestamp时间戳
+     * @return 可读的日期标识
+     */
+    public static String timeStamptoDate(int timestamp_int)
+    {
+        String result;
+
+        long current_time = new Date().getTime();
+        current_time = current_time / 1000;
+        long time_defference = current_time - timestamp_int; //时间差
+        if(time_defference <= 60)
+        {
+            return JUST_NOW;
+        }
+        else if(time_defference > 60 && time_defference <= 3600)
+        {
+            //时间小于一小时
+            int minutes = (int) time_defference / 60 ;
+            result = minutes + MINUTES_AGO;
+            return result;
+        }
+        else if(time_defference > 3600 && time_defference < 24 * 3600)
+        {
+            //时间小于一天
+            int total_minutes = (int) time_defference / 60; //总分钟数
+            int hours = total_minutes / 60;                 //小时数
+            result = hours + HOUR;
+            return result;
+        }
+        else
+        {
+            long timestamp_long = (long)timestamp_int * 1000;
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TIME_FORMAT);
+            String date = simpleDateFormat.format(new Date(timestamp_long));
+            date = date.substring(5,10) + DATE;
+            return date;
+        }
+    }
+
+
+    /**
      * 响应 SectionHelper 发布的所有根分区信息
      *
      * @param Root_Sections
@@ -184,7 +235,6 @@ public class BYR_BBS_API
         {
             for (Section section : Root_Sections.getSections())
             {
-//                db_root_sections.addSection(section);
                 getSectionsAndBoards(section.getName());
             }
         } catch (IOException e)

@@ -12,6 +12,8 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import de.greenrobot.event.EventBus;
 
@@ -26,6 +28,7 @@ public class SectionHelper
 
     private static final String TAG = "SectionHelper";
 
+
     public SectionHelper()
     {
         okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
@@ -38,6 +41,34 @@ public class SectionHelper
     {
         final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION);
 
+        //创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行。
+        //感觉和之前的方式并没有什么区别。。。因为这里只用到了一个线程。。。
+        ExecutorService singleThreadExecutor = Executors.newSingleThreadExecutor();
+        singleThreadExecutor.execute(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    Response response = okHttpHelper.getExecute(url);
+                    String response_result = response.body().string();
+                    JSONObject jsonObject = JSON.parseObject(response_result);
+                    response_result = jsonObject.getString("section");
+                    sections = new Gson().fromJson(response_result, new TypeToken<List<Section>>() {}.getType());
+
+                    for(Section section : sections)
+                        BYR_BBS_API.ROOT_SECTIONS.add(section);
+
+                    EventBus.getDefault().post(new Event.All_Root_Sections(sections));
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        /*
         new Thread()
         {
             public void run()
@@ -59,7 +90,7 @@ public class SectionHelper
                     e.printStackTrace();
                 }
             }
-        }.start();
+        }.start();*/
     }
 
 }

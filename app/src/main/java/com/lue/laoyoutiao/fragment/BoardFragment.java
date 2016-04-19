@@ -1,6 +1,7 @@
 package com.lue.laoyoutiao.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.lue.laoyoutiao.R;
+import com.lue.laoyoutiao.activity.BoardArticleListActivity;
 import com.lue.laoyoutiao.adapter.FavoriteBoardListAdapter;
 import com.lue.laoyoutiao.adapter.SectionListAdapter;
 import com.lue.laoyoutiao.dialog.LoadingDialog;
@@ -156,21 +158,22 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
 
     /**
      * 实现 OnChildViewClickListener 中的 onClickPosition 方法
-     * @param parentPosition
-     * @param groupPosition
-     * @param childPosition
+     * @param parentPosition 根分区位置
+     * @param groupPosition 子分区或子版面位置
+     * @param childPosition 子子版面位置
      */
     @Override
     public void onClickPosition(int parentPosition, int groupPosition, int childPosition)
     {
 
         String toast = null;
+        String board_description;
         String root_section_description = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getDescription();
         // childPosition == -1 表示点击的是根分区下的版面
         if(childPosition == -1)
         {
             int sub_section_size = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getSub_section_size();
-            String board_description = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getBoard_description(groupPosition - sub_section_size);
+            board_description = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getBoard_description(groupPosition - sub_section_size);
             toast = root_section_description + " : "
                     + board_description;
 
@@ -178,11 +181,16 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         else
         {
             String sub_section_name = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getSub_section_name(groupPosition);
-            String board_description = BYR_BBS_API.All_Sections.get(sub_section_name).getBoard_description(childPosition);
+            board_description = BYR_BBS_API.All_Sections.get(sub_section_name).getBoard_description(childPosition);
             toast = root_section_description + " : "
                     + BYR_BBS_API.All_Sections.get(sub_section_name).getDescription() + " : "
                     + board_description;
         }
+
+        Intent intent = new Intent(this.getActivity(), BoardArticleListActivity.class);
+        intent.putExtra("Board_Description", board_description);
+        startActivity(intent);
+
         Toast.makeText(ContextApplication.getAppContext(), toast, Toast.LENGTH_SHORT).show();
     }
 

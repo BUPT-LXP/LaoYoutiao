@@ -13,4 +13,6 @@
     <dimen name="child_expandable_list_group_padding_left">40dp</dimen>
     <dimen name="child_expandable_list_child_padding_left">75dp</dimen>
     <dimen name="child_paddingg_left_relative_to_parent">20dp</dimen>
+    <dimen name="app_bar_height">180dp</dimen>
+    <dimen name="text_margin">16dp</dimen>
 </resources>

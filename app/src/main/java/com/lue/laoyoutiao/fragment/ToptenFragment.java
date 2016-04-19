@@ -10,7 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.lue.laoyoutiao.R;
-import com.lue.laoyoutiao.adapter.ArticleListAdapter;
+import com.lue.laoyoutiao.adapter.ToptenArticleListAdapter;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.WidgetHelper;
@@ -57,7 +57,7 @@ public class ToptenFragment extends Fragment
 
         final ArrayAdapter<String> arrayAdapter;
         arrayAdapter = new ArrayAdapter<String>(ContextApplication.getAppContext(),
-                R.layout.article_list_item, titles);
+                R.layout.topten_article_list_item, titles);
 
         listview_topten.setAdapter(arrayAdapter);
     }
@@ -87,7 +87,7 @@ public class ToptenFragment extends Fragment
             listItems.add(map);
         }
 
-        ArticleListAdapter adapter = new ArticleListAdapter(ContextApplication.getAppContext(), listItems);
+        ToptenArticleListAdapter adapter = new ToptenArticleListAdapter(ContextApplication.getAppContext(), listItems);
 
         listview_topten.setAdapter(adapter);
 

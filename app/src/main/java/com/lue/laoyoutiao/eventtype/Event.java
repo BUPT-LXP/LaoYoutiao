@@ -118,4 +118,19 @@ public class Event
         }
     }
 
+    public static class Specified_Board_Articles
+    {
+        private List<Article> articles;
+
+        public Specified_Board_Articles(List<Article> articles)
+        {
+            this.articles = articles;
+        }
+
+        public List<Article> getArticles()
+        {
+            return articles;
+        }
+    }
+
 }

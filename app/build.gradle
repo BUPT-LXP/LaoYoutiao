@@ -25,7 +25,6 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    //testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:22.2.1'
     compile 'com.github.paper777:BBSSDK:1.3@aar'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
@@ -34,5 +33,8 @@ dependencies {
     compile 'com.google.code.gson:gson:2.4'
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.alibaba:fastjson:latest.integration'
-    compile 'nl.qbusict:cupboard:2.1.4'
+    compile 'com.android.support:recyclerview-v7:22.1.0'
+//    compile 'com.sch.rfview:AnimRefreshRecyclerView:1.0.6@aar'
+    compile 'com.nineoldandroids:library:2.4.0'
+    compile 'cn.bingoogolapple:bga-refreshlayout:1.1.4@aar'
 }

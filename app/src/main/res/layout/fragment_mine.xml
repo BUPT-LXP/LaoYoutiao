@@ -64,7 +64,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1sp"
-        android:background="@color/royalblue"/>
+        android:background="@color/my_default_theme_color"/>
 
     <TextView
         android:id="@+id/textview_my_secret_message"
@@ -106,7 +106,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1sp"
-        android:background="@color/royalblue"/>
+        android:background="@color/my_default_theme_color"/>
 
     <TextView
         android:id="@+id/textview_my_settings"

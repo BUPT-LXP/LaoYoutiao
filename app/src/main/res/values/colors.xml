@@ -152,6 +152,9 @@
 
     <color name="my_default_background">#e3e1e1</color><!--默认背景色 -->
 
+    <color name="my_default_theme_color">#00BE02</color><!--默认背景色 -->
+
+
     <drawable name="my_default_background">#e3e1e1</drawable><!--默认背景色 -->
     <drawable name="royalblue">#4169E1</drawable><!--皇家蓝 -->
 
