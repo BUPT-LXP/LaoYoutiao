@@ -6,8 +6,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.adapter.ToptenArticleListAdapter;
@@ -15,21 +15,27 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.WidgetHelper;
 import com.lue.laoyoutiao.metadata.Article;
+import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
+import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import de.greenrobot.event.EventBus;
 
 /**
  * Created by Lue on 2015/12/30.
  */
-public class ToptenFragment extends Fragment
+public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefreshLayoutDelegate
 {
     private View view;
+    private BGARefreshLayout mBGARefreshLayout;
     private ListView listview_topten;
+    private List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
+    private ToptenArticleListAdapter adapter ;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -37,7 +43,15 @@ public class ToptenFragment extends Fragment
         //创建或者填充Fragment的UI，并且返回它。如果这个Fragment没有UI， 返回null
         view = inflater.inflate(R.layout.fragment_topten, container, false);
 
+        mBGARefreshLayout = (BGARefreshLayout)view.findViewById(R.id.layout_topten_article_list);
         listview_topten = (ListView)view.findViewById(R.id.topten_list);
+
+        // 为BGARefreshLayout设置代理
+        mBGARefreshLayout.setDelegate(this);
+        // 设置下拉刷新和上拉加载更多的风格     参数1：应用程序上下文，参数2：是否具有上拉加载更多功能
+        BGANormalRefreshViewHolder holder = new BGANormalRefreshViewHolder(ContextApplication.getAppContext(), false);
+
+        mBGARefreshLayout.setRefreshViewHolder(holder);
 
         getTopten();
 
@@ -45,21 +59,6 @@ public class ToptenFragment extends Fragment
         EventBus.getDefault().register(this);
 
         return view;
-    }
-
-    /**
-     * 根据得到的title数组，设置十大标题
-     * @param titles
-     */
-    public void setToptenList(ArrayList<String> titles)
-    {
-//        listview_topten = (ListView)view.findViewById(R.id.topten_list);
-
-        final ArrayAdapter<String> arrayAdapter;
-        arrayAdapter = new ArrayAdapter<String>(ContextApplication.getAppContext(),
-                R.layout.topten_article_list_item, titles);
-
-        listview_topten.setAdapter(arrayAdapter);
     }
 
     /**
@@ -78,7 +77,7 @@ public class ToptenFragment extends Fragment
      */
     public void onEventMainThread(Event.Topten_ArticleList topten_article_list)
     {
-        List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
+        listItems.clear();
         for(Article article : topten_article_list.getTopten_list())
         {
             Map<String, Object> map = new HashMap<String, Object>();
@@ -87,10 +86,16 @@ public class ToptenFragment extends Fragment
             listItems.add(map);
         }
 
-        ToptenArticleListAdapter adapter = new ToptenArticleListAdapter(ContextApplication.getAppContext(), listItems);
+        if(adapter == null)
+        {
+            adapter = new ToptenArticleListAdapter(ContextApplication.getAppContext(), listItems);
+            listview_topten.setAdapter(adapter);
+        }
+        else
+            adapter.notifyDataSetChanged();
 
-        listview_topten.setAdapter(adapter);
-
+        if(mBGARefreshLayout.getCurrentRefreshStatus() == BGARefreshLayout.RefreshStatus.REFRESHING)
+            mBGARefreshLayout.endRefreshing();
     }
 
 
@@ -101,5 +106,27 @@ public class ToptenFragment extends Fragment
 
         //注销EventBus
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout refreshLayout)
+    {
+        if(BYR_BBS_API.isNetWorkAvailable())
+        {
+            // 如果网络可用，则加载网络数据
+            getTopten();
+        }
+        else
+        {
+            // 网络不可用，结束下拉刷新
+            Toast.makeText(ContextApplication.getAppContext(), "网络不可用", Toast.LENGTH_SHORT).show();
+            mBGARefreshLayout.endRefreshing();
+        }
+    }
+
+    @Override
+    public boolean onBGARefreshLayoutBeginLoadingMore(BGARefreshLayout refreshLayout)
+    {
+        return false;
     }
 }

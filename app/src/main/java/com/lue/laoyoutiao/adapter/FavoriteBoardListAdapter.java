@@ -100,7 +100,6 @@ public class FavoriteBoardListAdapter extends BaseAdapter
 
         GradientDrawable drawable = (GradientDrawable)listItemView.board_first_char.getBackground();
         drawable.setColor(mColor);
-//        listItemView.board_first_char.setBackgroundColor(mColor);
 
 
         int threads_today_count = (int)listItems.get(position).get("threads_today_count");

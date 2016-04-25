@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 import android.widget.GridView;
 import android.widget.RadioGroup;
@@ -165,33 +166,22 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     @Override
     public void onClickPosition(int parentPosition, int groupPosition, int childPosition)
     {
-
-        String toast = null;
         String board_description;
-        String root_section_description = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getDescription();
         // childPosition == -1 表示点击的是根分区下的版面
         if(childPosition == -1)
         {
             int sub_section_size = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getSub_section_size();
             board_description = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getBoard_description(groupPosition - sub_section_size);
-            toast = root_section_description + " : "
-                    + board_description;
-
         }
         else
         {
             String sub_section_name = BYR_BBS_API.ROOT_SECTIONS.get(parentPosition).getSub_section_name(groupPosition);
             board_description = BYR_BBS_API.All_Sections.get(sub_section_name).getBoard_description(childPosition);
-            toast = root_section_description + " : "
-                    + BYR_BBS_API.All_Sections.get(sub_section_name).getDescription() + " : "
-                    + board_description;
         }
 
         Intent intent = new Intent(this.getActivity(), BoardArticleListActivity.class);
         intent.putExtra("Board_Description", board_description);
         startActivity(intent);
-
-        Toast.makeText(ContextApplication.getAppContext(), toast, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -224,7 +214,10 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         }
 
         String name = BYR_BBS_API.All_Boards.get(board_description).getName();
-        new FavoriteHelper().postFavorite(url, name, "0", is_favorite);
+        HashMap<String, String> params_map = new HashMap<>();
+        params_map.put("name", name);
+        params_map.put("dir", "0");
+        new FavoriteHelper().postFavorite(url, params_map, is_favorite);
     }
 
     /**
@@ -261,7 +254,6 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
      */
     public void Show_Favorites()
     {
-//        Enumeration<Board> boardEnumeration = BYR_BBS_API.Favorite_Boards.elements();
         for (String key : BYR_BBS_API.Favorite_Boards.keySet())
         {
             Map<String, Object> map = new HashMap<>();
@@ -274,6 +266,17 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
 
         gridview_favorite_boards.setAdapter(favoriteBoardListAdapter);
 
+        gridview_favorite_boards.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                String description = (String) listItems.get(position).get("description");
+                Intent intent = new Intent(getActivity(), BoardArticleListActivity.class);
+                intent.putExtra("Board_Description", description);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -284,6 +287,5 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         //注销EventBus
         EventBus.getDefault().unregister(this);
     }
-
 
 }

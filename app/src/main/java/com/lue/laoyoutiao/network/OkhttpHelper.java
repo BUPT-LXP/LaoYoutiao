@@ -10,6 +10,7 @@ import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
@@ -113,21 +114,23 @@ public class OkHttpHelper
 
 
     /**
-     *  OkHttp Post 请求
-     * @param url      /favorite/add/:level.(xml|json)  , level 为收藏夹层数，顶层为0
-     * @param name     新的版面或自定义目录，版面为版面name，如Flash
-     * @param dir      是否为自定义目录 0不是，1是
-     * @return
+     * OkHttp 同步 Post 请求
+     * @param url /favorite/add/:level.(xml|json)  , level 为收藏夹层数，顶层为0
+     * @param params Post请求中需要携带的参数
+     * @return Response
      * @throws IOException
      */
-    public Response postFavoriteBoard(String url, String name, String dir) throws IOException
+    public Response postExecute(String url, HashMap<String, String> params) throws IOException
     {
-        RequestBody body = new FormEncodingBuilder().add("name", name).add("dir", dir).build();
+        FormEncodingBuilder builder = new FormEncodingBuilder();
+        for(String key : params.keySet())
+        {
+            builder.add(key, params.get(key));
+        }
+        RequestBody body = builder.build();
         Request request = new Request.Builder().url(url).addHeader("Authorization", "Basic " + byr_bbs_api.getAuth()).post(body).build();
 
-        Response response = okHttpClient.newCall(request).execute();
-
-        return response;
+        return okHttpClient.newCall(request).execute();
     }
 }
 

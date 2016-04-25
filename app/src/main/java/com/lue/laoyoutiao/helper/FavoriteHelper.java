@@ -15,6 +15,7 @@ import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -71,14 +72,14 @@ public class FavoriteHelper
         }.start();
     }
 
+
     /**
      * 添加/删除 收藏版面
      * @param url 链接
-     * @param name 要删除的版面或自定义目录，版面为版面name，如Flash
-     * @param dir 是否为自定义目录 0不是，1是
-     * @param is_favorite 若为true，即表明已经被收藏，本次点击是要取消收藏该版面;若为false，即表明未被收藏，本次点击是要收藏该版面
+     * @param params_map 包含了两个参数 ： name 要删除的版面或自定义目录，版面为版面name，如Flash；dir 是否为自定义目录 0不是，1是
+     * @param is_favorite  若为true，即表明已经被收藏，本次点击是要取消收藏该版面;若为false，即表明未被收藏，本次点击是要收藏该版面
      */
-    public void postFavorite(final String url, final String name, final String dir, final boolean is_favorite)
+    public void postFavorite(final String url, final HashMap<String, String> params_map , final boolean is_favorite)
     {
         new Thread()
         {
@@ -86,9 +87,9 @@ public class FavoriteHelper
             {
                 try
                 {
-                    Response response = okHttpHelper.postFavoriteBoard(url, name, dir);
+                    Response response = okHttpHelper.postExecute(url, params_map);
                     SharedPreferences sp = ContextApplication.getAppContext().getSharedPreferences("My_SharePreference", Context.MODE_PRIVATE);
-                    String description = sp.getString(name, "null");
+                    String description = sp.getString(params_map.get("name"), "null");
 
                     if(response.isSuccessful())
                     {

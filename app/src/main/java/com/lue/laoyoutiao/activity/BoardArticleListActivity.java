@@ -2,8 +2,6 @@ package com.lue.laoyoutiao.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -44,8 +42,13 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
     private ListView mListView_Articles;
     private static Context mContext;
 
-    private List<Article> top_Articles = new ArrayList<>();
-    private List<Article> common_Articles = new ArrayList<>();
+
+    private int page_number = 1;  //当前页码
+    public BoardHelper boardHelper = null;
+    private String board_description;
+    public List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>(); //普通文章相对应Adapter的数据
+
+    public BoardCommonArticleListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -56,7 +59,7 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         mContext = ContextApplication.getAppContext();
 
         Intent intent = getIntent();
-        String board_description = intent.getStringExtra("Board_Description");
+        board_description = intent.getStringExtra("Board_Description");
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
@@ -69,8 +72,8 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         initView();
 
         //获取指定版面的文章目录
-        BoardHelper boardHelper = new BoardHelper();
-        boardHelper.getSpecifiedBoard(BYR_BBS_API.All_Boards.get(board_description).getName());
+        boardHelper = new BoardHelper();
+        boardHelper.getSpecifiedBoard(BYR_BBS_API.All_Boards.get(board_description).getName(), page_number);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener()
@@ -120,10 +123,13 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
 
     /**
      * 响应BoardHelper发出的指定版面下的文章列表
-     * @param articles 文章列表，默认的数量为20
+     * @param articles 文章列表，默认的数量为30
      */
     public void onEventMainThread(final Event.Specified_Board_Articles articles)
     {
+        List<Article> top_Articles = new ArrayList<>();
+        List<Article> common_Articles = new ArrayList<>();
+
         for(Article article : articles.getArticles())
         {
             if(article.is_top())
@@ -132,7 +138,9 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
                 common_Articles.add(article);
         }
 
-        List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
+        if(page_number ==1)
+            listItems.clear();
+
         for(Article article : common_Articles)
         {
             Map<String, Object> map = new HashMap<String, Object>();
@@ -143,57 +151,40 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
             listItems.add(map);
         }
 
-        BoardCommonArticleListAdapter adapter = new BoardCommonArticleListAdapter(ContextApplication.getAppContext(), listItems);
-
-        mListView_Articles.setAdapter(adapter);
-
-    }
-
-
-    /**
-     * 判断当前网络是否可用
-     * @return 是否可用
-     */
-    private static boolean isNetWorkAvailable()
-    {
-        ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        if(connectivityManager != null)
+        if(page_number ==1)
         {
-            NetworkInfo info = connectivityManager.getActiveNetworkInfo();
-            if( info != null && info.isConnected() )
+            if(adapter == null)
             {
-                //当前网络是连接的
-                if(info.getState() == NetworkInfo.State.CONNECTED)
-                {
-                    // 当前所连接的网络可用
-                    return true;
-                }
+                adapter = new BoardCommonArticleListAdapter(ContextApplication.getAppContext(), listItems);
+                mListView_Articles.setAdapter(adapter);
             }
+            else
+            {
+                adapter.notifyDataSetChanged();
+            }
+
         }
-        return false;
+        else
+        {
+            adapter.notifyDataSetChanged();
+        }
+
+        if(mBGARefreshLayout.getCurrentRefreshStatus() == BGARefreshLayout.RefreshStatus.REFRESHING)
+            mBGARefreshLayout.endRefreshing();
+        if(mBGARefreshLayout.isLoadingMore())
+            mBGARefreshLayout.endLoadingMore();
+
     }
 
 
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout refreshLayout)
     {
-        if(isNetWorkAvailable())
+        if(BYR_BBS_API.isNetWorkAvailable())
         {
             // 如果网络可用，则加载网络数据
-            new Thread()
-            {
-                public void run()
-                {
-                    try
-                    {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-            }.start();
+            page_number = 1 ;
+            boardHelper.getSpecifiedBoard(BYR_BBS_API.All_Boards.get(board_description).getName(), page_number);
         }
         else
         {
@@ -206,29 +197,18 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
     @Override
     public boolean onBGARefreshLayoutBeginLoadingMore(BGARefreshLayout refreshLayout)
     {
-        if(isNetWorkAvailable())
+        if(BYR_BBS_API.isNetWorkAvailable())
         {
             // 如果网络可用，则加载网络数据
-            new Thread()
-            {
-                public void run()
-                {
-                    try
-                    {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                }
-            }.start();
+            page_number ++ ;
+            boardHelper.getSpecifiedBoard(BYR_BBS_API.All_Boards.get(board_description).getName(), page_number);
             return true;
         }
         else
         {
             // 网络不可用，结束下拉刷新
             Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
-//            mBGARefreshLayout.endRefreshing();
+            mBGARefreshLayout.endLoadingMore();
             return false;
         }
     }

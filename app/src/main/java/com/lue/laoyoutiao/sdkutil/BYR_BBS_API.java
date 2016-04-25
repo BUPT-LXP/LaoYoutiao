@@ -3,6 +3,8 @@ package com.lue.laoyoutiao.sdkutil;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +180,55 @@ public class BYR_BBS_API
             result = result + "/" + s;
         }
         return host + result + returnFormat + appkey;
+    }
+
+    /**
+     *
+     * @param params HTTP GET 参数
+     * @param strings 构建url时必要的参数
+     * @return 构建好的URL
+     * Example: Map: key:page, value:2 ; strings: widget topten
+     * return  : "http://api.byr.cn/widget/topten.json?&page=2&appkey=7a282a1a9de5b450"
+     */
+    public static String buildGETUrl(HashMap<String, String> params, String... strings)
+    {
+        String result = "";
+        for (String s : strings)
+        {
+            result = result + "/" + s;
+        }
+        String string_params = "";
+        for(String key : params.keySet())
+        {
+            string_params = string_params + "&" + key + "=" + params.get(key);
+        }
+        result = host + result + returnFormat + string_params + appkey;
+
+        return result;
+    }
+
+    /**
+     * 判断当前网络是否可用
+     * @return 是否可用
+     */
+    public static boolean isNetWorkAvailable()
+    {
+        ConnectivityManager connectivityManager = (ConnectivityManager) ContextApplication.getAppContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        if(connectivityManager != null)
+        {
+            NetworkInfo info = connectivityManager.getActiveNetworkInfo();
+            if( info != null && info.isConnected() )
+            {
+                //当前网络是连接的
+                if(info.getState() == NetworkInfo.State.CONNECTED)
+                {
+                    // 当前所连接的网络可用
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 
