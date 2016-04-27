@@ -72,6 +72,10 @@ public class BYR_BBS_API
     public static final String STRING_FAVORITE_DELETE = "delete";
     public static final String STRING_FAVORITE_TOP_LEVEL = "0";
 
+    //文章接口
+    public static final String STRING_ARTICLE = "article";
+    public static final String STRING_THREADS = "threads";
+
     //老邮条在本地的储存目录
     public static final String ROOT_FOLDER = "/LaoYouTiao";
     public final static String LOCAL_FILEPATH = Environment.getExternalStorageDirectory().getPath() + ROOT_FOLDER;
@@ -235,40 +239,51 @@ public class BYR_BBS_API
     /**
      * 将服务器返回的unixtimestamp时间戳转化成可读的日期标识
      * @param timestamp_int  unixtimestamp时间戳
+     * @param if_whore_time  是否返回完整时间, false代表返回的是相对当前时刻的时间, true代表返回的是绝对时间
      * @return 可读的日期标识
      */
-    public static String timeStamptoDate(int timestamp_int)
+    public static String timeStamptoDate(int timestamp_int, boolean if_whore_time)
     {
         String result;
 
-        long current_time = new Date().getTime();
-        current_time = current_time / 1000;
-        long time_defference = current_time - timestamp_int; //时间差
-        if(time_defference <= 60)
+        if(!if_whore_time)
         {
-            return JUST_NOW;
-        }
-        else if(time_defference > 60 && time_defference <= 3600)
-        {
-            //时间小于一小时
-            int minutes = (int) time_defference / 60 ;
-            result = minutes + MINUTES_AGO;
-            return result;
-        }
-        else if(time_defference > 3600 && time_defference < 24 * 3600)
-        {
-            //时间小于一天
-            int total_minutes = (int) time_defference / 60; //总分钟数
-            int hours = total_minutes / 60;                 //小时数
-            result = hours + HOUR;
-            return result;
+            long current_time = new Date().getTime();
+            current_time = current_time / 1000;
+            long time_defference = current_time - timestamp_int; //时间差
+            if (time_defference <= 60)
+            {
+                return JUST_NOW;
+            }
+            else if (time_defference > 60 && time_defference <= 3600)
+            {
+                //时间小于一小时
+                int minutes = (int) time_defference / 60;
+                result = minutes + MINUTES_AGO;
+                return result;
+            }
+            else if (time_defference > 3600 && time_defference < 24 * 3600)
+            {
+                //时间小于一天
+                int total_minutes = (int) time_defference / 60; //总分钟数
+                int hours = total_minutes / 60;                 //小时数
+                result = hours + HOUR;
+                return result;
+            }
+            else
+            {
+                long timestamp_long = (long) timestamp_int * 1000;
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TIME_FORMAT);
+                String date = simpleDateFormat.format(new Date(timestamp_long));
+                date = date.substring(5, 10) + DATE;
+                return date;
+            }
         }
         else
         {
-            long timestamp_long = (long)timestamp_int * 1000;
+            long timestamp_long = (long) timestamp_int * 1000;
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(TIME_FORMAT);
             String date = simpleDateFormat.format(new Date(timestamp_long));
-            date = date.substring(5,10) + DATE;
             return date;
         }
     }

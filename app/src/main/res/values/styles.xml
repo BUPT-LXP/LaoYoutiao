@@ -11,14 +11,13 @@
         <item name="android:actionBarStyle">@style/MyActionBarStyle</item>
     </style>
 
-    <style name ="MyActionBarStyle" parent="@android:style/Widget.Holo.ActionBar.Solid" >
-        <item name= "android:titleTextStyle">@style/MyActionBar.TitleTextStyle</item>
-    </style >
+    <style name="MyActionBarStyle" parent="@android:style/Widget.Holo.ActionBar.Solid">
+        <item name="android:titleTextStyle">@style/MyActionBar.TitleTextStyle</item>
+    </style>
 
-    <style name ="MyActionBar.TitleTextStyle" parent= "@android:style/TextAppearance.Holo.Widget.ActionBar.Title" >
-        <item name ="android:textSize">50sp</item>
-    </style >
-
+    <style name="MyActionBar.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textSize">50sp</item>
+    </style>
 
 
     <style name="AppTheme.NoActionBar">

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/imageview_user_face"
+            android:layout_width="50sp"
+            android:layout_height="50sp"
+            android:layout_gravity="left"
+            android:paddingEnd="8sp"
+            android:paddingStart="8sp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="8dp"
+            android:layout_toEndOf="@+id/imageview_user_face"
+            android:orientation="vertical"
+            android:paddingEnd="16sp"
+            android:paddingStart="16sp">
+
+            <TextView
+                android:id="@+id/textview_user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/royalblue"
+                android:textSize="12sp"/>
+
+            <TextView
+                android:id="@+id/textview_post_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/gray"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textview_user_floor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="end"
+            android:layout_marginEnd="9dp"
+            android:textColor="@color/gray"
+            android:textSize="14sp"/>
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textview_article_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:paddingTop="8sp"/>
+
+    <TextView
+        android:id="@+id/textview_article_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        android:paddingTop="8sp"/>
+
+</LinearLayout>

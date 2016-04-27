@@ -1,10 +1,13 @@
 package com.lue.laoyoutiao.eventtype;
 
+import android.graphics.Bitmap;
+
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.metadata.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -132,5 +135,35 @@ public class Event
             return articles;
         }
     }
+
+    public static class Read_Articles_Info
+    {
+        private List<Article> articles;
+        private List<Bitmap> user_faces = new ArrayList<>();
+        private int reply_count = -1;
+
+        public Read_Articles_Info(List<Article> articles, List<Bitmap> faces, int reply_count)
+        {
+            this.articles = articles;
+            this.user_faces = faces;
+            this.reply_count = reply_count;
+        }
+
+        public List<Article> getArticles()
+        {
+            return articles;
+        }
+
+        public List<Bitmap> getUser_faces()
+        {
+            return user_faces;
+        }
+
+        public int getReply_count()
+        {
+            return reply_count;
+        }
+    }
+
 
 }

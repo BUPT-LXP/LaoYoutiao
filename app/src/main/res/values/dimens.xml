@@ -15,4 +15,5 @@
     <dimen name="child_paddingg_left_relative_to_parent">20dp</dimen>
     <dimen name="app_bar_height">180dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="user_face_scale">50sp</dimen>
 </resources>

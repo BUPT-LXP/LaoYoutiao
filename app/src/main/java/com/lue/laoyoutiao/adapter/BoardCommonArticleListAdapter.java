@@ -66,7 +66,7 @@ public class BoardCommonArticleListAdapter extends BaseAdapter
             viewHolder = new ViewHolder();
 
             //获取list_item布局文件的视图
-            convertView = listContainer.inflate(R.layout.board_common_article_list_item, null);
+            convertView = listContainer.inflate(R.layout.list_item_board_common_article, null);
 
             //获取控件对象
             viewHolder.textview_title = (TextView)convertView.findViewById(R.id.textview_common_article_title);
@@ -84,10 +84,10 @@ public class BoardCommonArticleListAdapter extends BaseAdapter
 
         viewHolder.textview_title.setText((String)listItems.get(position).get("title"));
         int timestamp = (int)listItems.get(position).get("post_time");
-        String time = BYR_BBS_API.timeStamptoDate(timestamp);
+        String time = BYR_BBS_API.timeStamptoDate(timestamp, false);
         viewHolder.textview_post_time.setText(time + "发布");
         timestamp = (int)listItems.get(position).get("last_reply_time");
-        time = BYR_BBS_API.timeStamptoDate(timestamp);
+        time = BYR_BBS_API.timeStamptoDate(timestamp, false);
         viewHolder.textview_last_reply_time.setText(time + "更新");
         viewHolder.textview_reply_count.setText((int)(listItems.get(position).get("reply_count")) + "人回复");
 

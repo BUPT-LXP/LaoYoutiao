@@ -1,18 +1,22 @@
 package com.lue.laoyoutiao.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.lue.laoyoutiao.R;
+import com.lue.laoyoutiao.activity.ReadArticleActivity;
 import com.lue.laoyoutiao.adapter.ToptenArticleListAdapter;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.helper.WidgetHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
@@ -29,12 +33,13 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by Lue on 2015/12/30.
  */
-public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefreshLayoutDelegate
+public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefreshLayoutDelegate, AdapterView.OnItemClickListener
 {
     private View view;
     private BGARefreshLayout mBGARefreshLayout;
     private ListView listview_topten;
     private List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
+    private List<Article> articleList = new ArrayList<>();
     private ToptenArticleListAdapter adapter ;
 
     @Override
@@ -50,8 +55,9 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
         mBGARefreshLayout.setDelegate(this);
         // 设置下拉刷新和上拉加载更多的风格     参数1：应用程序上下文，参数2：是否具有上拉加载更多功能
         BGANormalRefreshViewHolder holder = new BGANormalRefreshViewHolder(ContextApplication.getAppContext(), false);
-
         mBGARefreshLayout.setRefreshViewHolder(holder);
+
+        listview_topten.setOnItemClickListener(this);
 
         getTopten();
 
@@ -78,12 +84,16 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
     public void onEventMainThread(Event.Topten_ArticleList topten_article_list)
     {
         listItems.clear();
+        articleList.clear();
+
         for(Article article : topten_article_list.getTopten_list())
         {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("board", article.getBoard_name());
             map.put("title", article.getTitle());
             listItems.add(map);
+
+            articleList.add(article);
         }
 
         if(adapter == null)
@@ -96,16 +106,6 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
 
         if(mBGARefreshLayout.getCurrentRefreshStatus() == BGARefreshLayout.RefreshStatus.REFRESHING)
             mBGARefreshLayout.endRefreshing();
-    }
-
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-
-        //注销EventBus
-        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -128,5 +128,27 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
     public boolean onBGARefreshLayoutBeginLoadingMore(BGARefreshLayout refreshLayout)
     {
         return false;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+    {
+        Article article = articleList.get(position);
+        ArticleHelper helper = new ArticleHelper();
+        helper.getThreadsInfo(article.getBoard_name(), article.getId(), 1);
+
+        Intent intent = new Intent(getActivity(), ReadArticleActivity.class);
+        intent.putExtra("board_name", article.getBoard_name());
+        intent.putExtra("article_id", article.getId());
+        startActivity(intent);
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+
+        //注销EventBus
+        EventBus.getDefault().unregister(this);
     }
 }

@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.adapter.BoardCommonArticleListAdapter;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.helper.BoardHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
@@ -35,7 +37,7 @@ import de.greenrobot.event.EventBus;
  * Created by Lue on 2015/12/30.
  */
 
-public class BoardArticleListActivity extends AppCompatActivity implements BGARefreshLayout.BGARefreshLayoutDelegate
+public class BoardArticleListActivity extends AppCompatActivity implements BGARefreshLayout.BGARefreshLayoutDelegate, AdapterView.OnItemClickListener
 {
     private BGARefreshLayout mBGARefreshLayout;
     private ExpandableListView mEpListLiew_Top_Articles;
@@ -46,7 +48,10 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
     private int page_number = 1;  //当前页码
     public BoardHelper boardHelper = null;
     private String board_description;
+    private String board_name;
     public List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>(); //普通文章相对应Adapter的数据
+    //保存当前显示的所有文章信息
+    private List<Article> articleList = new ArrayList<>();
 
     public BoardCommonArticleListAdapter adapter;
 
@@ -60,6 +65,7 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
 
         Intent intent = getIntent();
         board_description = intent.getStringExtra("Board_Description");
+        board_name = BYR_BBS_API.All_Boards.get(board_description).getName();
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
@@ -119,6 +125,21 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         refreshViewHolder.setRefreshingAnimResId(R.drawable.bga_refresh_mt_refreshing);
         // 设置下拉刷新和上拉加载更多的风格
         mBGARefreshLayout.setRefreshViewHolder(refreshViewHolder);
+
+        mListView_Articles.setOnItemClickListener(this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+    {
+        Article article = articleList.get(position);
+        ArticleHelper helper = new ArticleHelper();
+        helper.getThreadsInfo(board_name, article.getId(), 1);
+
+        Intent intent = new Intent(this, ReadArticleActivity.class);
+        intent.putExtra("board_name", board_name);
+        intent.putExtra("article_id", article.getId());
+        startActivity(intent);
     }
 
     /**
@@ -139,7 +160,10 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         }
 
         if(page_number ==1)
+        {
             listItems.clear();
+            articleList.clear();
+        }
 
         for(Article article : common_Articles)
         {
@@ -149,6 +173,9 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
             map.put("last_reply_time", article.getLast_reply_time());
             map.put("reply_count", article.getReply_count());
             listItems.add(map);
+
+
+            articleList.add(article);
         }
 
         if(page_number ==1)
@@ -184,7 +211,7 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         {
             // 如果网络可用，则加载网络数据
             page_number = 1 ;
-            boardHelper.getSpecifiedBoard(BYR_BBS_API.All_Boards.get(board_description).getName(), page_number);
+            boardHelper.getSpecifiedBoard(board_name, page_number);
         }
         else
         {
@@ -201,7 +228,7 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         {
             // 如果网络可用，则加载网络数据
             page_number ++ ;
-            boardHelper.getSpecifiedBoard(BYR_BBS_API.All_Boards.get(board_description).getName(), page_number);
+            boardHelper.getSpecifiedBoard(board_name, page_number);
             return true;
         }
         else
@@ -221,4 +248,6 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         //注销EventBus
         EventBus.getDefault().unregister(this);
     }
+
+
 }

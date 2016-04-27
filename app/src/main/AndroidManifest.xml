@@ -36,6 +36,9 @@
             android:name=".activity.BoardArticleListActivity"
             android:label="@string/title_activity_board_article_list">
         </activity>
+        <activity android:name=".activity.ReadArticleActivity"
+                  android:label="@string/read_article">
+        </activity>
     </application>
 
 </manifest>

@@ -14,11 +14,31 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ExpandableListView
-            android:id="@+id/eplistview_top_articles"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </ExpandableListView>
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:gravity="center"-->
+                <!--android:paddingStart="8dp"-->
+                <!--android:paddingEnd="8dp"-->
+                <!--android:background="@drawable/textview_style_stroke"-->
+                <!--android:textColor="@color/black"-->
+                <!--android:textSize="16sp"-->
+                <!--android:text="置顶"/>-->
+
+            <ExpandableListView
+                android:id="@+id/eplistview_top_articles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </ExpandableListView>
+
+        </RelativeLayout>
+
+
 
         <cn.bingoogolapple.refreshlayout.BGARefreshLayout
             android:id="@+id/layout_board_article_list"

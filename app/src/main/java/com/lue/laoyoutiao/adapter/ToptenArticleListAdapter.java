@@ -75,7 +75,7 @@ public class ToptenArticleListAdapter extends BaseAdapter
             listItemViewHolder = new ListItemViewHolder();
 
             //获取list_item布局文件的视图
-            convertView = listContainer.inflate(R.layout.topten_article_list_item, null);
+            convertView = listContainer.inflate(R.layout.list_item_topten_article, null);
 
             //获取控件对象
             listItemViewHolder.article_board = (TextView)convertView.findViewById(R.id.textview_article_board);

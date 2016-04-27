@@ -132,7 +132,7 @@ public class SectionListAdapter extends BaseExpandableListAdapter
         ViewHolder holder = null;
         if(convertView == null || convertView.getTag(R.id.tag_first) == null)
         {
-            convertView = LayoutInflater.from(context).inflate(R.layout.section_list_item, null);
+            convertView = LayoutInflater.from(context).inflate(R.layout.list_item_section, null);
             holder = new ViewHolder(convertView);
             convertView.setTag(holder);
         }
@@ -259,7 +259,7 @@ public class SectionListAdapter extends BaseExpandableListAdapter
             ViewHolder holder = null;
             if(convertView == null || convertView.getTag(R.id.tag_first) == null)
             {
-                convertView = LayoutInflater.from(context).inflate(R.layout.section_list_item, null);
+                convertView = LayoutInflater.from(context).inflate(R.layout.list_item_section, null);
                 holder = new ViewHolder(convertView);
                 convertView.setTag(R.id.tag_first,holder);
             }

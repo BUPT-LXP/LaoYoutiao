@@ -69,7 +69,7 @@ public class FavoriteBoardListAdapter extends BaseAdapter
             listItemView = new ListItemView();
 
             //获取list_item布局文件的视图
-            convertView = listContainer.inflate(R.layout.favorite_board_list_item, null);
+            convertView = listContainer.inflate(R.layout.list_item_favorite_board, null);
 
             //获取控件对象
             listItemView.board_first_char = (TextView)convertView.findViewById(R.id.textview_board_first_char);

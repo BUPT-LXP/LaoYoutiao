@@ -20,6 +20,11 @@
     <string name="favorite_boards_cancel">取消收藏版面</string>
     <string name="action_search">搜索相关帖子</string>
     <string name="reply_numbers">人回复</string>
+    <string name="post">发布</string>
+    <string name="update">更新</string>
+    <string name="read_article">阅读文章</string>
+    <string name="all_replies">所有回复</string>
+    <string name="first_floor">楼主</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
@@ -126,4 +131,5 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="title_activity_board_article_list">BoardArticleListActivity</string>
+    <string name="title_activity_read_article">ReadArticleActivity</string>
 </resources>
