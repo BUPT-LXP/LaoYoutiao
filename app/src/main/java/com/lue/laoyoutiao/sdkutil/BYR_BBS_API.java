@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
 
@@ -287,6 +289,88 @@ public class BYR_BBS_API
             return date;
         }
     }
+
+
+    /**
+     * 将文章内容通过正则表达式等解析成相应的类型
+     * @param article_content 内容
+     * @return 内容、引用内容、使用的APP
+     */
+    public static String[] ParseContent(String article_content)
+    {
+        Pattern pattern;
+        Matcher matcher;
+
+        while (article_content.endsWith("-") || article_content.endsWith("\n"))
+        {
+            article_content = article_content.substring(0, article_content.length() -1);
+        }
+
+        String my_app = null;
+        //实例 ：****[url=http://guiyou.wangx.in]发自「贵邮」[/url]
+        if(article_content.endsWith("[/url]"))
+        {
+            //去掉后面的 [/url]：  ****[url=http://guiyou.wangx.in]发自「贵邮」
+            article_content = article_content.substring(0, article_content.length() -6);
+            int index = article_content.lastIndexOf("[url=");
+            //[url=http://guiyou.wangx.in]发自「贵邮」
+            my_app = article_content.substring(index);
+            //去掉整个app_string的内容, 此时article_content中只剩下****了
+            article_content = article_content.substring(0, index);
+
+            index = my_app.lastIndexOf("]");
+            // url = http://guiyou.wangx.in
+            String url = my_app.substring(5, index -1);
+            //发自「贵邮」
+            my_app = my_app.substring(index + 1);
+
+            //"<a href=\"http://guiyou.wangx.in\"><u>发自「贵邮」</u></a>"
+            my_app = "<a href=\"" + url + "\"><u>" + my_app  + "</u></a>";
+        }
+
+
+        String my_content = article_content;
+        String my_reference = null;
+//        String pattern_format = "【[^】]*?在[\\s\\S]*?的大作中提到:[^】]*?】";
+        pattern = Pattern.compile("【[^】]*?在[\\s\\S]*?的大作中提到:[^】]*?】");
+        matcher = pattern.matcher(article_content);
+
+
+        String strTemp = null;
+        if(matcher.find())
+        {
+            my_reference = matcher.group();
+        }
+        if(my_reference != null)
+        {
+            int index = article_content.indexOf(my_reference);
+            my_reference = article_content.substring(index);
+            my_content = article_content.substring(0, index);
+        }
+
+        String array[] = new String[3];
+
+        while (my_content.endsWith("-") || my_content.endsWith("\n"))
+        {
+            my_content = my_content.substring(0, my_content.length() -1);
+        }
+
+        if(my_reference != null)
+        {
+            while (my_reference.endsWith("-") || my_reference.endsWith("\n") || my_reference.endsWith(":"))
+            {
+                my_reference = my_reference.substring(0, my_reference.length() - 1);
+            }
+        }
+
+        array[0] = my_content;
+        array[1] = my_reference;
+        array[2] = my_app;
+        return array;
+
+    }
+
+
 
 
     /**

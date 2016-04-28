@@ -2,6 +2,7 @@ package com.lue.laoyoutiao.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,14 +50,14 @@ public class ReadArticleAdapter extends BaseAdapter
     @Override
     public long getItemId(int position)
     {
-        return 0;
+        return position;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
         //自定义视图
-        ArticleView viewHolder = null;
+        ArticleView viewHolder;
         if(convertView == null)
         {
             viewHolder = new ArticleView(context);
@@ -69,8 +70,9 @@ public class ReadArticleAdapter extends BaseAdapter
             viewHolder.textview_floor = (TextView)convertView.findViewById(R.id.textview_user_floor);
             viewHolder.textview_title = (TextView)convertView.findViewById(R.id.textview_article_title);
             viewHolder.textview_content = (TextView)convertView.findViewById(R.id.textview_article_content);
+            viewHolder.textview_content_reply = (TextView)convertView.findViewById(R.id.textview_article_content_reference);
+            viewHolder.textview_post_app = (TextView)convertView.findViewById(R.id.textview_article_post_app);
 
-            viewHolder.textview_title.setVisibility(View.GONE);
             convertView.setTag(viewHolder);
         }
         else
@@ -78,11 +80,37 @@ public class ReadArticleAdapter extends BaseAdapter
             viewHolder = (ArticleView)convertView.getTag();
         }
 
+//        TextView textView_content = new TextView(context);
+//        textView_content.setPadding(0, (int)context.getResources().getDimension(R.dimen.article_content_textpadding_top), 0, 0);
+//        textView_content.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+//        textView_content.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_content_textsize));
+//        textView_content.setTextColor(context.getResources().getColor(R.color.black));
+//        String text = reply_articles.get(position).getContent().trim();
+//        textView_content.setText(text);
+//        viewHolder.linearlayout_content.addView(textView_content);
+
+
         viewHolder.imageview_face.setImageBitmap(user_faces.get(position));
         viewHolder.textview_username.setText(reply_articles.get(position).getUser().getId());
         viewHolder.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(reply_articles.get(position).getPost_time(), true));
         viewHolder.textview_floor.setText(position + 1 + "楼");
-        viewHolder.textview_content.setText(reply_articles.get(position).getContent().trim());
+
+        String content[] = BYR_BBS_API.ParseContent(reply_articles.get(position).getContent());
+        viewHolder.textview_content.setText(content[0]);
+        if(content[2] != null)
+        {
+            viewHolder.textview_post_app.setText(Html.fromHtml(content[2]));
+            viewHolder.textview_post_app.setVisibility(View.VISIBLE);
+            int padding = (int)context.getResources().getDimension(R.dimen.article_content_textpadding_top);
+            viewHolder.textview_post_app.setPadding(0, 0, 0, padding);
+        }
+        if(content[1] != null)
+        {
+            viewHolder.textview_content_reply.setText(content[1]);
+            viewHolder.textview_content_reply.setVisibility(View.VISIBLE);
+            int padding = (int)context.getResources().getDimension(R.dimen.article_content_textpadding_top);
+            viewHolder.textview_post_app.setPadding(0, 0, 0, padding);
+        }
 
         return convertView;
     }

@@ -3,7 +3,9 @@ package com.lue.laoyoutiao.activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.view.View;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -37,6 +39,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     private View v_all_reply_devider;
     //显示正在加载的对话框
     private LoadingDialog loading_dialog;
+    private ActionBar actionBar;
 
     private String board_name;
     private int article_id;
@@ -47,6 +50,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     private List<Bitmap> user_faces = new ArrayList<>();
     ArticleHelper articleHelperhelper = null;
     private ReadArticleAdapter adapter = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -59,6 +63,11 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         article_id = intent.getIntExtra("article_id", 0);
         articleHelperhelper = new ArticleHelper();
 
+        actionBar = getSupportActionBar();
+        if (actionBar != null)
+        {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
         init_view();
 
         //注册EventBus
@@ -79,6 +88,19 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         v_all_reply_devider.setVisibility(View.INVISIBLE);
 
         loading_dialog = new LoadingDialog(this);
+        //试图让dialog显示在actionbar的下面
+//        if(actionBar != null)
+//        {
+//            Window window = loading_dialog.getWindow();
+//            WindowManager.LayoutParams lp = window.getAttributes();
+//            TypedValue tv = new TypedValue();
+//            int actionbar_height = 0;
+//            if(getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
+//            {
+//                actionbar_height= TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
+//            }
+//            window.setAttributes(lp);
+//        }
         loading_dialog.show();
 
         // 为BGARefreshLayout设置代理
@@ -93,18 +115,45 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         this.reply_count = articles_info.getReply_count();
         if(page_number == 1)
         {
-//            articleList.clear();
-//            user_faces.clear();
+            articleList.clear();
+            user_faces.clear();
 
-            articleList = articles_info.getArticles();
-            user_faces = articles_info.getUser_faces();
+            for(int i=0; i<articles_info.getArticles().size(); i++)
+            {
+                articleList.add(articles_info.getArticles().get(i));
+                user_faces.add(articles_info.getUser_faces().get(i));
+            }
+
+            //如果按照下面这种方式的话，会造成 notifyDataSetChanged 不刷新
+            // 因为这样使 articleList指向了另外一个对象，原来的对象并没有改变。
+//            articleList = articles_info.getArticles();
+//            user_faces = articles_info.getUser_faces();
 
             v_Main_Post.imageview_face.setImageBitmap(user_faces.get(0));
             v_Main_Post.textview_username.setText(articleList.get(0).getUser().getId());
             v_Main_Post.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(articleList.get(0).getPost_time(), true));
             v_Main_Post.textview_floor.setText(R.string.first_floor);
             v_Main_Post.textview_title.setText(articleList.get(0).getTitle());
-            v_Main_Post.textview_content.setText(articleList.get(0).getContent().trim());
+            v_Main_Post.textview_title.setVisibility(View.VISIBLE);
+
+
+            String content[] = BYR_BBS_API.ParseContent(articleList.get(0).getContent());
+            v_Main_Post.textview_content.setText(content[0]);
+            if(content[2] != null)
+            {
+                v_Main_Post.textview_post_app.setText(Html.fromHtml(content[2]));
+                v_Main_Post.textview_post_app.setVisibility(View.VISIBLE);
+                int padding = (int)getResources().getDimension(R.dimen.article_content_textpadding_top);
+                v_Main_Post.textview_post_app.setPadding(0, 0, 0, padding);
+            }
+
+//            TextView textView_content = new TextView(this);
+//            textView_content.setText(articleList.get(0).getContent().trim());
+//            textView_content.setTextColor(getResources().getColor(R.color.black));
+//            textView_content.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_content_textsize));
+//            textView_content.setPadding(0, (int)getResources().getDimension(R.dimen.article_content_textpadding_top), 0, 0);
+//            v_Main_Post.linearlayout_content.addView(textView_content);
+//            v_Main_Post.linearlayout_content.invalidate();
 
             articleList.remove(0);
             user_faces.remove(0);
