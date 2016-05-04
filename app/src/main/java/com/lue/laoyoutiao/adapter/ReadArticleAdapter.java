@@ -15,6 +15,7 @@ import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ArticleView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,6 +27,7 @@ public class ReadArticleAdapter extends BaseAdapter
     private LayoutInflater listContainer;
     private List<Article> reply_articles;
     private List<Bitmap> user_faces;
+    public List<Integer> item_height = new ArrayList<>();
 
     public ReadArticleAdapter(Context context, List<Article> articles, List<Bitmap> faces)
     {
@@ -80,16 +82,6 @@ public class ReadArticleAdapter extends BaseAdapter
             viewHolder = (ArticleView)convertView.getTag();
         }
 
-//        TextView textView_content = new TextView(context);
-//        textView_content.setPadding(0, (int)context.getResources().getDimension(R.dimen.article_content_textpadding_top), 0, 0);
-//        textView_content.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-//        textView_content.setTextSize(TypedValue.COMPLEX_UNIT_SP, context.getResources().getDimension(R.dimen.article_content_textsize));
-//        textView_content.setTextColor(context.getResources().getColor(R.color.black));
-//        String text = reply_articles.get(position).getContent().trim();
-//        textView_content.setText(text);
-//        viewHolder.linearlayout_content.addView(textView_content);
-
-
         viewHolder.imageview_face.setImageBitmap(user_faces.get(position));
         viewHolder.textview_username.setText(reply_articles.get(position).getUser().getId());
         viewHolder.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(reply_articles.get(position).getPost_time(), true));
@@ -109,9 +101,12 @@ public class ReadArticleAdapter extends BaseAdapter
             viewHolder.textview_content_reply.setText(content[1]);
             viewHolder.textview_content_reply.setVisibility(View.VISIBLE);
             int padding = (int)context.getResources().getDimension(R.dimen.article_content_textpadding_top);
-            viewHolder.textview_post_app.setPadding(0, 0, 0, padding);
+            viewHolder.textview_content_reply.setPadding(0, 0, 0, padding);
         }
 
+        convertView.measure(0,0);
+        int height = convertView.getMeasuredHeight();
+        item_height.add(height);
         return convertView;
     }
 }

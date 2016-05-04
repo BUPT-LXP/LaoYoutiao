@@ -7,6 +7,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -88,19 +91,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         v_all_reply_devider.setVisibility(View.INVISIBLE);
 
         loading_dialog = new LoadingDialog(this);
-        //试图让dialog显示在actionbar的下面
-//        if(actionBar != null)
-//        {
-//            Window window = loading_dialog.getWindow();
-//            WindowManager.LayoutParams lp = window.getAttributes();
-//            TypedValue tv = new TypedValue();
-//            int actionbar_height = 0;
-//            if(getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true))
-//            {
-//                actionbar_height= TypedValue.complexToDimensionPixelSize(tv.data,getResources().getDisplayMetrics());
-//            }
-//            window.setAttributes(lp);
-//        }
         loading_dialog.show();
 
         // 为BGARefreshLayout设置代理
@@ -147,14 +137,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 v_Main_Post.textview_post_app.setPadding(0, 0, 0, padding);
             }
 
-//            TextView textView_content = new TextView(this);
-//            textView_content.setText(articleList.get(0).getContent().trim());
-//            textView_content.setTextColor(getResources().getColor(R.color.black));
-//            textView_content.setTextSize(TypedValue.COMPLEX_UNIT_SP, getResources().getDimension(R.dimen.article_content_textsize));
-//            textView_content.setPadding(0, (int)getResources().getDimension(R.dimen.article_content_textpadding_top), 0, 0);
-//            v_Main_Post.linearlayout_content.addView(textView_content);
-//            v_Main_Post.linearlayout_content.invalidate();
-
             articleList.remove(0);
             user_faces.remove(0);
             if(adapter == null)
@@ -187,9 +169,24 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         tv_all_reply.setVisibility(View.VISIBLE);
         v_all_reply_devider.setVisibility(View.VISIBLE);
 
+        int height = lv_Reply_List.getMeasuredHeight();
     }
 
+    public  void setListViewHeightBasedOnChildren(ListView listView) {
+        ListAdapter listAdapter = listView.getAdapter();
+        if (listAdapter == null)
+            return;
+        int totalHeight = 0;
 
+        ViewGroup.LayoutParams params = listView.getLayoutParams();
+
+        for(int i = 0; i < listAdapter.getCount(); i++)
+        {
+            totalHeight += adapter.item_height.get(i);
+        }
+        params.height = totalHeight / 2;
+        listView.setLayoutParams(params);
+    }
 
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout refreshLayout)
