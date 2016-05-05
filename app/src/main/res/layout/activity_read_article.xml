@@ -1,68 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<cn.bingoogolapple.refreshlayout.BGARefreshLayout
-    android:id="@+id/layout_read_article"
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
-    android:theme="@style/AppTheme.AppBarOverlay"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.lue.laoyoutiao.activity.ReadArticleActivity">
 
-    <ScrollView
-        android:id="@+id/scrollview_read_article"
+    <cn.bingoogolapple.refreshlayout.BGARefreshLayout
+        android:id="@+id/layout_read_article"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:scrollbars="none">
+        android:theme="@style/AppTheme.AppBarOverlay">
 
-        <LinearLayout
+        <ListView
+            android:id="@+id/listview_read_article"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingEnd="12dp"
+            android:paddingStart="12dp"
+            android:scrollbars="none"
+            android:headerDividersEnabled="false"/>
 
-            <com.lue.laoyoutiao.view.ArticleView
-                android:id="@+id/articleview_read_article"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+    </cn.bingoogolapple.refreshlayout.BGARefreshLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                >
+</LinearLayout>
 
-                <TextView
-                    android:id="@+id/textview_all_reply"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/all_replies"
-                    android:textSize="12sp"
-                    android:textColor="@color/black"
-                    android:paddingStart="0dp"
-                    android:paddingEnd="5dp"/>
-
-                <View
-                    android:id="@+id/view_all_reply_devider"
-                    android:layout_width="match_parent"
-                    android:layout_height="1sp"
-                    android:background="@color/gray"
-                    android:layout_gravity="center"
-                    android:paddingStart="5dp"
-                    android:paddingEnd="0dp"/>
-
-            </LinearLayout>
-
-
-            <com.lue.laoyoutiao.view.NoScrollListView
-                android:id="@+id/listview_read_article"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/textview_style_stroke"
-                android:scrollbars="none"/>
-
-        </LinearLayout>
-    </ScrollView>
-</cn.bingoogolapple.refreshlayout.BGARefreshLayout>
 
