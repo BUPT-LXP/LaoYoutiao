@@ -16,4 +16,7 @@
     <dimen name="app_bar_height">180dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="user_face_scale">50sp</dimen>
+    <dimen name="article_content_textsize">8sp</dimen>
+    <dimen name="article_content_textpadding_top">8sp</dimen>
+
 </resources>

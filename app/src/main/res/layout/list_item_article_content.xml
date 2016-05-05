@@ -63,14 +63,34 @@
         android:layout_height="wrap_content"
         android:textColor="@color/black"
         android:textSize="20sp"
-        android:paddingTop="8sp"/>
+        android:visibility="gone"/>
+
 
     <TextView
         android:id="@+id/textview_article_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="8sp"
+        android:textColor="@color/black"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/textview_article_content_reference"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16sp"
+        android:layout_marginEnd="0sp"
+        android:textColor="@color/gray"
+        android:textSize="16sp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/textview_article_post_app"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textColor="@color/black"
         android:textSize="16sp"
-        android:paddingTop="8sp"/>
+        android:visibility="gone"
+        android:autoLink="web"/>
 
 </LinearLayout>
