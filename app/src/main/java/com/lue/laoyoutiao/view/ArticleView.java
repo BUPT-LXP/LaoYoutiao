@@ -19,7 +19,6 @@ public class ArticleView extends LinearLayout
     public TextView textview_posttime;
     public TextView textview_floor;
     public TextView textview_title;
-//    public LinearLayout linearlayout_content;
     public TextView textview_content;
     public TextView textview_content_reply;
     public TextView textview_post_app;
@@ -43,7 +42,6 @@ public class ArticleView extends LinearLayout
         textview_content = (TextView)view.findViewById(R.id.textview_article_content);
         textview_content_reply = (TextView)view.findViewById(R.id.textview_article_content_reference);
         textview_post_app = (TextView)view.findViewById(R.id.textview_article_post_app);
-//        linearlayout_content = (LinearLayout)view.findViewById(R.id.linearlayout_article_content);
     }
 
     public ArticleView(Context context, AttributeSet attrs, int defStyleAttr)
