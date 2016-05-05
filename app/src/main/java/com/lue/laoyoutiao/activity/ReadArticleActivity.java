@@ -6,12 +6,10 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ListAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lue.laoyoutiao.R;
@@ -23,7 +21,6 @@ import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ArticleView;
-import com.lue.laoyoutiao.view.NoScrollListView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +32,12 @@ import de.greenrobot.event.EventBus;
 public class ReadArticleActivity extends AppCompatActivity implements BGARefreshLayout.BGARefreshLayoutDelegate
 {
     private BGARefreshLayout mBGARefreshLayout;
-    private ScrollView mScrollView;
-    private ArticleView v_Main_Post;
-    private NoScrollListView lv_Reply_List;
-    private TextView tv_all_reply;
-    private View v_all_reply_devider;
+    private ListView lv_Reply_List;
+    private View view_mainpost;
+    private View post_devider;
+    private ArticleView main_post;
+    private LinearLayout main_devider;
+    private LayoutInflater inflater;
     //显示正在加载的对话框
     private LoadingDialog loading_dialog;
     private ActionBar actionBar;
@@ -66,11 +64,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         article_id = intent.getIntExtra("article_id", 0);
         articleHelperhelper = new ArticleHelper();
 
-        actionBar = getSupportActionBar();
-        if (actionBar != null)
-        {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
         init_view();
 
         //注册EventBus
@@ -79,16 +72,22 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
 
     private void init_view()
     {
-        mBGARefreshLayout = (BGARefreshLayout)findViewById(R.id.layout_read_article);
-        mScrollView = (ScrollView)findViewById(R.id.scrollview_read_article);
-        v_Main_Post = (ArticleView)findViewById(R.id.articleview_read_article);
-        lv_Reply_List = (NoScrollListView)findViewById(R.id.listview_read_article);
-        tv_all_reply = (TextView)findViewById(R.id.textview_all_reply);
-        v_all_reply_devider = findViewById(R.id.view_all_reply_devider);
+        actionBar = getSupportActionBar();
+        if (actionBar != null)
+        {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
-        lv_Reply_List.setFocusable(false);
-        tv_all_reply.setVisibility(View.INVISIBLE);
-        v_all_reply_devider.setVisibility(View.INVISIBLE);
+        mBGARefreshLayout = (BGARefreshLayout)findViewById(R.id.layout_read_article);
+        lv_Reply_List = (ListView)findViewById(R.id.listview_read_article);
+
+
+        inflater = (LayoutInflater)getSystemService(LAYOUT_INFLATER_SERVICE);
+        view_mainpost = inflater.inflate(R.layout.layout_article_mainpost, lv_Reply_List, false);
+        post_devider = inflater.inflate(R.layout.layout_reply_devider, lv_Reply_List, false);
+
+        main_post = (ArticleView)view_mainpost.findViewById(R.id.articleview_read_article) ;
+        main_devider = (LinearLayout)post_devider.findViewById(R.id.linearlayout);
 
         loading_dialog = new LoadingDialog(this);
         loading_dialog.show();
@@ -119,28 +118,34 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
 //            articleList = articles_info.getArticles();
 //            user_faces = articles_info.getUser_faces();
 
-            v_Main_Post.imageview_face.setImageBitmap(user_faces.get(0));
-            v_Main_Post.textview_username.setText(articleList.get(0).getUser().getId());
-            v_Main_Post.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(articleList.get(0).getPost_time(), true));
-            v_Main_Post.textview_floor.setText(R.string.first_floor);
-            v_Main_Post.textview_title.setText(articleList.get(0).getTitle());
-            v_Main_Post.textview_title.setVisibility(View.VISIBLE);
+            main_post.imageview_face.setImageBitmap(user_faces.get(0));
+            main_post.textview_username.setText(articleList.get(0).getUser().getId());
+            main_post.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(articleList.get(0).getPost_time(), true));
+            main_post.textview_floor.setText(R.string.first_floor);
+            main_post.textview_title.setText(articleList.get(0).getTitle());
+            main_post.textview_title.setVisibility(View.VISIBLE);
 
 
             String content[] = BYR_BBS_API.ParseContent(articleList.get(0).getContent());
-            v_Main_Post.textview_content.setText(content[0]);
+            main_post.textview_content.setText(content[0]);
             if(content[2] != null)
             {
-                v_Main_Post.textview_post_app.setText(Html.fromHtml(content[2]));
-                v_Main_Post.textview_post_app.setVisibility(View.VISIBLE);
+                main_post.textview_post_app.setText(Html.fromHtml(content[2]));
+                main_post.textview_post_app.setVisibility(View.VISIBLE);
                 int padding = (int)getResources().getDimension(R.dimen.article_content_textpadding_top);
-                v_Main_Post.textview_post_app.setPadding(0, 0, 0, padding);
+                main_post.textview_post_app.setPadding(0, 0, 0, padding);
             }
 
+            //主贴内容已经在main_post中显示过了，因此将其移除，剩下的数据传给Adapter
             articleList.remove(0);
             user_faces.remove(0);
+
             if(adapter == null)
             {
+                //将主贴和分割线添加为HeaderView
+                lv_Reply_List.addHeaderView(view_mainpost);
+                lv_Reply_List.addHeaderView(post_devider);
+
                 adapter = new ReadArticleAdapter(ContextApplication.getAppContext(), articleList, user_faces);
                 lv_Reply_List.setAdapter(adapter);
             }
@@ -156,7 +161,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 articleList.add(articles_info.getArticles().get(i));
                 user_faces.add(articles_info.getUser_faces().get(i));
             }
-
             adapter.notifyDataSetChanged();
         }
 
@@ -166,27 +170,9 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             mBGARefreshLayout.endLoadingMore();
 
         loading_dialog.dismiss();
-        tv_all_reply.setVisibility(View.VISIBLE);
-        v_all_reply_devider.setVisibility(View.VISIBLE);
 
-        int height = lv_Reply_List.getMeasuredHeight();
     }
 
-    public  void setListViewHeightBasedOnChildren(ListView listView) {
-        ListAdapter listAdapter = listView.getAdapter();
-        if (listAdapter == null)
-            return;
-        int totalHeight = 0;
-
-        ViewGroup.LayoutParams params = listView.getLayoutParams();
-
-        for(int i = 0; i < listAdapter.getCount(); i++)
-        {
-            totalHeight += adapter.item_height.get(i);
-        }
-        params.height = totalHeight / 2;
-        listView.setLayoutParams(params);
-    }
 
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout refreshLayout)
