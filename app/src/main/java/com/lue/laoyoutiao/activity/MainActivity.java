@@ -35,7 +35,6 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
-
         //获取所有收藏的版面
         FavoriteHelper favoriteHelper = new FavoriteHelper();
         favoriteHelper.getFavoriteBoards();

@@ -173,7 +173,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
 
     }
 
-
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout refreshLayout)
     {
