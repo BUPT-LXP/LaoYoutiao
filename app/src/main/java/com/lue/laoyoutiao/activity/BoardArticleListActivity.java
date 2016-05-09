@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
@@ -21,6 +22,7 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.helper.BoardHelper;
+import com.lue.laoyoutiao.helper.FavoriteHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 
@@ -43,8 +45,9 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
     private ExpandableListView mEpListLiew_Top_Articles;
     private ListView mListView_Articles;
     private static Context mContext;
+    private Menu menu;
 
-
+    private boolean is_favorite = false;
     private int page_number = 1;  //当前页码
     public BoardHelper boardHelper = null;
     private String board_description;
@@ -66,6 +69,7 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         Intent intent = getIntent();
         board_description = intent.getStringExtra("Board_Description");
         board_name = BYR_BBS_API.All_Boards.get(board_description).getName();
+        is_favorite = intent.getBooleanExtra("Is_Favorite", false);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null)
@@ -97,12 +101,21 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         EventBus.getDefault().register(this);
     }
 
-
+    /**
+     * 添加ActionBar
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_board_article_list, menu);
+        if(is_favorite)
+            menu.findItem(R.id.action_favorite).setIcon(android.R.drawable.btn_star_big_on);
+        else
+            menu.findItem(R.id.action_favorite).setIcon(android.R.drawable.btn_star_big_off);
+        this.menu = menu;
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -200,6 +213,53 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
             mBGARefreshLayout.endRefreshing();
         if(mBGARefreshLayout.isLoadingMore())
             mBGARefreshLayout.endLoadingMore();
+
+    }
+
+
+    /**
+     * 为Action Button 添加响应事件
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        //当点击不同的menu item 是执行不同的操作
+        switch (id) {
+            case R.id.action_favorite:
+                Post_Favorite(item);
+                break;
+            case R.id.action_search:
+//                openSettings();
+                break;
+            default:
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void Post_Favorite(MenuItem item)
+    {
+        String url = null;
+        if(is_favorite)
+        {
+            url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_FAVORITE, BYR_BBS_API.STRING_FAVORITE_DELETE, BYR_BBS_API.STRING_FAVORITE_TOP_LEVEL);
+//            Toast.makeText(this, "取消收藏版面", Toast.LENGTH_SHORT).show();
+            item.setIcon(android.R.drawable.btn_star_big_off);
+        }
+        else
+        {
+            url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_FAVORITE, BYR_BBS_API.STRING_FAVORITE_ADD, BYR_BBS_API.STRING_FAVORITE_TOP_LEVEL);
+//            Toast.makeText(this, "收藏版面成功", Toast.LENGTH_SHORT).show();
+            item.setIcon(android.R.drawable.btn_star_big_on);
+        }
+        String name = BYR_BBS_API.All_Boards.get(board_description).getName();
+        HashMap<String, String> params_map = new HashMap<>();
+        params_map.put("name", name);
+        params_map.put("dir", "0");
+        new FavoriteHelper().postFavorite(url, params_map, is_favorite);
+        is_favorite = !is_favorite;
 
     }
 

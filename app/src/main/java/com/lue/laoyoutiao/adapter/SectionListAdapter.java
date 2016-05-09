@@ -72,7 +72,7 @@ public class SectionListAdapter extends BaseExpandableListAdapter
                     {
                         String description = textview_description.getText().toString();
                         //判断该版面是否已经被收藏
-                        boolean is_favorite = BYR_BBS_API.All_Boards.get(description).getIs_favorite();
+                        boolean is_favorite = !(BYR_BBS_API.Favorite_Boards.get(description) == null);
                         if(is_favorite)
                         {
                             image_favorite.setBackgroundResource(R.mipmap.board_favorite_unpressed);

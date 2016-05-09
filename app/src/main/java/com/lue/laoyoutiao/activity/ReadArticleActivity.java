@@ -126,8 +126,14 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             main_post.textview_title.setVisibility(View.VISIBLE);
 
 
-            String content[] = BYR_BBS_API.ParseContent(articleList.get(0).getContent());
-            main_post.textview_content.setText(content[0]);
+            String content[] = BYR_BBS_API.SeparateContent(articleList.get(0).getContent());
+
+            //若包含表情，则将String 转化成 SpannableString，使之显示动态表情
+            if(content[0].contains("[em"))
+                main_post.textview_content.setText(BYR_BBS_API.ParseContent(content[0], main_post.textview_content));
+            else
+                main_post.textview_content.setText(content[0]);
+
             if(content[2] != null)
             {
                 main_post.textview_post_app.setText(Html.fromHtml(content[2]));
@@ -172,7 +178,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         loading_dialog.dismiss();
 
     }
-
 
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout refreshLayout)

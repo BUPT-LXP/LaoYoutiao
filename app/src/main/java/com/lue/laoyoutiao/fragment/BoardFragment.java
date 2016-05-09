@@ -44,13 +44,15 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     private GridView gridview_favorite_boards;
     private RadioGroup viewGroup;
     private boolean is_sectionlist_showed = false ;
+    private boolean is_in_background = false;
 
     //显示正在加载分区的对话框
     private LoadingDialog loading_dialog;
 
     //收藏分区列表的数据源
-    List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
-    FavoriteBoardListAdapter favoriteBoardListAdapter = null;
+    private List<Map<String, Object>> listItems = new ArrayList<Map<String, Object>>();
+    private FavoriteBoardListAdapter favoriteBoardListAdapter = null;
+    private SectionListAdapter sectionListAdapter = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -136,12 +138,12 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
 
         List<Section> root_sections = BYR_BBS_API.ROOT_SECTIONS;
 
-        final SectionListAdapter adapter= new SectionListAdapter(ContextApplication.getAppContext(), root_sections);
+        sectionListAdapter = new SectionListAdapter(ContextApplication.getAppContext(), root_sections);
 
-        listview_all_sections.setAdapter(adapter);
+        listview_all_sections.setAdapter(sectionListAdapter);
 
-        adapter.setOnChildViewClickListener(this);
-        adapter.setChildFavoriteImageClickListener(this);
+        sectionListAdapter.setOnChildViewClickListener(this);
+        sectionListAdapter.setChildFavoriteImageClickListener(this);
 
         listview_all_sections.setOnChildClickListener(new ExpandableListView.OnChildClickListener()
         {
@@ -181,6 +183,8 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
 
         Intent intent = new Intent(this.getActivity(), BoardArticleListActivity.class);
         intent.putExtra("Board_Description", board_description);
+        boolean is_favorite = !(BYR_BBS_API.Favorite_Boards.get(board_description) == null);
+        intent.putExtra("Is_Favorite", is_favorite);
         startActivity(intent);
     }
 
@@ -245,7 +249,13 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
 
         if(favoriteBoardListAdapter == null)
             favoriteBoardListAdapter = new FavoriteBoardListAdapter(ContextApplication.getAppContext(), listItems);
-        favoriteBoardListAdapter.notifyDataSetChanged();
+        else
+            favoriteBoardListAdapter.notifyDataSetChanged();
+        if(sectionListAdapter != null && is_in_background)
+        {
+            sectionListAdapter.notifyDataSetChanged();
+        }
+
     }
 
 
@@ -274,10 +284,27 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
                 String description = (String) listItems.get(position).get("description");
                 Intent intent = new Intent(getActivity(), BoardArticleListActivity.class);
                 intent.putExtra("Board_Description", description);
+                boolean is_favorite = !(BYR_BBS_API.Favorite_Boards.get(description) == null);
+                intent.putExtra("Is_Favorite", is_favorite);
                 startActivity(intent);
             }
         });
     }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        is_in_background = true;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        is_in_background = false;
+    }
+
 
     @Override
     public void onDestroy()

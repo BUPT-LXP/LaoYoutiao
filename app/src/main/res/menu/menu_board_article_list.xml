@@ -7,8 +7,7 @@
           android:icon="@android:drawable/ic_menu_search"
           android:title="@string/action_search"
           app:showAsAction="ifRoom"/>
-    <!--<item android:id="@+id/action_favorite"-->
-          <!--android:icon="@mipmap/board_favorite_unpressed"-->
-          <!--android:title="@string/favorite_boards"-->
-          <!--app:showAsAction="ifRoom"/>-->
+    <item android:id="@+id/action_favorite"
+          android:title="@string/favorite_boards"
+          app:showAsAction="ifRoom"/>
 </menu>
