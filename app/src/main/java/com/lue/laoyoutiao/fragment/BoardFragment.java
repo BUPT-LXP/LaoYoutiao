@@ -44,6 +44,7 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     private GridView gridview_favorite_boards;
     private RadioGroup viewGroup;
     private boolean is_sectionlist_showed = false ;
+    private boolean is_in_background = false;
 
     //显示正在加载分区的对话框
     private LoadingDialog loading_dialog;
@@ -250,8 +251,11 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
             favoriteBoardListAdapter = new FavoriteBoardListAdapter(ContextApplication.getAppContext(), listItems);
         else
             favoriteBoardListAdapter.notifyDataSetChanged();
-        if(sectionListAdapter != null)
+        if(sectionListAdapter != null && is_in_background)
+        {
             sectionListAdapter.notifyDataSetChanged();
+        }
+
     }
 
 
@@ -286,6 +290,21 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
             }
         });
     }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        is_in_background = true;
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        is_in_background = false;
+    }
+
 
     @Override
     public void onDestroy()

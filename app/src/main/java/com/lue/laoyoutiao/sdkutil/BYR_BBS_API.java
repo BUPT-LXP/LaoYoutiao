@@ -6,8 +6,12 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ImageSpan;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -18,6 +22,7 @@ import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
+import com.lue.laoyoutiao.view.GifCallback;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
@@ -28,16 +33,19 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
+import pl.droidsonroids.gif.GifDrawable;
 
 /**
  * Created by Lue on 2015/12/23.
  */
 public class BYR_BBS_API
 {
+    private Context context;
     private static final String TAG = "BYR_BBS_API";
 
     //北邮人论坛网址
@@ -131,6 +139,8 @@ public class BYR_BBS_API
         setAuth(username, password);
 
         editor.apply();
+
+        context = ContextApplication.getAppContext();
 
         //注册EventBus
         EventBus.getDefault().register(this);
@@ -296,7 +306,7 @@ public class BYR_BBS_API
      * @param article_content 内容
      * @return 内容、引用内容、使用的APP
      */
-    public static String[] ParseContent(String article_content)
+    public static String[] SeparateContent(String article_content)
     {
         Pattern pattern;
         Matcher matcher;
@@ -306,6 +316,7 @@ public class BYR_BBS_API
             article_content = article_content.substring(0, article_content.length() -1);
         }
 
+        //分离出用户使用的客户端程序
         String my_app = null;
         //实例 ：****[url=http://guiyou.wangx.in]发自「贵邮」[/url]
         if(article_content.endsWith("[/url]"))
@@ -328,15 +339,12 @@ public class BYR_BBS_API
             my_app = "<a href=\"" + url + "\"><u>" + my_app  + "</u></a>";
         }
 
-
+        //分离出用户的评论以及引用内容
         String my_content = article_content;
         String my_reference = null;
-//        String pattern_format = "【[^】]*?在[\\s\\S]*?的大作中提到:[^】]*?】";
         pattern = Pattern.compile("【[^】]*?在[\\s\\S]*?的大作中提到:[^】]*?】");
         matcher = pattern.matcher(article_content);
 
-
-        String strTemp = null;
         if(matcher.find())
         {
             my_reference = matcher.group();
@@ -348,13 +356,12 @@ public class BYR_BBS_API
             my_content = article_content.substring(0, index);
         }
 
+        //返回结果
         String array[] = new String[3];
-
         while (my_content.endsWith("-") || my_content.endsWith("\n"))
         {
             my_content = my_content.substring(0, my_content.length() -1);
         }
-
         if(my_reference != null)
         {
             while (my_reference.endsWith("-") || my_reference.endsWith("\n") || my_reference.endsWith(":"))
@@ -367,9 +374,47 @@ public class BYR_BBS_API
         array[1] = my_reference;
         array[2] = my_app;
         return array;
-
     }
 
+
+    /**
+     * 使用SpannableString来使TextView支持显示动态表情
+     * @param content 内容
+     * @param textView 显示的textview
+     * @return 扩展好的SpannableString
+     */
+    public static SpannableString ParseContent(String content, TextView textView)
+    {
+        Context context = ContextApplication.getAppContext();
+        Pattern pattern;
+        Matcher matcher;
+
+        pattern = Pattern.compile("\\[(em[abc]?\\d+)\\]");
+        matcher = pattern.matcher(content);
+        String emoji, emoji_filename;
+        MatchResult match_result;
+        SpannableString spannableString = new SpannableString (content);
+        GifDrawable gif = null;
+        while(matcher.find())
+        {
+            match_result = matcher.toMatchResult();
+            emoji = match_result.group(1);
+            emoji_filename = "emoji/" + emoji + ".gif" ;
+
+            try
+            {
+                gif = new GifDrawable(context.getResources().getAssets(), emoji_filename);
+                gif.setBounds(0, 0, gif.getIntrinsicWidth()*2, gif.getIntrinsicHeight()*2);
+                gif.setCallback(new GifCallback(textView));
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            spannableString.setSpan(new ImageSpan(gif, ImageSpan.ALIGN_BASELINE), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        return spannableString;
+    }
 
 
 
@@ -395,7 +440,11 @@ public class BYR_BBS_API
 
     }
 
-
+    /**
+     * 获取所有分区和版面的信息，并保存
+     * @param section_name 分区名称
+     * @throws IOException
+     */
     public void getSectionsAndBoards(final String section_name) throws IOException
     {
         final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION, section_name);
