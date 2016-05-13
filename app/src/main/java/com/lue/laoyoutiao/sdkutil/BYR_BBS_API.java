@@ -3,11 +3,12 @@ package com.lue.laoyoutiao.sdkutil;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.text.Spannable;
-import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.style.ImageSpan;
 import android.util.Base64;
 import android.util.Log;
@@ -19,6 +20,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.AttachmentHelper;
+import com.lue.laoyoutiao.metadata.Attachment;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
@@ -223,6 +226,113 @@ public class BYR_BBS_API
         return result;
     }
 
+
+    /**
+     * 响应 SectionHelper 发布的所有根分区信息
+     *
+     * @param Root_Sections
+     */
+    public void onEventBackgroundThread(final Event.All_Root_Sections Root_Sections)
+    {
+        Log.d(TAG, "Receive Event All_Root_Sections");
+
+        try
+        {
+            for (Section section : Root_Sections.getSections())
+            {
+                getSectionsAndBoards(section.getName());
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 获取所有分区和版面的信息，并保存
+     * @param section_name 分区名称
+     * @throws IOException
+     */
+    public void getSectionsAndBoards(final String section_name) throws IOException
+    {
+        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION, section_name);
+
+        String last_section_name = ROOT_SECTIONS.get(ROOT_SECTIONS.size() -1).getName();
+
+        if( section_name.equals(last_section_name))
+        {
+            Is_GetSections_Finished = true;
+
+            //向BoardFragment发送消息，告诉它可以取消加载页面的显示
+            EventBus.getDefault().post(new Event.Get_Sections_Finished(true));
+        }
+
+        Response response = OkHttpHelper.getM_OkHttpHelper().getExecute(url);
+        String response_result = response.body().string();
+
+        //版面所属类别, 原接口中为class，但class为保留字，因此使用boardclass
+        response_result = response_result.replace("\"class\"", "\"boardclass\"");
+
+        JSONObject jsonObject = JSON.parseObject(response_result);
+
+        //储存分区信息
+        Section section = new Gson().fromJson(response_result, new TypeToken<Section>()
+        {
+        }.getType());
+
+        if (section.getParent() != null)
+        {
+            Section parent_section = BYR_BBS_API.All_Sections.get(section.getParent());
+            parent_section.setSub_section_names(section.getName());
+            parent_section.setSub_section_descriptions(section.getDescription());
+            BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
+
+        }
+        BYR_BBS_API.All_Sections.put(section.getName(), section);
+
+        editor.putString(section.getName(), section.getDescription());
+
+        //储存版面信息
+        String Boards_String = jsonObject.getString("board");
+        List<Board> boards = new Gson().fromJson(Boards_String, new TypeToken<List<Board>>()
+        {
+        }.getType());
+        for (Board board : boards)
+        {
+            BYR_BBS_API.All_Boards.put(board.getDescription(), board);
+
+            editor.putString(board.getName(), board.getDescription());
+
+            Section parent_section = BYR_BBS_API.All_Sections.get(section.getName());
+            parent_section.setBoard_names(board.getName());
+            parent_section.setBoard_descriptions(board.getDescription());
+            BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
+
+            if (section.getParent() == null)
+            {
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoard_names(board.getName());
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoard_descriptions(board.getDescription());
+            }
+        }
+
+        //判断是否有子分区，若有，则查找子分区信息
+        String Sub_Section_String = jsonObject.getString("sub_section");
+        if (Sub_Section_String.length() > 2)
+        {
+            Sub_Section_String = Sub_Section_String.substring(Sub_Section_String.indexOf("[") + 1, Sub_Section_String.lastIndexOf("]"));
+            String Sub_Section_Name[] = Sub_Section_String.split(",");
+            for (int i = 0; i < Sub_Section_Name.length; i++)
+            {
+                Sub_Section_Name[i] = Sub_Section_Name[i].substring(Sub_Section_Name[i].indexOf("\"") + 1, Sub_Section_Name[i].lastIndexOf("\""));
+                getSectionsAndBoards(Sub_Section_Name[i]);
+
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_names(Sub_Section_Name[i]);
+                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_descriptions(All_Sections.get(Sub_Section_Name[i]).getDescription());
+            }
+        }
+        editor.commit();
+    }
     /**
      * 判断当前网络是否可用
      * @return 是否可用
@@ -378,151 +488,135 @@ public class BYR_BBS_API
 
 
     /**
-     * 使用SpannableString来使TextView支持显示动态表情
+     * SpannableStringBuilder
+     * @param article_index 文章序号，主贴序号为-1，回复序号既是Adapter的position
      * @param content 内容
      * @param textView 显示的textview
-     * @return 扩展好的SpannableString
+     * @param attachment 文章附件
+     * @return SpannableStringBuilder
      */
-    public static SpannableString ParseContent(String content, TextView textView)
+    public static SpannableStringBuilder ParseContent(final int article_index, String content, TextView textView, final Attachment attachment)
     {
         Context context = ContextApplication.getAppContext();
         Pattern pattern;
         Matcher matcher;
+        SpannableStringBuilder spannableString = new SpannableStringBuilder(content);
 
-        pattern = Pattern.compile("\\[(em[abc]?\\d+)\\]");
-        matcher = pattern.matcher(content);
-        String emoji, emoji_filename;
-        MatchResult match_result;
-        SpannableString spannableString = new SpannableString (content);
-        GifDrawable gif = null;
-        while(matcher.find())
+        if (content.contains("[em"))
         {
-            match_result = matcher.toMatchResult();
-            emoji = match_result.group(1);
-            emoji_filename = "emoji/" + emoji + ".gif" ;
+            pattern = Pattern.compile("\\[(em[abc]?\\d+)\\]");
+            matcher = pattern.matcher(content);
+            String emoji, emoji_filename;
+            MatchResult match_result;
+            GifDrawable gif = null;
+            while (matcher.find())
+            {
+                match_result = matcher.toMatchResult();
+                emoji = match_result.group(1);
+                emoji_filename = "emoji/" + emoji + ".gif";
 
-            try
-            {
-                gif = new GifDrawable(context.getResources().getAssets(), emoji_filename);
-                gif.setBounds(0, 0, gif.getIntrinsicWidth()*2, gif.getIntrinsicHeight()*2);
-                gif.setCallback(new GifCallback(textView));
-            } catch (IOException e)
-            {
-                e.printStackTrace();
+                try
+                {
+                    gif = new GifDrawable(context.getResources().getAssets(), emoji_filename);
+                    gif.setBounds(0, 0, gif.getIntrinsicWidth() * 2, gif.getIntrinsicHeight() * 2);
+                    gif.setCallback(new GifCallback(textView));
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+
+                spannableString.setSpan(new ImageSpan(gif, ImageSpan.ALIGN_BASELINE), matcher.start(),
+                        matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-
-            spannableString.setSpan(new ImageSpan(gif, ImageSpan.ALIGN_BASELINE), matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
+
+        if(attachment.getRemain_count() < 20 )
+        {
+            final AttachmentHelper attachmentHelper = new AttachmentHelper();
+            new Thread()
+            {
+                public void run()
+                {
+                    Attachment.file[] attachmentFiles = attachment.getFiles();
+                    List<Bitmap> attachment_images = new ArrayList<>();
+                    for (Attachment.file attachmentFile : attachmentFiles)
+                    {
+                        if(attachmentFile.getName().endsWith(".png") || attachmentFile.getName().endsWith(".jpg")
+                                || attachmentFile.getName().endsWith(".gif") || attachmentFile.getName().endsWith(".jpeg"))
+                        {
+                            final String img_url = attachmentFile.getThumbnail_middle() + returnFormat + appkey;
+                            Bitmap bitmap = attachmentHelper.get_Attachment_Image(img_url);
+                            attachment_images.add(bitmap);
+                        }
+                    }
+                    if(attachment_images.size() > 0)
+                        EventBus.getDefault().post(new Event.Attachment_Images(article_index, attachment_images));
+                }
+            }.start();
+        }
+
         return spannableString;
     }
 
-
-
     /**
-     * 响应 SectionHelper 发布的所有根分区信息
-     *
-     * @param Root_Sections
+     * 将附件图片通过 SpannableStringBuilder 显示
+     * @param content 回复内容
+     * @param images 图片
+     * @return 回复内容
      */
-    public void onEventBackgroundThread(final Event.All_Root_Sections Root_Sections)
+    public static SpannableStringBuilder Show_Attachments(SpannableStringBuilder content, List<Bitmap> images)
     {
-        Log.d(TAG, "Receive Event All_Root_Sections");
+//        SpannableStringBuilder ssb = new SpannableStringBuilder(content);
+        Context context = ContextApplication.getAppContext();
+        Pattern pattern = Pattern.compile("(\\[upload=\\d*\\]\\[/upload\\])");
+        Matcher matcher = pattern.matcher(content);
 
-        try
+        int index = 0;
+
+        while (matcher.find())
         {
-            for (Section section : Root_Sections.getSections())
+            try
             {
-                getSectionsAndBoards(section.getName());
+                ImageSpan imageSpan = new ImageSpan(context, images.get(index), ImageSpan.ALIGN_BOTTOM);
+
+                content.setSpan(imageSpan, matcher.start()+2*index, matcher.end()+2*index
+                    , Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                content.insert(matcher.start()+2*index, "\n");
+                content.insert(matcher.end()+2*index+1, "\n");
+                index++;
+            } catch (IndexOutOfBoundsException e)
+            {
+                //针对极少数content中包含的[upload]数量多于附件数量的情况下，该情况很少见且不正常，但是为了正常显示，需要规避这个Bug
+                content.replace(matcher.start()+2*index, matcher.end()+2*index, "");
+                while(matcher.find())
+                {
+                    content.replace(matcher.start()+2*index, matcher.end()+2*index, "");
+                }
+                return content;
             }
-        } catch (IOException e)
-        {
-            e.printStackTrace();
         }
 
+        if(index < images.size())
+        {
+            //针对极少数content中包含的[upload]数量少于附件数量的情况下，该情况很少见且不正常，将附件中的内容展现在末尾
+            while(images.size() > index)
+            {
+                ImageSpan imageSpan = new ImageSpan(context, images.get(index), ImageSpan.ALIGN_BASELINE);
+                //先换行，然后使用一个空格占位，接着使用图片代替刚才占位的空格，然后再换行
+                content.insert(content.length(), "\n ");
+                content.setSpan(imageSpan, content.length()-1, content.length()
+                        , Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                content.insert(content.length(), "\n");
+
+                index++;
+            }
+        }
+
+        return content;
     }
 
-    /**
-     * 获取所有分区和版面的信息，并保存
-     * @param section_name 分区名称
-     * @throws IOException
-     */
-    public void getSectionsAndBoards(final String section_name) throws IOException
-    {
-        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION, section_name);
 
-        String last_section_name = ROOT_SECTIONS.get(ROOT_SECTIONS.size() -1).getName();
 
-        if( section_name.equals(last_section_name))
-        {
-            Is_GetSections_Finished = true;
 
-            //向BoardFragment发送消息，告诉它可以取消加载页面的显示
-            EventBus.getDefault().post(new Event.Get_Sections_Finished(true));
-        }
-
-        Response response = OkHttpHelper.getM_OkHttpHelper().getExecute(url);
-        String response_result = response.body().string();
-
-        //版面所属类别, 原接口中为class，但class为保留字，因此使用boardclass
-        response_result = response_result.replace("\"class\"", "\"boardclass\"");
-
-        JSONObject jsonObject = JSON.parseObject(response_result);
-
-        //储存分区信息
-        Section section = new Gson().fromJson(response_result, new TypeToken<Section>()
-        {
-        }.getType());
-
-        if (section.getParent() != null)
-        {
-            Section parent_section = BYR_BBS_API.All_Sections.get(section.getParent());
-            parent_section.setSub_section_names(section.getName());
-            parent_section.setSub_section_descriptions(section.getDescription());
-            BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-
-        }
-        BYR_BBS_API.All_Sections.put(section.getName(), section);
-
-        editor.putString(section.getName(), section.getDescription());
-
-        //储存版面信息
-        String Boards_String = jsonObject.getString("board");
-        List<Board> boards = new Gson().fromJson(Boards_String, new TypeToken<List<Board>>()
-        {
-        }.getType());
-        for (Board board : boards)
-        {
-            BYR_BBS_API.All_Boards.put(board.getDescription(), board);
-
-            editor.putString(board.getName(), board.getDescription());
-
-            Section parent_section = BYR_BBS_API.All_Sections.get(section.getName());
-            parent_section.setBoard_names(board.getName());
-            parent_section.setBoard_descriptions(board.getDescription());
-            BYR_BBS_API.All_Sections.put(parent_section.getName(), parent_section);
-
-            if (section.getParent() == null)
-            {
-                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoard_names(board.getName());
-                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setBoard_descriptions(board.getDescription());
-            }
-        }
-
-        //判断是否有子分区，若有，则查找子分区信息
-        String Sub_Section_String = jsonObject.getString("sub_section");
-        if (Sub_Section_String.length() > 2)
-        {
-            Sub_Section_String = Sub_Section_String.substring(Sub_Section_String.indexOf("[") + 1, Sub_Section_String.lastIndexOf("]"));
-            String Sub_Section_Name[] = Sub_Section_String.split(",");
-            for (int i = 0; i < Sub_Section_Name.length; i++)
-            {
-                Sub_Section_Name[i] = Sub_Section_Name[i].substring(Sub_Section_Name[i].indexOf("\"") + 1, Sub_Section_Name[i].lastIndexOf("\""));
-                getSectionsAndBoards(Sub_Section_Name[i]);
-
-                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_names(Sub_Section_Name[i]);
-                ROOT_SECTIONS.get(Integer.parseInt(section.getName())).setSub_section_descriptions(All_Sections.get(Sub_Section_Name[i]).getDescription());
-            }
-        }
-        editor.commit();
-    }
 }
 

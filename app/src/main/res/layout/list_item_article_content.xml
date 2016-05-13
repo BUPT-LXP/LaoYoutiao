@@ -72,7 +72,8 @@
         android:layout_height="wrap_content"
         android:paddingBottom="8sp"
         android:textColor="@color/black"
-        android:textSize="16sp"/>
+        android:textSize="16sp"
+        android:lineSpacingExtra="3dp"/>
 
     <TextView
         android:id="@+id/textview_article_content_reference"

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -43,6 +44,8 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     private ActionBar actionBar;
 
     private String board_name;
+    private Article main_article;
+    private SpannableStringBuilder ssb_content;
     private int article_id;
     private List<Article> articleList = new ArrayList<>();
     private int page_number = 1;
@@ -99,6 +102,10 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         mBGARefreshLayout.setRefreshViewHolder(holder);
     }
 
+    /**
+     * 响应 ArticleHelper 中发布的主贴及其回复信息，并将信息展现
+     * @param articles_info 主贴及回复信息
+     */
     public void onEventMainThread(final Event.Read_Articles_Info articles_info)
     {
         this.reply_count = articles_info.getReply_count();
@@ -113,6 +120,8 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 user_faces.add(articles_info.getUser_faces().get(i));
             }
 
+            main_article = articleList.get(0);
+
             //如果按照下面这种方式的话，会造成 notifyDataSetChanged 不刷新
             // 因为这样使 articleList指向了另外一个对象，原来的对象并没有改变。
 //            articleList = articles_info.getArticles();
@@ -121,7 +130,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             main_post.imageview_face.setImageBitmap(user_faces.get(0));
             main_post.textview_username.setText(articleList.get(0).getUser().getId());
             main_post.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(articleList.get(0).getPost_time(), true));
-            main_post.textview_floor.setText(R.string.first_floor);
+            main_post.textview_floor.setText(R.string.main_floor);
             main_post.textview_title.setText(articleList.get(0).getTitle());
             main_post.textview_title.setVisibility(View.VISIBLE);
 
@@ -129,10 +138,9 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             String content[] = BYR_BBS_API.SeparateContent(articleList.get(0).getContent());
 
             //若包含表情，则将String 转化成 SpannableString，使之显示动态表情
-            if(content[0].contains("[em"))
-                main_post.textview_content.setText(BYR_BBS_API.ParseContent(content[0], main_post.textview_content));
-            else
-                main_post.textview_content.setText(content[0]);
+            ssb_content = BYR_BBS_API.ParseContent(-1, content[0],
+                    main_post.textview_content, articleList.get(0).getAttachment());
+            main_post.textview_content.setText(ssb_content);
 
             if(content[2] != null)
             {
@@ -141,6 +149,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 int padding = (int)getResources().getDimension(R.dimen.article_content_textpadding_top);
                 main_post.textview_post_app.setPadding(0, 0, 0, padding);
             }
+
 
             //主贴内容已经在main_post中显示过了，因此将其移除，剩下的数据传给Adapter
             articleList.remove(0);
@@ -152,7 +161,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 lv_Reply_List.addHeaderView(view_mainpost);
                 lv_Reply_List.addHeaderView(post_devider);
 
-                adapter = new ReadArticleAdapter(ContextApplication.getAppContext(), articleList, user_faces);
+                adapter = new ReadArticleAdapter(ContextApplication.getAppContext(), articleList, user_faces, lv_Reply_List);
                 lv_Reply_List.setAdapter(adapter);
             }
             else
@@ -176,9 +185,31 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             mBGARefreshLayout.endLoadingMore();
 
         loading_dialog.dismiss();
-
     }
 
+    /**
+     * 响应 AttachmentHelper 发布的图片附件信息，并将其展现
+     * 需要注意的是，此处只需要响应一次（主贴），后续发布的在Adapter中响应(暂时无法实现)
+     * @param attachment_images 图片附件
+     */
+    public void onEventMainThread(final Event.Attachment_Images attachment_images)
+    {
+        int article_index = attachment_images.getArticle_index();
+        if(-1 == article_index)
+        {
+//            ssb_content = BYR_BBS_API.Show_Attachments(ssb_content, attachment_images.getImages());
+            ssb_content = BYR_BBS_API.Show_Attachments(ssb_content, attachment_images.getImages());
+            main_post.textview_content.setText(ssb_content);
+        }
+
+        //注销EventBus
+//        EventBus.getDefault().unregister(this);
+    }
+
+    /**
+     * 重写下拉刷新
+     * @param refreshLayout
+     */
     @Override
     public void onBGARefreshLayoutBeginRefreshing(BGARefreshLayout refreshLayout)
     {
@@ -196,13 +227,18 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         }
     }
 
+    /**
+     * 重写上拉加载
+     * @param refreshLayout
+     * @return
+     */
     @Override
     public boolean onBGARefreshLayoutBeginLoadingMore(BGARefreshLayout refreshLayout)
     {
         if(BYR_BBS_API.isNetWorkAvailable())
         {
             // 如果网络可用，判断是否已经加载到最后一页
-            if( (reply_count / count_per_page) >= page_number)
+            if( reply_count > page_number * count_per_page )
             {
                 //加载网络数据
                 page_number++;

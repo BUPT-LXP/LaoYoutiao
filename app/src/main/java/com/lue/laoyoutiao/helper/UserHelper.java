@@ -5,14 +5,10 @@ import android.graphics.BitmapFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.eventtype.Event;
-import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.metadata.User;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
 import java.io.File;
@@ -83,9 +79,10 @@ public class UserHelper
                 try
                 {
                     //获取 Response
-                    OkHttpClient okHttpClient = new OkHttpClient();
-                    Request request = new Request.Builder().url(face_url).build();
-                    Response response = okHttpClient.newCall(request).execute();
+//                    OkHttpClient okHttpClient = new OkHttpClient();
+//                    Request request = new Request.Builder().url(face_url).build();
+//                    Response response = okHttpClient.newCall(request).execute();
+                    Response response = okHttpHelper.getExecute(face_url);
 
                     //将 Response 转换成输入流
                     InputStream inputStream = response.body().byteStream();
@@ -119,9 +116,10 @@ public class UserHelper
         try
         {
             //获取 Response
-            OkHttpClient okHttpClient = new OkHttpClient();
-            Request request = new Request.Builder().url(face_url).build();
-            Response response = okHttpClient.newCall(request).execute();
+//            OkHttpClient okHttpClient = new OkHttpClient();
+//            Request request = new Request.Builder().url(face_url).build();
+//            Response response = okHttpClient.newCall(request).execute();
+            Response response = okHttpHelper.getExecute(face_url);
 
             //将 Response 转换成输入流
             InputStream inputStream = response.body().byteStream();
@@ -130,7 +128,7 @@ public class UserHelper
 //            options.inJustDecodeBounds = true;
 //            user_face = BitmapFactory.decodeStream(inputStream, null, options);
 
-            final int REQUIRED_SIZE = (int) ContextApplication.getAppContext().getResources().getDimension(R.dimen.user_face_scale);
+//            final int REQUIRED_SIZE = (int) ContextApplication.getAppContext().getResources().getDimension(R.dimen.user_face_scale);
 //            int insamplesize = (options.outWidth / REQUIRED_SIZE);
 //            if(insamplesize <= 0)
 //                insamplesize = 1;
