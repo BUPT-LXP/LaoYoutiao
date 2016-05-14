@@ -100,6 +100,9 @@ public class Event
         }
     }
 
+    /**
+     * 提交收藏版面成功
+     */
     public static class Post_Favorite_Finished
     {
         private String description = null;
@@ -121,6 +124,9 @@ public class Event
         }
     }
 
+    /**
+     * 指定版面的文章列表
+     */
     public static class Specified_Board_Articles
     {
         private List<Article> articles;
@@ -136,6 +142,9 @@ public class Event
         }
     }
 
+    /**
+     * 指定标题的文章及其回复
+     */
     public static class Read_Articles_Info
     {
         private List<Article> articles;
@@ -166,4 +175,25 @@ public class Event
     }
 
 
+    public static class Attachment_Images
+    {
+        private int article_index;
+        private List<Bitmap> images = new ArrayList<>();
+
+        public Attachment_Images(int article_index, List<Bitmap> images)
+        {
+            this.article_index = article_index;
+            this.images = images;
+        }
+
+        public List<Bitmap> getImages()
+        {
+            return images;
+        }
+
+        public int getArticle_index()
+        {
+            return article_index;
+        }
+    }
 }

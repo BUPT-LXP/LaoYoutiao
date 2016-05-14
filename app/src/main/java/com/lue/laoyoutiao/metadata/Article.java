@@ -2,6 +2,7 @@ package com.lue.laoyoutiao.metadata;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.SpannableStringBuilder;
 
 /** Article元数据
  * //https://github.com/xw2423/nForum/wiki/nForum-API-Meta-Article
@@ -53,6 +54,12 @@ public class Article implements Parcelable
     private String last_reply_user_id = null;
     //该文章最后回复的时间 unxitmestamp
     private int last_reply_time = -1;
+
+    //该文章回复内容的SpannableString，仅限回复内容，不包括引用别人的内容
+    private SpannableStringBuilder ssb_content;
+    private String str_reference;
+    private String str_app;
+    private boolean is_content_separated = false;
 
     @Override
     public int describeContents()
@@ -348,4 +355,43 @@ public class Article implements Parcelable
         this.user = user;
     }
 
+    public SpannableStringBuilder getSsb_content()
+    {
+        return ssb_content;
+    }
+
+    public void setSsb_content(SpannableStringBuilder ssb_content)
+    {
+        this.ssb_content = ssb_content;
+    }
+
+    public boolean is_content_separated()
+    {
+        return is_content_separated;
+    }
+
+    public void setIs_content_separated(boolean is_content_separated)
+    {
+        this.is_content_separated = is_content_separated;
+    }
+
+    public String getStr_reference()
+    {
+        return str_reference;
+    }
+
+    public void setStr_reference(String str_reference)
+    {
+        this.str_reference = str_reference;
+    }
+
+    public String getStr_app()
+    {
+        return str_app;
+    }
+
+    public void setStr_app(String str_app)
+    {
+        this.str_app = str_app;
+    }
 }

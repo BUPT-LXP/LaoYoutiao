@@ -24,7 +24,10 @@
     <string name="update">更新</string>
     <string name="read_article">阅读文章</string>
     <string name="all_replies">所有回复</string>
-    <string name="first_floor">楼主</string>
+    <string name="main_floor">楼主</string>
+    <string name="first_floor">沙发</string>
+    <string name="second_floor">板凳</string>
+    <string name="_floor">楼</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>

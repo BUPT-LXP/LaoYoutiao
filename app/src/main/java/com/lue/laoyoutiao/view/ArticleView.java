@@ -49,5 +49,4 @@ public class ArticleView extends LinearLayout
         super(context, attrs, defStyleAttr);
     }
 
-
 }

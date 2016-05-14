@@ -35,6 +35,7 @@ import cn.bingoogolapple.refreshlayout.BGAMeiTuanRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import de.greenrobot.event.EventBus;
 
+
 /**
  * Created by Lue on 2015/12/30.
  */
@@ -159,6 +160,7 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
      * 响应BoardHelper发出的指定版面下的文章列表
      * @param articles 文章列表，默认的数量为30
      */
+
     public void onEventMainThread(final Event.Specified_Board_Articles articles)
     {
         List<Article> top_Articles = new ArrayList<>();
