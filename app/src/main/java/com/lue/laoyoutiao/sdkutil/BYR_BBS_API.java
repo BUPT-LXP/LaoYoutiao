@@ -4,12 +4,17 @@ package com.lue.laoyoutiao.sdkutil;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.TextView;
@@ -479,6 +484,24 @@ public class BYR_BBS_API
             }
         }
 
+
+        //取消斜体
+        my_content = my_content.replaceAll("\\[[iI]\\]", "");
+        my_content = my_content.replaceAll("\\[/[iI]\\]", "");
+
+        //取消下划线
+        my_content = my_content.replaceAll("\\[[uU]\\]", "");
+        my_content = my_content.replaceAll("\\[/[uU]\\]", "");
+
+        //取消字体
+        my_content = my_content.replaceAll("\\[face=[^\\]]*?\\][\\s\\S]*?", "");
+        my_content = my_content.replaceAll("\\[/face\\]", "");
+
+//        //取消字号
+//        my_content = my_content.replaceAll("\\[size=[^\\]]*?\\][\\s\\S]*?", "");
+//        my_content = my_content.replaceAll("\\[/size\\]", "");
+
+
         array[0] = my_content;
         array[1] = my_reference;
         array[2] = my_app;
@@ -494,17 +517,107 @@ public class BYR_BBS_API
      * @param attachment 文章附件
      * @return SpannableStringBuilder
      */
-    public static SpannableStringBuilder ParseContent(final int article_index, String content, TextView textView, final Attachment attachment)
+    public static SpannableStringBuilder ParseContent(final int article_index, String content,
+                                                      TextView textView, final Attachment attachment)
     {
         final Context context = ContextApplication.getAppContext();
         Pattern pattern;
         Matcher matcher;
         SpannableStringBuilder spannableString = new SpannableStringBuilder(content);
 
+        //文字加粗
+        if(content.contains("[b]") && content.contains("[/b]"))
+        {
+            pattern = Pattern.compile("\\[b\\]([\\s\\S]*?)\\[/b\\]");
+            matcher = pattern.matcher(spannableString);
+
+            //3表示的是[b] 的长度
+            //4表示的是[/b]的长度
+            //7是相加的长度
+            int bold_num = 0;
+            while (matcher.find())
+            {
+                spannableString.delete(matcher.start()- bold_num*7, matcher.start()+3 - bold_num*7);
+                spannableString.delete(matcher.end()-7 - bold_num*7, matcher.end()-3 - bold_num*7);
+                spannableString.setSpan(new StyleSpan(Typeface.BOLD), matcher.start() - bold_num*7, matcher.end()-7 - bold_num*7,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                ForegroundColorSpan span = new ForegroundColorSpan(Color.parseColor("#DC143C"));
+//                spannableString.setSpan(span, matcher.start() - bold_num*7, matcher.end()-7 - bold_num*7,
+//                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                bold_num ++ ;
+            }
+        }
+
+        //文字颜色
+        if(content.contains("[color=") && content.contains("[/color]"))
+        {
+            pattern = Pattern.compile("\\[color=([^\\]]*?)\\]([\\s\\S]*?)\\[/color\\]");
+            matcher = pattern.matcher(spannableString);
+
+            //15表示的是[color=#XXXXXX] 的长度
+            //8表示的是[/color]的长度
+            //23是相加的长度
+            int color_num = 0;
+            while (matcher.find())
+            {
+                String color = matcher.group(1);
+                spannableString.delete(matcher.start()- color_num*23, matcher.start()+15 - color_num*23);
+                spannableString.delete(matcher.end()-23 - color_num*23, matcher.end()-15 - color_num*23);
+
+                ForegroundColorSpan span = new ForegroundColorSpan(Color.parseColor(color));
+                spannableString.setSpan(span, matcher.start() - color_num*23, matcher.end()-23 - color_num*23,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                color_num ++ ;
+            }
+        }
+
+        //文字大小
+        if(content.contains("[size=") && content.contains("[/size]"))
+        {
+            pattern = Pattern.compile("\\[size=(\\d)\\]([\\s\\S]*?)\\[/size\\]");
+            matcher = pattern.matcher(spannableString);
+
+            //8表示的是[size=5] 的长度
+            //7表示的是[/size]的长度
+            //15是相加的长度
+            int size_num = 0;
+            while (matcher.find())
+            {
+                String size = matcher.group(1);
+                Float size_f = Float.parseFloat(size) / 2;
+
+                spannableString.delete(matcher.start()- size_num*15, matcher.start()+8 - size_num*15);
+                spannableString.delete(matcher.end()-15 - size_num*15, matcher.end()-8 - size_num*15);
+
+                RelativeSizeSpan span = new RelativeSizeSpan(size_f);
+                spannableString.setSpan(span, matcher.start() - size_num*15, matcher.end()-15 - size_num*15,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                size_num ++ ;
+            }
+        }
+
+//        //文字斜体，发现没有效果，索性去掉吧
+//        if(content.contains("[i]") && content.contains("[/i]"))
+//        {
+//            pattern = Pattern.compile("\\[i\\]([\\s\\S]*?)\\[/i\\]");
+//            matcher = pattern.matcher(spannableString);
+//
+//            int italic_num = 0;
+//            while (matcher.find())
+//            {
+//                spannableString.delete(matcher.start() - italic_num*7, matcher.start()+3 - italic_num*7);
+//                spannableString.delete(matcher.end()-7 - italic_num*7, matcher.end()-3 - italic_num*7);
+////                spannableString.setSpan(new StyleSpan(Typeface.ITALIC), matcher.start(), matcher.end()-7,
+////                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                italic_num ++ ;
+//            }
+//        }
+
+
         if (content.contains("[em"))
         {
             pattern = Pattern.compile("\\[(em[abc]?\\d+)\\]");
-            matcher = pattern.matcher(content);
+            matcher = pattern.matcher(spannableString);
             String emoji, emoji_filename;
             MatchResult match_result;
             GifDrawable gif = null;

@@ -267,7 +267,10 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     @Override
     public void onBackPressed()
     {
+        //为adapter注销EventBus
+        EventBus.getDefault().unregister(adapter);
         adapter = null;
+
         //释放图片内存
         for(Article article : articleList)
         {

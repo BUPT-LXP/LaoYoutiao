@@ -162,7 +162,7 @@ public class ReadArticleAdapter extends BaseAdapter
                 reply_articles.get(article_index).setSsb_content(ssb);
                 textview_content.setText(ssb);
             }
-            catch (NullPointerException e)
+            catch (NullPointerException | IndexOutOfBoundsException e)
             {
                 e.printStackTrace();
             }
