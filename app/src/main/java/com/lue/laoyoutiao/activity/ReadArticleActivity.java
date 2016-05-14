@@ -30,6 +30,7 @@ import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import de.greenrobot.event.EventBus;
 
+
 public class ReadArticleActivity extends AppCompatActivity implements BGARefreshLayout.BGARefreshLayoutDelegate
 {
     private BGARefreshLayout mBGARefreshLayout;
@@ -192,18 +193,16 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
      * 需要注意的是，此处只需要响应一次（主贴），后续发布的在Adapter中响应(暂时无法实现)
      * @param attachment_images 图片附件
      */
+
     public void onEventMainThread(final Event.Attachment_Images attachment_images)
     {
         int article_index = attachment_images.getArticle_index();
         if(-1 == article_index)
         {
-//            ssb_content = BYR_BBS_API.Show_Attachments(ssb_content, attachment_images.getImages());
-            ssb_content = BYR_BBS_API.Show_Attachments(ssb_content, attachment_images.getImages());
+            ssb_content = BYR_BBS_API.Show_Attachments(ssb_content, attachment_images.getImages(),
+                    main_post.textview_content.getWidth());
             main_post.textview_content.setText(ssb_content);
         }
-
-        //注销EventBus
-//        EventBus.getDefault().unregister(this);
     }
 
     /**
@@ -268,6 +267,23 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     @Override
     public void onBackPressed()
     {
+        adapter = null;
+        //释放图片内存
+        for(Article article : articleList)
+        {
+            if(article.getSsb_content() != null)
+                article.getSsb_content().clear();
+        }
+        for(Bitmap bitmap : user_faces)
+        {
+            bitmap.recycle();
+        }
+        for(Article article : articleList)
+        {
+            article = null;
+        }
+        articleList.clear();
+        System.gc();
         finish();
     }
 

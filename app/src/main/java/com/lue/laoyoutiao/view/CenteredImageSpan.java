@@ -8,93 +8,53 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.style.ImageSpan;
 
-import java.lang.ref.WeakReference;
-
 /**
- * Created by Lue on 2016/5/12.
+ * Created by Lue on 2016/5/13.
  */
 public class CenteredImageSpan extends ImageSpan
 {
+    private int tv_width;
 
-    // Extra variables used to redefine the Font Metrics when an ImageSpan is added
-    private int initialDescent = 0;
-    private int extraSpace = 0;
-
-
-
-    public CenteredImageSpan(final Drawable drawable, final int verticalAlignment)
-    {
-        super(drawable, verticalAlignment);
-    }
-
-    public CenteredImageSpan(Context context, Bitmap b, int verticalAlignment)
+    public CenteredImageSpan(Context context, Bitmap b, int verticalAlignment, int tv_width)
     {
         super(context, b, verticalAlignment);
+        this.tv_width = tv_width;
     }
 
-
-    public Rect getBounds()
-    {
-        return getDrawable().getBounds();
-    }
-
-
-    public void draw(final Canvas canvas)
-    {
-        getDrawable().draw(canvas);
-    }
-
-
-    //
-    // Following methods are overriden from DynamicDrawableSpan.
-    //
-
-    // Method used to redefined the Font Metrics when an ImageSpan is added
-    @Override
-    public int getSize(Paint paint, CharSequence text,
-                       int start, int end,
+    public int getSize(Paint paint, CharSequence text, int start, int end,
                        Paint.FontMetricsInt fm)
     {
-        Drawable d = getCachedDrawable();
+        Drawable d = getDrawable();
         Rect rect = d.getBounds();
-
         if (fm != null)
         {
-            // Centers the text with the ImageSpan
-            if (rect.bottom - (fm.descent - fm.ascent) >= 0){
-            // Stores the initial descent and computes the margin available
-            initialDescent = fm.descent;
-            extraSpace = rect.bottom - (fm.descent - fm.ascent);
+            Paint.FontMetricsInt fmPaint = paint.getFontMetricsInt();
+            int fontHeight = fmPaint.bottom - fmPaint.top;
+            int drHeight = rect.bottom - rect.top;
+
+            int top = drHeight / 2 - fontHeight / 4;
+            int bottom = drHeight / 2 + fontHeight / 4;
+
+            fm.ascent = -bottom;
+            fm.top = -bottom;
+            fm.bottom = top;
+            fm.descent = top;
         }
-
-            fm.descent = extraSpace / 2 + initialDescent;
-            fm.bottom = fm.descent;
-
-            fm.ascent = -rect.bottom + fm.descent;
-            fm.top = fm.ascent;
-        }
-
         return rect.right;
     }
 
-    // Redefined locally because it is a private member from DynamicDrawableSpan
-    private Drawable getCachedDrawable()
+    @Override
+    public void draw(Canvas canvas, CharSequence text, int start, int end,
+                     float x, int top, int y, int bottom, Paint paint)
     {
-        WeakReference<Drawable> wr = mDrawableRef;
-        Drawable d = null;
+        Drawable b = getDrawable();
+        canvas.save();
+        int transY = 0;
+        transY = ((bottom - top) - b.getBounds().bottom) / 2 + top;
 
-        if (wr != null)
-            d = wr.get();
-
-        if (d == null)
-        {
-            d = getDrawable();
-            mDrawableRef = new WeakReference<>(d);
-        }
-
-        return d;
+        //使图片水平居中
+        canvas.translate((tv_width - b.getBounds().width())/2, transY);
+        b.draw(canvas);
+        canvas.restore();
     }
-
-    private WeakReference<Drawable> mDrawableRef;
 }
-

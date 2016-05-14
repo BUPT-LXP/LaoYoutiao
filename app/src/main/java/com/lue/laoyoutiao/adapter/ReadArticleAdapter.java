@@ -22,6 +22,8 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
+
+
 /**
  * Created by Lue on 2016/4/26.
  */
@@ -150,14 +152,14 @@ public class ReadArticleAdapter extends BaseAdapter
         int article_index = attachment_images.getArticle_index();
         if(article_index >= 0)
         {
-//            SpannableString ss = BYR_BBS_API.Show_Attachments(reply_articles.get(article_index).getSsb_content(), attachment_images.getImages());
-            SpannableStringBuilder ssb = BYR_BBS_API.Show_Attachments(reply_articles.get(article_index).getSsb_content(), attachment_images.getImages());
-            reply_articles.get(article_index).setSsb_content(ssb);
             int child_index = article_index - listview.getFirstVisiblePosition() + listview.getHeaderViewsCount();
             View view = listview.getChildAt(child_index);
             try
             {
                 TextView textview_content = (TextView) view.findViewById(R.id.textview_article_content);
+                SpannableStringBuilder ssb = BYR_BBS_API.Show_Attachments(reply_articles.get(article_index).getSsb_content(),
+                        attachment_images.getImages(), textview_content.getWidth());
+                reply_articles.get(article_index).setSsb_content(ssb);
                 textview_content.setText(ssb);
             }
             catch (NullPointerException e)
@@ -166,5 +168,4 @@ public class ReadArticleAdapter extends BaseAdapter
             }
         }
     }
-
 }

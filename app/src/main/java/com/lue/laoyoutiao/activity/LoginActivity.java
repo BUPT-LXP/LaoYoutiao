@@ -172,6 +172,7 @@ public class LoginActivity extends AppCompatActivity
         }
     }
 
+
     public void onEventMainThread(Event.My_User_Info user_me)
     {
         if(user_me.getMe().getUser_name() == null)
