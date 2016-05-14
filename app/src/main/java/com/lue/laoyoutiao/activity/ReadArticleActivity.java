@@ -109,9 +109,13 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
      */
     public void onEventMainThread(final Event.Read_Articles_Info articles_info)
     {
+
+
         this.reply_count = articles_info.getReply_count();
         if(page_number == 1)
         {
+//            lv_Reply_List.setSelection(0);
+
             articleList.clear();
             user_faces.clear();
 
@@ -162,7 +166,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 lv_Reply_List.addHeaderView(view_mainpost);
                 lv_Reply_List.addHeaderView(post_devider);
 
-                adapter = new ReadArticleAdapter(ContextApplication.getAppContext(), articleList, user_faces, lv_Reply_List);
+                adapter = new ReadArticleAdapter(this, articleList, user_faces, lv_Reply_List);
                 lv_Reply_List.setAdapter(adapter);
             }
             else
@@ -172,6 +176,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         }
         else
         {
+
             for(int i=0; i<articles_info.getArticles().size(); i++)
             {
                 articleList.add(articles_info.getArticles().get(i));
@@ -186,6 +191,14 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             mBGARefreshLayout.endLoadingMore();
 
         loading_dialog.dismiss();
+
+//        if(page_number > 1)
+//        {
+//            int position = (page_number -1)*count_per_page + 1;
+//            lv_Reply_List.setSelection(position);
+//
+//            Log.d("ReadArticle: ", "SET selection at " + position);
+//        }
     }
 
     /**

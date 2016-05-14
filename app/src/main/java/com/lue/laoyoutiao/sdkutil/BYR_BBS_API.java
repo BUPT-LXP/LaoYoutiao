@@ -445,7 +445,7 @@ public class BYR_BBS_API
 
             index = my_app.lastIndexOf("]");
             // url = http://guiyou.wangx.in
-            String url = my_app.substring(5, index -1);
+            String url = my_app.substring(5, index);
             //发自「贵邮」
             my_app = my_app.substring(index + 1);
 
@@ -595,6 +595,8 @@ public class BYR_BBS_API
                 size_num ++ ;
             }
         }
+
+
 
 //        //文字斜体，发现没有效果，索性去掉吧
 //        if(content.contains("[i]") && content.contains("[/i]"))

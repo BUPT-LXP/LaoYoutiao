@@ -4,11 +4,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -74,18 +74,10 @@ public class ReadArticleAdapter extends BaseAdapter
 
         if (convertView == null)
         {
-            viewHolder = new ArticleView(context);
+
             //获取list_item布局文件的视图
             convertView = listContainer.inflate(R.layout.list_item_article_content, null);
-
-            viewHolder.imageview_face = (ImageView) convertView.findViewById(R.id.imageview_user_face);
-            viewHolder.textview_username = (TextView) convertView.findViewById(R.id.textview_user_name);
-            viewHolder.textview_posttime = (TextView) convertView.findViewById(R.id.textview_post_time);
-            viewHolder.textview_floor = (TextView) convertView.findViewById(R.id.textview_user_floor);
-            viewHolder.textview_title = (TextView) convertView.findViewById(R.id.textview_article_title);
-            viewHolder.textview_content = (TextView) convertView.findViewById(R.id.textview_article_content);
-            viewHolder.textview_content_reply = (TextView) convertView.findViewById(R.id.textview_article_content_reference);
-            viewHolder.textview_post_app = (TextView) convertView.findViewById(R.id.textview_article_post_app);
+            viewHolder = new ArticleView(context, convertView);
 
             convertView.setTag(viewHolder);
         } else
@@ -137,6 +129,8 @@ public class ReadArticleAdapter extends BaseAdapter
             viewHolder.textview_post_app.setVisibility(View.VISIBLE);
             int padding = (int) context.getResources().getDimension(R.dimen.article_content_textpadding_top);
             viewHolder.textview_post_app.setPadding(0, 0, 0, padding);
+
+            viewHolder.textview_post_app.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
 
