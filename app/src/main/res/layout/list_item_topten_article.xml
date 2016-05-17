@@ -11,7 +11,7 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:gravity="center"
-        android:background="@drawable/textview_style_circle"
+        android:background="@drawable/shape_circle_textview"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:layout_gravity="center_vertical"

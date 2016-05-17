@@ -28,6 +28,13 @@
     <string name="first_floor">沙发</string>
     <string name="second_floor">板凳</string>
     <string name="_floor">楼</string>
+    <string name="image">图片</string>
+    <string name="camera">拍照</string>
+    <string name="senior_reply">高级</string>
+    <string name="emoji_classic">经典表情</string>
+    <string name="emoji_tuzki">兔斯基</string>
+    <string name="emoji_yoci">悠嘻猴</string>
+    <string name="emoji_onion">洋葱头</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
