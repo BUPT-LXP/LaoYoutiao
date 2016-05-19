@@ -6,15 +6,22 @@
     <!-- 边框 -->
     <stroke
         android:width="0.5dp"
-        android:color="@android:color/black" />
+        android:color="@color/gray" />
     <!-- 圆角 -->
-    <corners android:radius="3dp" />
+    <!--<corners android:radius="3dp" />-->
+    <corners
+        android:bottomLeftRadius="3dp"
+        android:bottomRightRadius="3dp"
+        android:topLeftRadius="3dp"
+        android:topRightRadius="3dp"/>
     <!-- 边距 -->
     <padding
         android:bottom="6dp"
         android:left="6dp"
         android:right="6dp"
         android:top="6dp" />
+
+
     <!-- 渐变 -->
     <!--<gradient-->
         <!--android:angle="270"-->

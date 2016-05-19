@@ -7,23 +7,39 @@
     android:orientation="vertical"
     tools:context="com.lue.laoyoutiao.activity.ReadArticleActivity">
 
-    <cn.bingoogolapple.refreshlayout.BGARefreshLayout
-        android:id="@+id/layout_read_article"
+    <RelativeLayout
+        android:id="@+id/linearlayout_articles"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <ListView
-            android:id="@+id/listview_read_article"
+
+        <cn.bingoogolapple.refreshlayout.BGARefreshLayout
+            android:id="@+id/layout_read_article"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingEnd="12dp"
-            android:paddingStart="12dp"
-            android:scrollbars="none"
-            android:headerDividersEnabled="false"/>
+            android:layout_height="wrap_content"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-    </cn.bingoogolapple.refreshlayout.BGARefreshLayout>
+            <ListView
+                android:id="@+id/listview_read_article"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingEnd="12dp"
+                android:paddingStart="12dp"
+                android:scrollbars="none"
+                android:headerDividersEnabled="false"/>
+
+        </cn.bingoogolapple.refreshlayout.BGARefreshLayout>
+
+    </RelativeLayout>
+
+    <include
+        android:id="@+id/reply_layout"
+        layout="@layout/layout_reply"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 
 </LinearLayout>
 

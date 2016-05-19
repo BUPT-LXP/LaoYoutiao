@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:descendantFocusability="blocksDescendants"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -70,10 +71,13 @@
         android:id="@+id/textview_article_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingTop="8sp"
         android:paddingBottom="8sp"
         android:textColor="@color/black"
         android:textSize="16sp"
-        android:lineSpacingExtra="3dp"/>
+        android:lineSpacingExtra="3dp"
+        android:autoLink="web|email|phone"
+        android:textIsSelectable="true"/>
 
     <TextView
         android:id="@+id/textview_article_content_reference"
@@ -92,6 +96,6 @@
         android:textColor="@color/black"
         android:textSize="16sp"
         android:visibility="gone"
-        android:autoLink="web"/>
+        />
 
 </LinearLayout>

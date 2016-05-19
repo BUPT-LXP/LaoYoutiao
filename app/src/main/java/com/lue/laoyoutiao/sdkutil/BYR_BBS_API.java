@@ -4,12 +4,17 @@ package com.lue.laoyoutiao.sdkutil;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.TextView;
@@ -26,6 +31,7 @@ import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.view.CenteredImageSpan;
+import com.lue.laoyoutiao.view.ClickableTextSpan;
 import com.lue.laoyoutiao.view.GifCallback;
 import com.squareup.okhttp.Response;
 
@@ -440,7 +446,7 @@ public class BYR_BBS_API
 
             index = my_app.lastIndexOf("]");
             // url = http://guiyou.wangx.in
-            String url = my_app.substring(5, index -1);
+            String url = my_app.substring(5, index);
             //发自「贵邮」
             my_app = my_app.substring(index + 1);
 
@@ -462,7 +468,26 @@ public class BYR_BBS_API
         {
             int index = article_content.indexOf(my_reference);
             my_reference = article_content.substring(index);
+
             my_content = article_content.substring(0, index);
+
+            //此处是为了辨别引用处于回复上面的一些情况
+            //例如测试区的 "\n: 嘿嘿嘿\n: 哈哈哈\n: 哼哼哼\n下面下面下面"
+            // 其实"下面下面下面"是回复内容, "\n: 嘿嘿嘿\n: 哈哈哈\n: 哼哼哼"是引用内容
+            int index1 = my_reference.lastIndexOf("\n:");
+            String s1 = my_reference.substring(index1 + 2);
+            // s1:哼哼哼\n下面下面下面
+            int index2 = s1.indexOf("\n");
+            if(index2 != -1)
+            {
+                //在后面找到了换行符，表明此时回复内容在引用下面，是不正常的，需要调整
+                if(my_content.equals("\n"))
+                    my_content = s1.substring(index2+1);
+                else
+                    my_content = my_content + s1.substring(index2+1);
+                my_reference = my_reference.replace(my_content, "");
+            }
+
         }
 
         //返回结果
@@ -479,6 +504,23 @@ public class BYR_BBS_API
             }
         }
 
+
+        //取消斜体
+        my_content = my_content.replaceAll("\\[[iI]\\]", "");
+        my_content = my_content.replaceAll("\\[/[iI]\\]", "");
+
+        //取消下划线
+        my_content = my_content.replaceAll("\\[[uU]\\]", "");
+        my_content = my_content.replaceAll("\\[/[uU]\\]", "");
+
+        //取消字体
+        my_content = my_content.replaceAll("\\[face=[^\\]]*?\\][\\s\\S]*?", "");
+        my_content = my_content.replaceAll("\\[/face\\]", "");
+
+//        //取消字号
+//        my_content = my_content.replaceAll("\\[size=[^\\]]*?\\][\\s\\S]*?", "");
+//        my_content = my_content.replaceAll("\\[/size\\]", "");
+
         array[0] = my_content;
         array[1] = my_reference;
         array[2] = my_app;
@@ -494,17 +536,125 @@ public class BYR_BBS_API
      * @param attachment 文章附件
      * @return SpannableStringBuilder
      */
-    public static SpannableStringBuilder ParseContent(final int article_index, String content, TextView textView, final Attachment attachment)
+    public static SpannableStringBuilder ParseContent(final int article_index, String content,
+                                                      TextView textView, final Attachment attachment)
     {
         final Context context = ContextApplication.getAppContext();
         Pattern pattern;
         Matcher matcher;
         SpannableStringBuilder spannableString = new SpannableStringBuilder(content);
 
+        //文字加粗
+        if(content.contains("[b]") && content.contains("[/b]"))
+        {
+            pattern = Pattern.compile("\\[b\\]([\\s\\S]*?)\\[/b\\]");
+            matcher = pattern.matcher(spannableString);
+
+            //3表示的是[b] 的长度
+            //4表示的是[/b]的长度
+            //7是相加的长度
+            int bold_num = 0;
+            while (matcher.find())
+            {
+                spannableString.delete(matcher.start()- bold_num*7, matcher.start()+3 - bold_num*7);
+                spannableString.delete(matcher.end()-7 - bold_num*7, matcher.end()-3 - bold_num*7);
+                spannableString.setSpan(new StyleSpan(Typeface.BOLD), matcher.start() - bold_num*7, matcher.end()-7 - bold_num*7,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                ForegroundColorSpan span = new ForegroundColorSpan(Color.parseColor("#DC143C"));
+//                spannableString.setSpan(span, matcher.start() - bold_num*7, matcher.end()-7 - bold_num*7,
+//                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                bold_num ++ ;
+            }
+        }
+
+        //文字颜色
+        if(content.contains("[color=") && content.contains("[/color]"))
+        {
+            pattern = Pattern.compile("\\[color=([^\\]]*?)\\]([\\s\\S]*?)\\[/color\\]");
+            matcher = pattern.matcher(spannableString);
+
+            //15表示的是[color=#XXXXXX] 的长度
+            //8表示的是[/color]的长度
+            //23是相加的长度
+            int color_num = 0;
+            while (matcher.find())
+            {
+                String color = matcher.group(1);
+                spannableString.delete(matcher.start()- color_num*23, matcher.start()+15 - color_num*23);
+                spannableString.delete(matcher.end()-23 - color_num*23, matcher.end()-15 - color_num*23);
+
+                ForegroundColorSpan span = new ForegroundColorSpan(Color.parseColor(color));
+                spannableString.setSpan(span, matcher.start() - color_num*23, matcher.end()-23 - color_num*23,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                color_num ++ ;
+            }
+        }
+
+        //文字大小
+        if(content.contains("[size=") && content.contains("[/size]"))
+        {
+            pattern = Pattern.compile("\\[size=(\\d)\\]([\\s\\S]*?)\\[/size\\]");
+            matcher = pattern.matcher(spannableString);
+
+            //8表示的是[size=5] 的长度
+            //7表示的是[/size]的长度
+            //15是相加的长度
+            int size_num = 0;
+            while (matcher.find())
+            {
+                String size = matcher.group(1);
+                Float size_f = Float.parseFloat(size) / 2;
+
+                spannableString.delete(matcher.start()- size_num*15, matcher.start()+8 - size_num*15);
+                spannableString.delete(matcher.end()-15 - size_num*15, matcher.end()-8 - size_num*15);
+
+                RelativeSizeSpan span = new RelativeSizeSpan(size_f);
+                spannableString.setSpan(span, matcher.start() - size_num*15, matcher.end()-15 - size_num*15,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                size_num ++ ;
+            }
+        }
+
+        //匹配论坛超链接
+        if(content.contains("http://bbs.byr.cn"))
+        {
+            pattern = Pattern.compile("http://bbs.byr.cn[^\\s]+");
+            matcher = pattern.matcher(spannableString);
+
+            while(matcher.find())
+            {
+                String url = matcher.group();
+                ClickableTextSpan span = new ClickableTextSpan(context, url);
+                spannableString.setSpan(span, matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+
+
+
+
+
+//        //文字斜体，发现没有效果，索性去掉吧
+//        if(content.contains("[i]") && content.contains("[/i]"))
+//        {
+//            pattern = Pattern.compile("\\[i\\]([\\s\\S]*?)\\[/i\\]");
+//            matcher = pattern.matcher(spannableString);
+//
+//            int italic_num = 0;
+//            while (matcher.find())
+//            {
+//                spannableString.delete(matcher.start() - italic_num*7, matcher.start()+3 - italic_num*7);
+//                spannableString.delete(matcher.end()-7 - italic_num*7, matcher.end()-3 - italic_num*7);
+////                spannableString.setSpan(new StyleSpan(Typeface.ITALIC), matcher.start(), matcher.end()-7,
+////                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//                italic_num ++ ;
+//            }
+//        }
+
+
         if (content.contains("[em"))
         {
             pattern = Pattern.compile("\\[(em[abc]?\\d+)\\]");
-            matcher = pattern.matcher(content);
+            matcher = pattern.matcher(spannableString);
             String emoji, emoji_filename;
             MatchResult match_result;
             GifDrawable gif = null;

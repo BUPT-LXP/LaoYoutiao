@@ -18,5 +18,6 @@
     <dimen name="user_face_scale">50sp</dimen>
     <dimen name="article_content_textsize">8sp</dimen>
     <dimen name="article_content_textpadding_top">8sp</dimen>
+    <dimen name="tab_height">40dp</dimen>
 
 </resources>
