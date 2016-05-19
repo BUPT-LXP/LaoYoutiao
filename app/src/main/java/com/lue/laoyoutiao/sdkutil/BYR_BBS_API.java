@@ -31,6 +31,7 @@ import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.view.CenteredImageSpan;
+import com.lue.laoyoutiao.view.ClickableTextSpan;
 import com.lue.laoyoutiao.view.GifCallback;
 import com.squareup.okhttp.Response;
 
@@ -467,7 +468,26 @@ public class BYR_BBS_API
         {
             int index = article_content.indexOf(my_reference);
             my_reference = article_content.substring(index);
+
             my_content = article_content.substring(0, index);
+
+            //此处是为了辨别引用处于回复上面的一些情况
+            //例如测试区的 "\n: 嘿嘿嘿\n: 哈哈哈\n: 哼哼哼\n下面下面下面"
+            // 其实"下面下面下面"是回复内容, "\n: 嘿嘿嘿\n: 哈哈哈\n: 哼哼哼"是引用内容
+            int index1 = my_reference.lastIndexOf("\n:");
+            String s1 = my_reference.substring(index1 + 2);
+            // s1:哼哼哼\n下面下面下面
+            int index2 = s1.indexOf("\n");
+            if(index2 != -1)
+            {
+                //在后面找到了换行符，表明此时回复内容在引用下面，是不正常的，需要调整
+                if(my_content.equals("\n"))
+                    my_content = s1.substring(index2+1);
+                else
+                    my_content = my_content + s1.substring(index2+1);
+                my_reference = my_reference.replace(my_content, "");
+            }
+
         }
 
         //返回结果
@@ -500,7 +520,6 @@ public class BYR_BBS_API
 //        //取消字号
 //        my_content = my_content.replaceAll("\\[size=[^\\]]*?\\][\\s\\S]*?", "");
 //        my_content = my_content.replaceAll("\\[/size\\]", "");
-
 
         array[0] = my_content;
         array[1] = my_reference;
@@ -595,6 +614,22 @@ public class BYR_BBS_API
                 size_num ++ ;
             }
         }
+
+        //匹配论坛超链接
+        if(content.contains("http://bbs.byr.cn"))
+        {
+            pattern = Pattern.compile("http://bbs.byr.cn[^\\s]+");
+            matcher = pattern.matcher(spannableString);
+
+            while(matcher.find())
+            {
+                String url = matcher.group();
+                ClickableTextSpan span = new ClickableTextSpan(context, url);
+                spannableString.setSpan(span, matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+
+
 
 
 

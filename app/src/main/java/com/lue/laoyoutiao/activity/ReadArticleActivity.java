@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -26,8 +27,8 @@ import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ArticleView;
+import com.lue.laoyoutiao.view.EmojiClickManager;
 import com.lue.laoyoutiao.view.EmotionInputDetector;
-import com.lue.laoyoutiao.view.ReplyviewOnItemClickManager;
 import com.lue.laoyoutiao.view.SlidingTabLayout;
 
 import java.util.ArrayList;
@@ -42,6 +43,8 @@ import de.greenrobot.event.EventBus;
 
 public class ReadArticleActivity extends AppCompatActivity implements BGARefreshLayout.BGARefreshLayoutDelegate
 {
+    private static final String TAG = "ReadArticleActivity";
+
     private BGARefreshLayout mBGARefreshLayout;
     private ListView lv_Reply_List;
     private View view_mainpost;
@@ -138,7 +141,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         slidingTabLayout.setDistributeEvenly(true);
         slidingTabLayout.setViewPager(viewpager);
 
-        ReplyviewOnItemClickManager globalOnItemClickListener = ReplyviewOnItemClickManager.getInstance();
+        EmojiClickManager globalOnItemClickListener = EmojiClickManager.getInstance();
         globalOnItemClickListener.attachToEditText((EditText)findViewById(R.id.edit_text));
 
 
@@ -186,6 +189,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             ssb_content = BYR_BBS_API.ParseContent(-1, content[0],
                     main_post.textview_content, articleList.get(0).getAttachment());
             main_post.textview_content.setText(ssb_content);
+            main_post.textview_content.setMovementMethod(LinkMovementMethod.getInstance());
 
             if(content[2] != null)
             {
@@ -193,6 +197,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 main_post.textview_post_app.setVisibility(View.VISIBLE);
                 int padding = (int)getResources().getDimension(R.dimen.article_content_textpadding_top);
                 main_post.textview_post_app.setPadding(0, 0, 0, padding);
+                main_post.textview_post_app.setMovementMethod(LinkMovementMethod.getInstance());
             }
 
 
@@ -320,10 +325,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     @Override
     public void onBackPressed()
     {
-//        if (emotionInputDetector.interceptBackPress())
-//        {
-//            super.onBackPressed();
-//        }
         if (!emotionInputDetector.interceptBackPress())
         {
 
@@ -356,11 +357,23 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     }
 
     @Override
-    public void onDestroy()
+    protected void onPause()
     {
-        super.onDestroy();
+        super.onPause();
 
         //注销EventBus
+        //注意此处一定要注销，否则会出现问题，具体内容见 http://bbs.byr.cn/#!article/MobileTerminalAT/30560
         EventBus.getDefault().unregister(this);
     }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        //注册EventBus
+        if(!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
+    }
+
 }

@@ -110,10 +110,12 @@ public class ReadArticleAdapter extends BaseAdapter
                     viewHolder.textview_content, article.getAttachment());
             article.setSsb_content(ssb);
             viewHolder.textview_content.setText(ssb);
+            viewHolder.textview_content.setMovementMethod(LinkMovementMethod.getInstance());
         }
         else
         {
             viewHolder.textview_content.setText(article.getSsb_content());
+            viewHolder.textview_content.setMovementMethod(LinkMovementMethod.getInstance());
         }
 
         if (article.getStr_reference() != null)
@@ -123,6 +125,10 @@ public class ReadArticleAdapter extends BaseAdapter
             int padding = (int) context.getResources().getDimension(R.dimen.article_content_textpadding_top);
             viewHolder.textview_content_reply.setPadding(0, 0, 0, padding);
         }
+        else
+        {
+            viewHolder.textview_content_reply.setVisibility(View.GONE);
+        }
         if (article.getStr_app() != null)
         {
             viewHolder.textview_post_app.setText(Html.fromHtml(article.getStr_app()));
@@ -131,6 +137,10 @@ public class ReadArticleAdapter extends BaseAdapter
             viewHolder.textview_post_app.setPadding(0, 0, 0, padding);
 
             viewHolder.textview_post_app.setMovementMethod(LinkMovementMethod.getInstance());
+        }
+        else
+        {
+            viewHolder.textview_post_app.setVisibility(View.GONE);
         }
 
 

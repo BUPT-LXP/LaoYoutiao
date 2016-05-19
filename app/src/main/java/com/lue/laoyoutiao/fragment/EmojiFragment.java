@@ -11,7 +11,7 @@ import android.widget.GridView;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.adapter.EmojiGridviewAdapter;
-import com.lue.laoyoutiao.view.ReplyviewOnItemClickManager;
+import com.lue.laoyoutiao.view.EmojiClickManager;
 
 /**
  * Created by Lue on 2016/5/17.
@@ -70,7 +70,7 @@ public class EmojiFragment extends Fragment
 
         GridView grid = (GridView) view.findViewById(R.id.grid);
         grid.setAdapter(adapter);
-        grid.setOnItemClickListener(ReplyviewOnItemClickManager.getInstance().getOnItemClickListener(0));
+        grid.setOnItemClickListener(EmojiClickManager.getInstance().getOnItemClickListener(0));
         return view;
     }
 }

@@ -7,17 +7,17 @@ import android.widget.EditText;
 /**
  * Created by Lue on 2016/5/16.
  */
-public class ReplyviewOnItemClickManager
+public class EmojiClickManager
 {
 
-    private static ReplyviewOnItemClickManager instance;
+    private static EmojiClickManager instance;
     private EditText mEditText;
 
-    public static ReplyviewOnItemClickManager getInstance()
+    public static EmojiClickManager getInstance()
     {
         if (instance == null)
         {
-            instance = new ReplyviewOnItemClickManager();
+            instance = new EmojiClickManager();
         }
         return instance;
     }
