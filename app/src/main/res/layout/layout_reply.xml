@@ -123,13 +123,13 @@
         tools:layout_height="200dp"
         tools:visibility="visible">
 
-        <com.lue.laoyoutiao.view.SlidingTabLayout
+        <com.lue.laoyoutiao.view.emoji.SlidingTabLayout
             android:id="@+id/sliding_tabs"
             android:layout_width="match_parent"
             android:layout_height="36dp"
             android:layout_alignParentTop="true">
 
-        </com.lue.laoyoutiao.view.SlidingTabLayout>
+        </com.lue.laoyoutiao.view.emoji.SlidingTabLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

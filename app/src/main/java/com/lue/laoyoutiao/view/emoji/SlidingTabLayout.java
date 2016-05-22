@@ -1,4 +1,4 @@
-package com.lue.laoyoutiao.view;
+package com.lue.laoyoutiao.view.emoji;
 
 /**
  * Created by Lue on 2016/5/16.

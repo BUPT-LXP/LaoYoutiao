@@ -46,6 +46,12 @@
             android:label="@string/title_activity_senior_reply"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
+
+        <activity
+            android:name=".activity.ShowImageActivity"
+            android:label="@string/title_activity_senior_reply"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>
