@@ -362,6 +362,9 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             {
                 article = null;
             }
+
+            images_hd.clear();
+
             articleList.clear();
             System.gc();
             finish();
@@ -386,6 +389,15 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         //注册EventBus
         if(!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        //注销EventBus
+        if(EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().unregister(this);
     }
 
 }
