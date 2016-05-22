@@ -303,13 +303,22 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
     }
 
     @Override
-    public void onDestroy()
+    protected void onPause()
     {
-        super.onDestroy();
+        super.onPause();
 
         //注销EventBus
+        //注意此处一定要注销，否则会出现问题，具体内容见 http://bbs.byr.cn/#!article/MobileTerminalAT/30560
         EventBus.getDefault().unregister(this);
     }
 
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
 
+        //注册EventBus
+        if(!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
+    }
 }

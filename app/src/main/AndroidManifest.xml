@@ -36,8 +36,21 @@
             android:name=".activity.BoardArticleListActivity"
             android:label="@string/title_activity_board_article_list">
         </activity>
-        <activity android:name=".activity.ReadArticleActivity"
-                  android:label="@string/read_article">
+        <activity
+            android:name=".activity.ReadArticleActivity"
+            android:label="@string/read_article"
+            android:launchMode="standard" >
+        </activity>
+        <activity
+            android:name=".activity.SeniorReplyActivity"
+            android:label="@string/title_activity_senior_reply"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
+
+        <activity
+            android:name=".activity.ShowImageActivity"
+            android:label="@string/title_activity_senior_reply"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

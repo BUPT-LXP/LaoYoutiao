@@ -41,8 +41,9 @@ public class ArticleView extends LinearLayout implements View.OnClickListener
         textview_post_app = (TextView)view.findViewById(R.id.textview_article_post_app);
 
         imageview_face.setOnClickListener(this);
-        textview_content.setOnClickListener(this);
-//        textview_post_app.setOnClickListener(this);
+//        textview_content.setTextIsSelectable(true);
+//        textview_content.setFocusable(true);
+//        textview_content.setFocusableInTouchMode(true);
     }
 
     public ArticleView(Context context, AttributeSet attrs)
@@ -61,8 +62,12 @@ public class ArticleView extends LinearLayout implements View.OnClickListener
         textview_post_app = (TextView)view.findViewById(R.id.textview_article_post_app);
 
         imageview_face.setOnClickListener(this);
-        textview_content.setOnClickListener(this);
-//        textview_post_app.setOnClickListener(this);
+
+        //下面代码无效，网上找了说textview在listview中显示确实有问题，所以就先搁置，以后再弄吧。。
+
+//        textview_content.setTextIsSelectable(true);
+//        textview_content.setFocusable(true);
+//        textview_content.setFocusableInTouchMode(true);
     }
 
     public ArticleView(Context context, AttributeSet attrs, int defStyleAttr)
@@ -80,12 +85,12 @@ public class ArticleView extends LinearLayout implements View.OnClickListener
             case R.id.imageview_user_face:
                 Toast.makeText(context, "点击头像", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.textview_article_content:
-                Toast.makeText(context, "点击内容", Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.textview_article_post_app:
-                Toast.makeText(context, "点击APP", Toast.LENGTH_SHORT).show();
-                break;
+//            case R.id.textview_article_content:
+//                Toast.makeText(context, "点击内容", Toast.LENGTH_SHORT).show();
+//                break;
+//            case R.id.textview_article_post_app:
+//                Toast.makeText(context, "点击APP", Toast.LENGTH_SHORT).show();
+//                break;
             default:
                 break;
         }

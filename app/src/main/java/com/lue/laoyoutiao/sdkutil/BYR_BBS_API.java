@@ -30,10 +30,13 @@ import com.lue.laoyoutiao.metadata.Attachment;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
-import com.lue.laoyoutiao.view.CenteredImageSpan;
-import com.lue.laoyoutiao.view.GifCallback;
+import com.lue.laoyoutiao.view.span.CenteredImageSpan;
+import com.lue.laoyoutiao.view.span.ClickableTextSpan;
+import com.lue.laoyoutiao.view.span.GifCallback;
 import com.squareup.okhttp.Response;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,8 +64,8 @@ public class BYR_BBS_API
     private static final String host = "http://api.byr.cn";
 
     //返回格式以及appkey
-    private static final String returnFormat = ".json?";
-    private static final String appkey = "&appkey=" + "7a282a1a9de5b450";
+    public static final String returnFormat = ".json?";
+    public static final String appkey = "&appkey=" + "7a282a1a9de5b450";
 
     //由用户名及密码组成的认证信息
     private static String auth;
@@ -227,6 +230,38 @@ public class BYR_BBS_API
         result = host + result + returnFormat + string_params + appkey;
 
         return result;
+    }
+
+
+    /**
+     * 保存图片到本地
+     * @param image_name 图片名称，一般以图片的url代替
+     * @param bitmap 图片
+     * @return 成功则返回true，否则返回false
+     */
+    public static boolean saveImage(String image_name, Bitmap bitmap)
+    {
+        //创建本地储存文件夹及对应文件
+        String root_dic = LOCAL_FILEPATH;
+        File dirFile = new File(root_dic + IMAGES_SAVED);
+        if (!dirFile.exists())
+            dirFile.mkdirs();
+        File file = new File(dirFile + image_name);
+
+        try
+        {
+            //将bitmap保存到本地文件中
+            FileOutputStream fout = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fout);
+            fout.flush();
+            fout.close();
+            return true;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
@@ -467,7 +502,26 @@ public class BYR_BBS_API
         {
             int index = article_content.indexOf(my_reference);
             my_reference = article_content.substring(index);
+
             my_content = article_content.substring(0, index);
+
+            //此处是为了辨别引用处于回复上面的一些情况
+            //例如测试区的 "\n: 嘿嘿嘿\n: 哈哈哈\n: 哼哼哼\n下面下面下面"
+            // 其实"下面下面下面"是回复内容, "\n: 嘿嘿嘿\n: 哈哈哈\n: 哼哼哼"是引用内容
+            int index1 = my_reference.lastIndexOf("\n:");
+            String s1 = my_reference.substring(index1 + 2);
+            // s1:哼哼哼\n下面下面下面
+            int index2 = s1.indexOf("\n");
+            if(index2 != -1)
+            {
+                //在后面找到了换行符，表明此时回复内容在引用下面，是不正常的，需要调整
+                if(my_content.equals("\n"))
+                    my_content = s1.substring(index2+1);
+                else
+                    my_content = my_content + s1.substring(index2+1);
+                my_reference = my_reference.replace(my_content, "");
+            }
+
         }
 
         //返回结果
@@ -500,7 +554,6 @@ public class BYR_BBS_API
 //        //取消字号
 //        my_content = my_content.replaceAll("\\[size=[^\\]]*?\\][\\s\\S]*?", "");
 //        my_content = my_content.replaceAll("\\[/size\\]", "");
-
 
         array[0] = my_content;
         array[1] = my_reference;
@@ -541,9 +594,6 @@ public class BYR_BBS_API
                 spannableString.delete(matcher.end()-7 - bold_num*7, matcher.end()-3 - bold_num*7);
                 spannableString.setSpan(new StyleSpan(Typeface.BOLD), matcher.start() - bold_num*7, matcher.end()-7 - bold_num*7,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                ForegroundColorSpan span = new ForegroundColorSpan(Color.parseColor("#DC143C"));
-//                spannableString.setSpan(span, matcher.start() - bold_num*7, matcher.end()-7 - bold_num*7,
-//                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 bold_num ++ ;
             }
         }
@@ -595,6 +645,22 @@ public class BYR_BBS_API
                 size_num ++ ;
             }
         }
+
+        //匹配论坛超链接
+        if(content.contains("http://bbs.byr.cn"))
+        {
+            pattern = Pattern.compile("http://bbs.byr.cn[^\\s]+");
+            matcher = pattern.matcher(spannableString);
+
+            while(matcher.find())
+            {
+                String url = matcher.group();
+                ClickableTextSpan span = new ClickableTextSpan(context, url);
+                spannableString.setSpan(span, matcher.start(), matcher.end(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+        }
+
+
 
 
 
@@ -653,6 +719,7 @@ public class BYR_BBS_API
                 {
                     Attachment.file[] attachmentFiles = attachment.getFiles();
                     List<Bitmap> attachment_images = new ArrayList<>();
+                    List<String> urls = new ArrayList<>();
                     for (Attachment.file attachmentFile : attachmentFiles)
                     {
                         if(attachmentFile.getName().endsWith(".png") || attachmentFile.getName().endsWith(".jpg")
@@ -661,11 +728,12 @@ public class BYR_BBS_API
                             final String img_url = attachmentFile.getThumbnail_middle() + returnFormat + appkey;
                             Bitmap bitmap = attachmentHelper.get_Attachment_Image(img_url);
                             attachment_images.add(bitmap);
+                            urls.add(attachmentFile.getUrl());
                         }
                     }
                     if(attachment_images.size() > 0)
                     {
-                        EventBus.getDefault().post(new Event.Attachment_Images(article_index, attachment_images));
+                        EventBus.getDefault().post(new Event.Attachment_Images(article_index, attachment_images, urls));
                     }
                 }
             }.start();
@@ -680,9 +748,11 @@ public class BYR_BBS_API
      * @param images 图片
      * @return 回复内容
      */
-    public static SpannableStringBuilder Show_Attachments(SpannableStringBuilder content, List<Bitmap> images, int tv_width)
+    public static SpannableStringBuilder Show_Attachments(SpannableStringBuilder content,
+                                                          List<Bitmap> images, int tv_width,
+                                                          List<String> urls, Context context)
     {
-        Context context = ContextApplication.getAppContext();
+//        Context context = ContextApplication.getAppContext();
         Pattern pattern = Pattern.compile("(\\[upload=\\d*\\]\\[/upload\\])");
         Matcher matcher = pattern.matcher(content);
 
@@ -694,7 +764,7 @@ public class BYR_BBS_API
             try
             {
                 CenteredImageSpan imageSpan = new CenteredImageSpan(context, images.get(index),
-                        ImageSpan.ALIGN_BOTTOM, tv_width);
+                        ImageSpan.ALIGN_BOTTOM, tv_width, urls.get(index));
 
                 index ++;
 
@@ -778,7 +848,7 @@ public class BYR_BBS_API
             while(images.size() > index)
             {
                 CenteredImageSpan imageSpan = new CenteredImageSpan(context, images.get(index),
-                        ImageSpan.ALIGN_BASELINE, tv_width);
+                        ImageSpan.ALIGN_BASELINE, tv_width, urls.get(index));
                 //先换行，然后使用一个空格占位，接着使用图片代替刚才占位的空格，然后再换行
                 content.insert(content.length(), "\n ");
                 content.setSpan(imageSpan, content.length()-1, content.length()
