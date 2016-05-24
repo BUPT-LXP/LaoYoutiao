@@ -16,7 +16,6 @@ import android.text.style.ImageSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Base64;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
@@ -30,11 +29,14 @@ import com.lue.laoyoutiao.metadata.Attachment;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
-import com.lue.laoyoutiao.view.CenteredImageSpan;
-import com.lue.laoyoutiao.view.ClickableTextSpan;
-import com.lue.laoyoutiao.view.GifCallback;
+import com.lue.laoyoutiao.view.span.CenteredImageSpan;
+import com.lue.laoyoutiao.view.span.ClickableTextSpan;
+import com.lue.laoyoutiao.view.span.GifCallback;
 import com.squareup.okhttp.Response;
+import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,8 +64,8 @@ public class BYR_BBS_API
     private static final String host = "http://api.byr.cn";
 
     //返回格式以及appkey
-    private static final String returnFormat = ".json?";
-    private static final String appkey = "&appkey=" + "7a282a1a9de5b450";
+    public static final String returnFormat = ".json?";
+    public static final String appkey = "&appkey=" + "7a282a1a9de5b450";
 
     //由用户名及密码组成的认证信息
     private static String auth;
@@ -232,6 +234,38 @@ public class BYR_BBS_API
 
 
     /**
+     * 保存图片到本地
+     * @param image_name 图片名称，一般以图片的url代替
+     * @param bitmap 图片
+     * @return 成功则返回true，否则返回false
+     */
+    public static boolean saveImage(String image_name, Bitmap bitmap)
+    {
+        //创建本地储存文件夹及对应文件
+        String root_dic = LOCAL_FILEPATH;
+        File dirFile = new File(root_dic + IMAGES_SAVED);
+        if (!dirFile.exists())
+            dirFile.mkdirs();
+        File file = new File(dirFile + image_name);
+
+        try
+        {
+            //将bitmap保存到本地文件中
+            FileOutputStream fout = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fout);
+            fout.flush();
+            fout.close();
+            return true;
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    /**
      * 响应 SectionHelper 发布的所有根分区信息
      *
      * @param Root_Sections
@@ -239,7 +273,6 @@ public class BYR_BBS_API
 
     public void onEventBackgroundThread(final Event.All_Root_Sections Root_Sections)
     {
-        Log.d(TAG, "Receive Event All_Root_Sections");
 
         try
         {
@@ -560,9 +593,6 @@ public class BYR_BBS_API
                 spannableString.delete(matcher.end()-7 - bold_num*7, matcher.end()-3 - bold_num*7);
                 spannableString.setSpan(new StyleSpan(Typeface.BOLD), matcher.start() - bold_num*7, matcher.end()-7 - bold_num*7,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                ForegroundColorSpan span = new ForegroundColorSpan(Color.parseColor("#DC143C"));
-//                spannableString.setSpan(span, matcher.start() - bold_num*7, matcher.end()-7 - bold_num*7,
-//                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 bold_num ++ ;
             }
         }
@@ -629,28 +659,34 @@ public class BYR_BBS_API
             }
         }
 
+        //网络图片
+        if(content.contains("[img=") && content.contains("[/img]"))
+        {
+            pattern = Pattern.compile("\\[img=([^\\]]*?)\\]\\[/img\\]");
+            final Matcher m = pattern.matcher(content);
 
+            new Thread()
+            {
+                public void run()
+                {
+                    while (m.find())
+                    {
+                        final String url = m.group(1);
+                        Bitmap bitmap = null;
+                        try
+                        {
+                            bitmap = Picasso.with(context).load(url).get();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        EventBus.getDefault().post(new Event.Bitmap_Outside(article_index, url, bitmap));
+                    }
+                }
+            }.start();
+        }
 
-
-
-//        //文字斜体，发现没有效果，索性去掉吧
-//        if(content.contains("[i]") && content.contains("[/i]"))
-//        {
-//            pattern = Pattern.compile("\\[i\\]([\\s\\S]*?)\\[/i\\]");
-//            matcher = pattern.matcher(spannableString);
-//
-//            int italic_num = 0;
-//            while (matcher.find())
-//            {
-//                spannableString.delete(matcher.start() - italic_num*7, matcher.start()+3 - italic_num*7);
-//                spannableString.delete(matcher.end()-7 - italic_num*7, matcher.end()-3 - italic_num*7);
-////                spannableString.setSpan(new StyleSpan(Typeface.ITALIC), matcher.start(), matcher.end()-7,
-////                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                italic_num ++ ;
-//            }
-//        }
-
-
+        //表情
         if (content.contains("[em"))
         {
             pattern = Pattern.compile("\\[(em[abc]?\\d+)\\]");
@@ -679,6 +715,7 @@ public class BYR_BBS_API
             }
         }
 
+        //包含附件
         if(attachment.getRemain_count() < 20 )
         {
             final AttachmentHelper attachmentHelper = new AttachmentHelper();
@@ -686,9 +723,10 @@ public class BYR_BBS_API
             {
                 public void run()
                 {
-                    Attachment.file[] attachmentFiles = attachment.getFiles();
+                    Attachment._file[] attachmentFiles = attachment.getFile();
                     List<Bitmap> attachment_images = new ArrayList<>();
-                    for (Attachment.file attachmentFile : attachmentFiles)
+                    List<String> urls = new ArrayList<>();
+                    for (Attachment._file attachmentFile : attachmentFiles)
                     {
                         if(attachmentFile.getName().endsWith(".png") || attachmentFile.getName().endsWith(".jpg")
                                 || attachmentFile.getName().endsWith(".gif") || attachmentFile.getName().endsWith(".jpeg"))
@@ -696,11 +734,12 @@ public class BYR_BBS_API
                             final String img_url = attachmentFile.getThumbnail_middle() + returnFormat + appkey;
                             Bitmap bitmap = attachmentHelper.get_Attachment_Image(img_url);
                             attachment_images.add(bitmap);
+                            urls.add(attachmentFile.getUrl());
                         }
                     }
                     if(attachment_images.size() > 0)
                     {
-                        EventBus.getDefault().post(new Event.Attachment_Images(article_index, attachment_images));
+                        EventBus.getDefault().post(new Event.Attachment_Images(article_index, attachment_images, urls));
                     }
                 }
             }.start();
@@ -709,16 +748,48 @@ public class BYR_BBS_API
         return spannableString;
     }
 
+
+    /**
+     * 展示回复内容中的[img=************][/img]标签
+     * @param content 内容
+     * @param bitmap 图片
+     * @param tv_width textview宽度
+     * @param url 链接
+     * @param context context
+     * @return 设置了span的内容
+     */
+    public static SpannableStringBuilder Show_Outside_Images(SpannableStringBuilder content,
+                                                             Bitmap bitmap, int tv_width,
+                                                             String url, Context context)
+    {
+        String str = content.toString();
+        int index = str.indexOf(url);
+        int start = index - 5;
+        int end = index + url.length() + 7;
+
+        CenteredImageSpan imageSpan = new CenteredImageSpan(context, bitmap,
+                ImageSpan.ALIGN_BOTTOM, tv_width, url);
+
+        content.setSpan(imageSpan, start, end
+                , Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        return content;
+    }
+
+
+
     /**
      * 将附件图片通过 SpannableStringBuilder 显示
      * @param content 回复内容
      * @param images 图片
      * @return 回复内容
      */
-    public static SpannableStringBuilder Show_Attachments(SpannableStringBuilder content, List<Bitmap> images, int tv_width)
+    public static SpannableStringBuilder Show_Attachments(SpannableStringBuilder content,
+                                                          List<Bitmap> images, int tv_width,
+                                                          List<String> urls, Context context)
     {
-        Context context = ContextApplication.getAppContext();
-        Pattern pattern = Pattern.compile("(\\[upload=\\d*\\]\\[/upload\\])");
+//        Context context = ContextApplication.getAppContext();
+        Pattern pattern = Pattern.compile("(\\[upload=(\\d*)\\]\\[/upload\\])");
         Matcher matcher = pattern.matcher(content);
 
         int index = 0;
@@ -728,8 +799,10 @@ public class BYR_BBS_API
         {
             try
             {
-                CenteredImageSpan imageSpan = new CenteredImageSpan(context, images.get(index),
-                        ImageSpan.ALIGN_BOTTOM, tv_width);
+                String upload_index_str = matcher.group(2);
+                int upload_index_int = Integer.parseInt(upload_index_str);
+                CenteredImageSpan imageSpan = new CenteredImageSpan(context, images.get(upload_index_int-1),
+                        ImageSpan.ALIGN_BOTTOM, tv_width, urls.get(upload_index_int-1));
 
                 index ++;
 
@@ -813,7 +886,7 @@ public class BYR_BBS_API
             while(images.size() > index)
             {
                 CenteredImageSpan imageSpan = new CenteredImageSpan(context, images.get(index),
-                        ImageSpan.ALIGN_BASELINE, tv_width);
+                        ImageSpan.ALIGN_BASELINE, tv_width, urls.get(index));
                 //先换行，然后使用一个空格占位，接着使用图片代替刚才占位的空格，然后再换行
                 content.insert(content.length(), "\n ");
                 content.setSpan(imageSpan, content.length()-1, content.length()

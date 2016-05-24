@@ -39,13 +39,13 @@
         <activity
             android:name=".activity.ReadArticleActivity"
             android:label="@string/read_article"
-            android:launchMode="standard" >
+            android:launchMode="standard">
         </activity>
         <activity
             android:name=".activity.SeniorReplyActivity"
-            android:label="@string/title_activity_senior_reply"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:label="@string/title_activity_senior_reply">
         </activity>
+
     </application>
 
 </manifest>

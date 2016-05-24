@@ -11,7 +11,7 @@ import android.widget.GridView;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.adapter.EmojiGridviewAdapter;
-import com.lue.laoyoutiao.view.EmojiClickManager;
+import com.lue.laoyoutiao.view.emoji.EmojiClickManager;
 
 /**
  * Created by Lue on 2016/5/17.
@@ -23,7 +23,7 @@ public class EmojiFragment extends Fragment
     //表情类别，0代表普通，1代表悠嘻猴，2代表兔斯基，3代表洋葱头
     private int emoji_category;
 
-    public static final EmojiFragment getInstance(int emoji_num, int emoji_category)
+    public static EmojiFragment getInstance(int emoji_num, int emoji_category)
     {
         EmojiFragment fragment = new EmojiFragment();
         Bundle bundle = new Bundle();

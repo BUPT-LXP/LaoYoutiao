@@ -1,4 +1,4 @@
-package com.lue.laoyoutiao.view;
+package com.lue.laoyoutiao.view.emoji;
 
 import android.content.Context;
 import android.graphics.Canvas;

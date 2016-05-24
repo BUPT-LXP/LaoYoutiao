@@ -1,4 +1,4 @@
-package com.lue.laoyoutiao.view;
+package com.lue.laoyoutiao.view.span;
 
 import android.content.Context;
 import android.content.Intent;
@@ -11,8 +11,11 @@ import android.widget.Toast;
 
 import com.lue.laoyoutiao.activity.BoardArticleListActivity;
 import com.lue.laoyoutiao.activity.ReadArticleActivity;
+import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
+
+import de.greenrobot.event.EventBus;
 
 /**
  * Created by Lue on 2016/5/17.
@@ -48,7 +51,7 @@ public class ClickableTextSpan extends ClickableSpan
             {
                 int index1 = text.lastIndexOf("/");
                 String id = text.substring(index1+1);
-                int article_id = -1;
+                int article_id;
                 try
                 {
                     article_id = Integer.parseInt(id);
@@ -57,11 +60,12 @@ public class ClickableTextSpan extends ClickableSpan
                     Toast.makeText(context, "Oops, 网址格式有错误！",Toast.LENGTH_SHORT).show();
                     return;
                 }
+                //通知原Activity，现在将要开启一个新的Activity，原来的需要注销EventBus
+                EventBus.getDefault().post(new Event.Start_New());
 
                 text = text.substring(0, index1);
                 int index2 = text.lastIndexOf("/");
                 String board_name = text.substring(index2+1);
-
 
                 ArticleHelper helper = new ArticleHelper();
                 helper.getThreadsInfo(board_name, article_id, 1);
@@ -86,6 +90,9 @@ public class ClickableTextSpan extends ClickableSpan
 
                 if(!board_description.equals("null"))
                 {
+                    //通知原Activity，现在将要开启一个新的Activity，原来的需要注销EventBus
+                    EventBus.getDefault().post(new Event.Start_New());
+
                     Intent intent = new Intent(context, BoardArticleListActivity.class);
                     intent.putExtra("Board_Description", board_description);
                     boolean is_favorite = !(BYR_BBS_API.Favorite_Boards.get(board_description) == null);
@@ -96,7 +103,6 @@ public class ClickableTextSpan extends ClickableSpan
                 else
                 {
                     Toast.makeText(context, "Oops, 网址格式有错误！",Toast.LENGTH_SHORT).show();
-                    return;
                 }
             }
         }

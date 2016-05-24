@@ -218,7 +218,6 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
 
     }
 
-
     /**
      * 为Action Button 添加响应事件
      * @param item

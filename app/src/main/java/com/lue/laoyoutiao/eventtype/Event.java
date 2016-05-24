@@ -174,21 +174,97 @@ public class Event
         }
     }
 
-
+    /**
+     * 附件中的图片信息，图片大小：中等
+     */
     public static class Attachment_Images
     {
         private int article_index;
         private List<Bitmap> images = new ArrayList<>();
+        private List<String> urls = new ArrayList<>();
 
-        public Attachment_Images(int article_index, List<Bitmap> images)
+        public Attachment_Images(int article_index, List<Bitmap> images, List<String> urls)
         {
             this.article_index = article_index;
             this.images = images;
+            this.urls = urls;
         }
 
         public List<Bitmap> getImages()
         {
             return images;
+        }
+
+        public int getArticle_index()
+        {
+            return article_index;
+        }
+
+        public List<String> getUrls()
+        {
+            return urls;
+        }
+    }
+
+    /**
+     * 当使用本app打开新的链接时，通知其他的activity停止订阅EventBus
+     */
+    public static class Start_New
+    {
+        public Start_New() {}
+    }
+
+    /**
+     * 附件及站外大图
+     */
+    public static class Bitmap_HD
+    {
+        private String url;
+        private Bitmap image_hd;
+
+        public Bitmap_HD(String url, Bitmap image_hd)
+        {
+            this.url = url;
+            this.image_hd = image_hd;
+        }
+
+
+        public String getUrl()
+        {
+            return url;
+        }
+
+        public Bitmap getImage_hd()
+        {
+            return image_hd;
+        }
+
+    }
+
+    /**
+     * 站外图片
+     */
+    public static class Bitmap_Outside
+    {
+        private int article_index;
+        private String url;
+        private Bitmap image_hd;
+
+        public Bitmap_Outside(int article_index, String url, Bitmap image_hd)
+        {
+            this.article_index = article_index;
+            this.url = url;
+            this.image_hd = image_hd;
+        }
+
+        public String getUrl()
+        {
+            return url;
+        }
+
+        public Bitmap getImage_hd()
+        {
+            return image_hd;
         }
 
         public int getArticle_index()

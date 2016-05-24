@@ -1,4 +1,4 @@
-package com.lue.laoyoutiao.view;
+package com.lue.laoyoutiao.view.span;
 
 import android.graphics.drawable.Drawable;
 import android.widget.TextView;

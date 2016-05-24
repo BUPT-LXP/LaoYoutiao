@@ -49,7 +49,6 @@ public class ArticleHelper
                 {
                     Response response = okHttpHelper.getExecute(url);
                     String response_result = response.body().string();
-                    response_result = response_result.replaceAll("file", "files");
                     JSONObject jsonObject = JSON.parseObject(response_result);
                     response_result = jsonObject.getString("article");
                     List<Article> articles = new Gson().fromJson(response_result, new TypeToken<List<Article>>() {}.getType());

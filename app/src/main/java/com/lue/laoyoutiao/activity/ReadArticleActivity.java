@@ -13,7 +13,6 @@ import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -27,11 +26,13 @@ import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ArticleView;
-import com.lue.laoyoutiao.view.EmojiClickManager;
-import com.lue.laoyoutiao.view.EmotionInputDetector;
-import com.lue.laoyoutiao.view.SlidingTabLayout;
+import com.lue.laoyoutiao.view.emoji.EmojiClickManager;
+import com.lue.laoyoutiao.view.emoji.EmotionInputDetector;
+import com.lue.laoyoutiao.view.emoji.SlidingTabLayout;
+import com.lue.laoyoutiao.view.span.ClickableMovementMethod;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
@@ -50,14 +51,12 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     private View view_mainpost;
     private View post_devider;
     private ArticleView main_post;
-    private LinearLayout main_devider;
     private LayoutInflater inflater;
     //显示正在加载的对话框
     private LoadingDialog loading_dialog;
     private ActionBar actionBar;
 
     private String board_name;
-    private Article main_article;
     private SpannableStringBuilder ssb_content;
     private int article_id;
     private List<Article> articleList = new ArrayList<>();
@@ -67,6 +66,8 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     private List<Bitmap> user_faces = new ArrayList<>();
     ArticleHelper articleHelperhelper = null;
     private ReadArticleAdapter adapter = null;
+
+    public Hashtable<String, Bitmap> images_hd = new Hashtable<>();
 
     //表情界面
     private EmotionInputDetector emotionInputDetector;
@@ -105,7 +106,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
 
 
         main_post = (ArticleView)view_mainpost.findViewById(R.id.articleview_read_article) ;
-        main_devider = (LinearLayout)post_devider.findViewById(R.id.linearlayout);
 
         loading_dialog = new LoadingDialog(this);
         loading_dialog.show();
@@ -168,8 +168,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 user_faces.add(articles_info.getUser_faces().get(i));
             }
 
-            main_article = articleList.get(0);
-
             //如果按照下面这种方式的话，会造成 notifyDataSetChanged 不刷新
             // 因为这样使 articleList指向了另外一个对象，原来的对象并没有改变。
 //            articleList = articles_info.getArticles();
@@ -189,7 +187,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             ssb_content = BYR_BBS_API.ParseContent(-1, content[0],
                     main_post.textview_content, articleList.get(0).getAttachment());
             main_post.textview_content.setText(ssb_content);
-            main_post.textview_content.setMovementMethod(LinkMovementMethod.getInstance());
+            main_post.textview_content.setMovementMethod(ClickableMovementMethod.getInstance());
 
             if(content[2] != null)
             {
@@ -251,14 +249,53 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
      * 需要注意的是，此处只需要响应一次（主贴），后续发布的在Adapter中响应(暂时无法实现)
      * @param attachment_images 图片附件
      */
-
     public void onEventMainThread(final Event.Attachment_Images attachment_images)
     {
         int article_index = attachment_images.getArticle_index();
         if(-1 == article_index)
         {
             ssb_content = BYR_BBS_API.Show_Attachments(ssb_content, attachment_images.getImages(),
-                    main_post.textview_content.getWidth());
+                    main_post.textview_content.getWidth(), attachment_images.getUrls(), this);
+            main_post.textview_content.setText(ssb_content);
+        }
+    }
+
+    /**
+     *当点击了指向本站的链接时，开启一个新的Activity，此时需要注销当前Activity的EventBus
+     * @param start_new 标志
+     */
+    public void onEventBackgroundThread(final Event.Start_New start_new)
+    {
+        if(EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().unregister(this);
+    }
+
+    /**
+     * 接收附件高清大图
+     * @param bitmap_hd 图片信息
+     */
+    public void onEventBackgroundThread(final Event.Bitmap_HD bitmap_hd)
+    {
+        String url = bitmap_hd.getUrl();
+        Bitmap image = bitmap_hd.getImage_hd();
+
+        images_hd.put(url, image);
+    }
+
+    /**
+     * 接收站外高清大图
+     * @param bitmap_outside 图片信息
+     */
+    public void onEventMainThread(final Event.Bitmap_Outside bitmap_outside)
+    {
+        String url = bitmap_outside.getUrl();
+        Bitmap image = bitmap_outside.getImage_hd();
+        images_hd.put(url, image);
+
+        if(bitmap_outside.getArticle_index() == -1)
+        {
+            ssb_content = BYR_BBS_API.Show_Outside_Images(ssb_content, image,
+                    main_post.textview_content.getWidth(), url, this);
             main_post.textview_content.setText(ssb_content);
         }
     }
@@ -350,21 +387,15 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             {
                 article = null;
             }
+
+            images_hd.clear();
+
             articleList.clear();
             System.gc();
             finish();
         }
     }
 
-    @Override
-    protected void onPause()
-    {
-        super.onPause();
-
-        //注销EventBus
-        //注意此处一定要注销，否则会出现问题，具体内容见 http://bbs.byr.cn/#!article/MobileTerminalAT/30560
-        EventBus.getDefault().unregister(this);
-    }
 
     @Override
     protected void onResume()
@@ -374,6 +405,15 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         //注册EventBus
         if(!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        //注销EventBus
+        if(EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().unregister(this);
     }
 
 }

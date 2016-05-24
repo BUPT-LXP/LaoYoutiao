@@ -10,7 +10,7 @@ import android.os.Parcelable;
 public class Attachment implements Parcelable
 {
     // 文件列表
-    private file[] files = null;
+    private _file[] file = null;
     // 剩余空间大小
     private String remain_space = null;
     // 剩余附件个数
@@ -27,14 +27,14 @@ public class Attachment implements Parcelable
     @Override
     public void writeToParcel(Parcel dest, int flags)
     {
-        dest.writeArray(files);
+        dest.writeArray(file);
         dest.writeString(remain_space);
         dest.writeInt(remain_count);
     }
 
     protected Attachment(Parcel in)
     {
-        files = in.createTypedArray(file.CREATOR);
+        file = in.createTypedArray(_file.CREATOR);
         remain_space = in.readString();
         remain_count = in.readInt();
     }
@@ -54,13 +54,13 @@ public class Attachment implements Parcelable
         }
     };
 
-    public file[] getFiles()
+    public _file[] getFile()
     {
-        return files;
+        return file;
     }
-    public void setFiles(file[] files)
+    public void setFile(_file[] file)
     {
-        this.files = files;
+        this.file = file;
     }
 
     public String getRemain_space()
@@ -82,7 +82,7 @@ public class Attachment implements Parcelable
     }
 
 
-    public static class file implements Parcelable
+    public static class _file implements Parcelable
     {
         // 文件名
         String name = null;
@@ -109,7 +109,7 @@ public class Attachment implements Parcelable
             dest.writeString(thumbnail_middle);
         }
 
-        protected file(Parcel in)
+        protected _file(Parcel in)
         {
             name = in.readString();
             url = in.readString();
@@ -118,18 +118,18 @@ public class Attachment implements Parcelable
             thumbnail_middle = in.readString();
         }
 
-        public static final Creator<file> CREATOR = new Creator<file>()
+        public static final Creator<_file> CREATOR = new Creator<_file>()
         {
             @Override
-            public file createFromParcel(Parcel in)
+            public _file createFromParcel(Parcel in)
             {
-                return new file(in);
+                return new _file(in);
             }
 
             @Override
-            public file[] newArray(int size)
+            public _file[] newArray(int size)
             {
-                return new file[size];
+                return new _file[size];
             }
         };
 

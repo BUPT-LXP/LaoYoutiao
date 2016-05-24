@@ -17,6 +17,7 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ArticleView;
+import com.lue.laoyoutiao.view.span.ClickableMovementMethod;
 
 import java.util.List;
 
@@ -110,12 +111,12 @@ public class ReadArticleAdapter extends BaseAdapter
                     viewHolder.textview_content, article.getAttachment());
             article.setSsb_content(ssb);
             viewHolder.textview_content.setText(ssb);
-            viewHolder.textview_content.setMovementMethod(LinkMovementMethod.getInstance());
+            viewHolder.textview_content.setMovementMethod(ClickableMovementMethod.getInstance());
         }
         else
         {
             viewHolder.textview_content.setText(article.getSsb_content());
-            viewHolder.textview_content.setMovementMethod(LinkMovementMethod.getInstance());
+            viewHolder.textview_content.setMovementMethod(ClickableMovementMethod.getInstance());
         }
 
         if (article.getStr_reference() != null)
@@ -162,7 +163,39 @@ public class ReadArticleAdapter extends BaseAdapter
             {
                 TextView textview_content = (TextView) view.findViewById(R.id.textview_article_content);
                 SpannableStringBuilder ssb = BYR_BBS_API.Show_Attachments(reply_articles.get(article_index).getSsb_content(),
-                        attachment_images.getImages(), textview_content.getWidth());
+                        attachment_images.getImages(), textview_content.getWidth(), attachment_images.getUrls(), context);
+                reply_articles.get(article_index).setSsb_content(ssb);
+                textview_content.setText(ssb);
+            }
+            catch (NullPointerException | IndexOutOfBoundsException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 接收站外高清大图
+     * @param bitmap_outside 图片信息
+     */
+    public void onEventMainThread(final Event.Bitmap_Outside bitmap_outside)
+    {
+        int article_index = bitmap_outside.getArticle_index();
+        if(article_index >= 0)
+        {
+            int child_index = article_index - listview.getFirstVisiblePosition() + listview.getHeaderViewsCount();
+            View view = listview.getChildAt(child_index);
+
+            try
+            {
+                TextView textview_content = (TextView) view.findViewById(R.id.textview_article_content);
+
+                String url = bitmap_outside.getUrl();
+                Bitmap image = bitmap_outside.getImage_hd();
+
+
+                SpannableStringBuilder ssb  = BYR_BBS_API.Show_Outside_Images(reply_articles.get(article_index).getSsb_content()
+                        , image, textview_content.getWidth(), url, context);
                 reply_articles.get(article_index).setSsb_content(ssb);
                 textview_content.setText(ssb);
             }

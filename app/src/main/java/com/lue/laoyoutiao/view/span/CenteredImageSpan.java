@@ -1,4 +1,4 @@
-package com.lue.laoyoutiao.view;
+package com.lue.laoyoutiao.view.span;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -6,19 +6,30 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.text.SpannableString;
 import android.text.style.ImageSpan;
+import android.view.View;
+import android.widget.TextView;
+
+import com.lue.laoyoutiao.R;
+import com.lue.laoyoutiao.activity.ReadArticleActivity;
+import com.lue.laoyoutiao.dialog.ShowImageDialog;
 
 /**
  * Created by Lue on 2016/5/13.
  */
-public class CenteredImageSpan extends ImageSpan
+public class CenteredImageSpan extends ImageSpan implements View.OnClickListener
 {
+    private ReadArticleActivity context;
     private int tv_width;
+    private String url;
 
-    public CenteredImageSpan(Context context, Bitmap b, int verticalAlignment, int tv_width)
+    public CenteredImageSpan(Context context, Bitmap b, int verticalAlignment, int tv_width, String url)
     {
         super(context, b, verticalAlignment);
         this.tv_width = tv_width;
+        this.url = url;
+        this.context = (ReadArticleActivity) context;
     }
 
     public int getSize(Paint paint, CharSequence text, int start, int end,
@@ -57,4 +68,34 @@ public class CenteredImageSpan extends ImageSpan
         b.draw(canvas);
         canvas.restore();
     }
+
+    @Override
+    public void onClick(View v)
+    {
+
+        int id = v.getId();
+        if(id == R.id.textview_article_content)
+        {
+            TextView textView = (TextView)v;
+            CharSequence charSequence = textView.getText();
+            SpannableString spannableString = new SpannableString(charSequence);
+            CenteredImageSpan[] spans = spannableString.getSpans(0, spannableString.length(), CenteredImageSpan.class);
+
+            String[] urls = new String[spans.length];
+
+            int index = 0;
+            for(int i=0; i<spans.length; i++)
+            {
+                urls[i] = spans[i].url;
+                if(url.equals(spans[i].url))
+                {
+                    index = i;
+                }
+            }
+
+            ShowImageDialog dialog = ShowImageDialog.getInstance(urls, index);
+            dialog.show(context.getFragmentManager(), "");
+        }
+    }
+
 }
