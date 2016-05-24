@@ -20,4 +20,7 @@
     <dimen name="article_content_textpadding_top">8sp</dimen>
     <dimen name="tab_height">40dp</dimen>
 
+    <dimen name="bar_text_size">16dp</dimen>
+    <dimen name="bar_height">40dp</dimen>
+
 </resources>

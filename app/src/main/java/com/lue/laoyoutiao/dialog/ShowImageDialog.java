@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
@@ -24,6 +23,7 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.AttachmentHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
+import com.lue.laoyoutiao.view.ZoomImageView;
 
 import de.greenrobot.event.EventBus;
 
@@ -35,7 +35,7 @@ public class ShowImageDialog extends DialogFragment
     private Context context;
     private ViewPager viewpager;
     private TextView textview;
-    private ImageView[] pageview;
+    private ZoomImageView[] pageview;
     private int currentitem = 0;
     private int totalitem = 0;
     private Bitmap[] images;
@@ -55,6 +55,7 @@ public class ShowImageDialog extends DialogFragment
                 pageview[currentitem].setImageBitmap(images[currentitem]);
                 adapter.notifyDataSetChanged();
             }
+//            pageview[currentitem].setImage(images[currentitem]);
             viewpager.setCurrentItem(currentitem);
 
             AlphaAnimation aAnima = new AlphaAnimation(1.0f, 0.0f);//从全不透明变为全透明
@@ -120,14 +121,14 @@ public class ShowImageDialog extends DialogFragment
             //缓存
             cache = ACache.get(context);
 
-            pageview = new ImageView[totalitem];
+            pageview = new ZoomImageView[totalitem];
             images = new Bitmap[totalitem];
 
             ReadArticleActivity activity = (ReadArticleActivity) this.getActivity();
 
             for (int i = 0; i < totalitem; i++)
             {
-                ImageView imageView = new ImageView(context);
+                ZoomImageView imageView = new ZoomImageView(context);
                 pageview[i] = imageView;
                 images[i] = activity.images_hd.get(urls[i]);
             }
@@ -188,6 +189,7 @@ public class ShowImageDialog extends DialogFragment
                 pageview[currentitem].setImageBitmap(images[currentitem]);
                 adapter.notifyDataSetChanged();
             }
+//            pageview[currentitem].setImage(images[currentitem]);
             viewpager.setCurrentItem(currentitem);
 
             AlphaAnimation aAnima = new AlphaAnimation(1.0f, 0.0f);//从全不透明变为全透明
@@ -234,13 +236,14 @@ public class ShowImageDialog extends DialogFragment
         public Object instantiateItem(ViewGroup container, int position)
         {
             container.addView(pageview[position]);
-            return position;
+            return pageview[position];
         }
 
         @Override
         public boolean isViewFromObject(View view, Object object)
         {
-            return view == pageview[Integer.parseInt(object.toString())];
+//            return view == pageview[Integer.parseInt(object.toString())];
+            return view == object;
         }
 
         @Override
