@@ -16,7 +16,6 @@ import android.text.style.ImageSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
 import android.util.Base64;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
@@ -34,6 +33,7 @@ import com.lue.laoyoutiao.view.span.CenteredImageSpan;
 import com.lue.laoyoutiao.view.span.ClickableTextSpan;
 import com.lue.laoyoutiao.view.span.GifCallback;
 import com.squareup.okhttp.Response;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -273,7 +273,6 @@ public class BYR_BBS_API
 
     public void onEventBackgroundThread(final Event.All_Root_Sections Root_Sections)
     {
-        Log.d(TAG, "Receive Event All_Root_Sections");
 
         try
         {
@@ -660,28 +659,34 @@ public class BYR_BBS_API
             }
         }
 
+        //网络图片
+        if(content.contains("[img=") && content.contains("[/img]"))
+        {
+            pattern = Pattern.compile("\\[img=([^\\]]*?)\\]\\[/img\\]");
+            final Matcher m = pattern.matcher(content);
 
+            new Thread()
+            {
+                public void run()
+                {
+                    while (m.find())
+                    {
+                        final String url = m.group(1);
+                        Bitmap bitmap = null;
+                        try
+                        {
+                            bitmap = Picasso.with(context).load(url).get();
+                        } catch (IOException e)
+                        {
+                            e.printStackTrace();
+                        }
+                        EventBus.getDefault().post(new Event.Bitmap_Outside(article_index, url, bitmap));
+                    }
+                }
+            }.start();
+        }
 
-
-
-//        //文字斜体，发现没有效果，索性去掉吧
-//        if(content.contains("[i]") && content.contains("[/i]"))
-//        {
-//            pattern = Pattern.compile("\\[i\\]([\\s\\S]*?)\\[/i\\]");
-//            matcher = pattern.matcher(spannableString);
-//
-//            int italic_num = 0;
-//            while (matcher.find())
-//            {
-//                spannableString.delete(matcher.start() - italic_num*7, matcher.start()+3 - italic_num*7);
-//                spannableString.delete(matcher.end()-7 - italic_num*7, matcher.end()-3 - italic_num*7);
-////                spannableString.setSpan(new StyleSpan(Typeface.ITALIC), matcher.start(), matcher.end()-7,
-////                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//                italic_num ++ ;
-//            }
-//        }
-
-
+        //表情
         if (content.contains("[em"))
         {
             pattern = Pattern.compile("\\[(em[abc]?\\d+)\\]");
@@ -710,6 +715,7 @@ public class BYR_BBS_API
             }
         }
 
+        //包含附件
         if(attachment.getRemain_count() < 20 )
         {
             final AttachmentHelper attachmentHelper = new AttachmentHelper();
@@ -717,10 +723,10 @@ public class BYR_BBS_API
             {
                 public void run()
                 {
-                    Attachment.file[] attachmentFiles = attachment.getFiles();
+                    Attachment._file[] attachmentFiles = attachment.getFile();
                     List<Bitmap> attachment_images = new ArrayList<>();
                     List<String> urls = new ArrayList<>();
-                    for (Attachment.file attachmentFile : attachmentFiles)
+                    for (Attachment._file attachmentFile : attachmentFiles)
                     {
                         if(attachmentFile.getName().endsWith(".png") || attachmentFile.getName().endsWith(".jpg")
                                 || attachmentFile.getName().endsWith(".gif") || attachmentFile.getName().endsWith(".jpeg"))
@@ -742,6 +748,36 @@ public class BYR_BBS_API
         return spannableString;
     }
 
+
+    /**
+     * 展示回复内容中的[img=************][/img]标签
+     * @param content 内容
+     * @param bitmap 图片
+     * @param tv_width textview宽度
+     * @param url 链接
+     * @param context context
+     * @return 设置了span的内容
+     */
+    public static SpannableStringBuilder Show_Outside_Images(SpannableStringBuilder content,
+                                                             Bitmap bitmap, int tv_width,
+                                                             String url, Context context)
+    {
+        String str = content.toString();
+        int index = str.indexOf(url);
+        int start = index - 5;
+        int end = index + url.length() + 7;
+
+        CenteredImageSpan imageSpan = new CenteredImageSpan(context, bitmap,
+                ImageSpan.ALIGN_BOTTOM, tv_width, url);
+
+        content.setSpan(imageSpan, start, end
+                , Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        return content;
+    }
+
+
+
     /**
      * 将附件图片通过 SpannableStringBuilder 显示
      * @param content 回复内容
@@ -753,7 +789,7 @@ public class BYR_BBS_API
                                                           List<String> urls, Context context)
     {
 //        Context context = ContextApplication.getAppContext();
-        Pattern pattern = Pattern.compile("(\\[upload=\\d*\\]\\[/upload\\])");
+        Pattern pattern = Pattern.compile("(\\[upload=(\\d*)\\]\\[/upload\\])");
         Matcher matcher = pattern.matcher(content);
 
         int index = 0;
@@ -763,8 +799,10 @@ public class BYR_BBS_API
         {
             try
             {
-                CenteredImageSpan imageSpan = new CenteredImageSpan(context, images.get(index),
-                        ImageSpan.ALIGN_BOTTOM, tv_width, urls.get(index));
+                String upload_index_str = matcher.group(2);
+                int upload_index_int = Integer.parseInt(upload_index_str);
+                CenteredImageSpan imageSpan = new CenteredImageSpan(context, images.get(upload_index_int-1),
+                        ImageSpan.ALIGN_BOTTOM, tv_width, urls.get(upload_index_int-1));
 
                 index ++;
 

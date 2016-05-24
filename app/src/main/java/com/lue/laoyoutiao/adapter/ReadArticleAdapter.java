@@ -173,4 +173,36 @@ public class ReadArticleAdapter extends BaseAdapter
             }
         }
     }
+
+    /**
+     * 接收站外高清大图
+     * @param bitmap_outside 图片信息
+     */
+    public void onEventMainThread(final Event.Bitmap_Outside bitmap_outside)
+    {
+        int article_index = bitmap_outside.getArticle_index();
+        if(article_index >= 0)
+        {
+            int child_index = article_index - listview.getFirstVisiblePosition() + listview.getHeaderViewsCount();
+            View view = listview.getChildAt(child_index);
+
+            try
+            {
+                TextView textview_content = (TextView) view.findViewById(R.id.textview_article_content);
+
+                String url = bitmap_outside.getUrl();
+                Bitmap image = bitmap_outside.getImage_hd();
+
+
+                SpannableStringBuilder ssb  = BYR_BBS_API.Show_Outside_Images(reply_articles.get(article_index).getSsb_content()
+                        , image, textview_content.getWidth(), url, context);
+                reply_articles.get(article_index).setSsb_content(ssb);
+                textview_content.setText(ssb);
+            }
+            catch (NullPointerException | IndexOutOfBoundsException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 }

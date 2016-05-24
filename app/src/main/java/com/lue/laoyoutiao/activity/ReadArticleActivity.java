@@ -249,7 +249,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
      * 需要注意的是，此处只需要响应一次（主贴），后续发布的在Adapter中响应(暂时无法实现)
      * @param attachment_images 图片附件
      */
-
     public void onEventMainThread(final Event.Attachment_Images attachment_images)
     {
         int article_index = attachment_images.getArticle_index();
@@ -261,18 +260,44 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         }
     }
 
+    /**
+     *当点击了指向本站的链接时，开启一个新的Activity，此时需要注销当前Activity的EventBus
+     * @param start_new 标志
+     */
     public void onEventBackgroundThread(final Event.Start_New start_new)
     {
         if(EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().unregister(this);
     }
 
+    /**
+     * 接收附件高清大图
+     * @param bitmap_hd 图片信息
+     */
     public void onEventBackgroundThread(final Event.Bitmap_HD bitmap_hd)
     {
         String url = bitmap_hd.getUrl();
         Bitmap image = bitmap_hd.getImage_hd();
 
         images_hd.put(url, image);
+    }
+
+    /**
+     * 接收站外高清大图
+     * @param bitmap_outside 图片信息
+     */
+    public void onEventMainThread(final Event.Bitmap_Outside bitmap_outside)
+    {
+        String url = bitmap_outside.getUrl();
+        Bitmap image = bitmap_outside.getImage_hd();
+        images_hd.put(url, image);
+
+        if(bitmap_outside.getArticle_index() == -1)
+        {
+            ssb_content = BYR_BBS_API.Show_Outside_Images(ssb_content, image,
+                    main_post.textview_content.getWidth(), url, this);
+            main_post.textview_content.setText(ssb_content);
+        }
     }
 
     /**
@@ -371,15 +396,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         }
     }
 
-    @Override
-    protected void onPause()
-    {
-        super.onPause();
-
-        //注销EventBus
-        //注意此处一定要注销，否则会出现问题，具体内容见 http://bbs.byr.cn/#!article/MobileTerminalAT/30560
-//        EventBus.getDefault().unregister(this);
-    }
 
     @Override
     protected void onResume()

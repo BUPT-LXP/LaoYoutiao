@@ -13,8 +13,9 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.activity.ReadArticleActivity;
@@ -33,8 +34,10 @@ public class ShowImageDialog extends DialogFragment
 {
     private Context context;
     private ViewPager viewpager;
+    private TextView textview;
     private ImageView[] pageview;
     private int currentitem = 0;
+    private int totalitem = 0;
     private Bitmap[] images;
     private String[] urls;
     private MyPagerAdapter adapter;
@@ -53,10 +56,15 @@ public class ShowImageDialog extends DialogFragment
                 adapter.notifyDataSetChanged();
             }
             viewpager.setCurrentItem(currentitem);
+
+            AlphaAnimation aAnima = new AlphaAnimation(1.0f, 0.0f);//从全不透明变为全透明
+            aAnima.setDuration(2000);
+            aAnima.setFillAfter(true);
+            textview.startAnimation(aAnima);
         }
     };
 
-    public static ShowImageDialog getInstance(Context contexts, String[] urls, int currentitem)
+    public static ShowImageDialog getInstance(String[] urls, int currentitem)
     {
         ShowImageDialog dialog = new ShowImageDialog();
         Bundle bundle = new Bundle();
@@ -64,6 +72,14 @@ public class ShowImageDialog extends DialogFragment
         bundle.putInt("currentitem", currentitem);
         dialog.setArguments(bundle);
         return dialog;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        //设置全屏，在onCreateDialog() 或 onCreateView()里设置无效
+        setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
     }
 
     @Override
@@ -76,31 +92,18 @@ public class ShowImageDialog extends DialogFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
+
         context = ContextApplication.getAppContext();
 
         View view = inflater.inflate(R.layout.dialog_showimage, container);
         viewpager = (ViewPager) view.findViewById(R.id.viewpager);
-
-        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
-//        setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        textview = (TextView)view.findViewById(R.id.textview);
 
         init();
 
         return view;
     }
 
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        Dialog dialog = getDialog();
-        if (dialog != null)
-        {
-            int width = ViewGroup.LayoutParams.MATCH_PARENT;
-            int height = ViewGroup.LayoutParams.MATCH_PARENT;
-            dialog.getWindow().setLayout(width, height);
-        }
-    }
 
     private void init()
     {
@@ -113,15 +116,16 @@ public class ShowImageDialog extends DialogFragment
 
         if (urls.length > 0)
         {
+            totalitem = urls.length;
             //缓存
             cache = ACache.get(context);
 
-            pageview = new ImageView[urls.length];
-            images = new Bitmap[urls.length];
+            pageview = new ImageView[totalitem];
+            images = new Bitmap[totalitem];
 
             ReadArticleActivity activity = (ReadArticleActivity) this.getActivity();
 
-            for (int i = 0; i < urls.length; i++)
+            for (int i = 0; i < totalitem; i++)
             {
                 ImageView imageView = new ImageView(context);
                 pageview[i] = imageView;
@@ -141,8 +145,10 @@ public class ShowImageDialog extends DialogFragment
 
     private void show(final int index)
     {
-
         currentitem = index;
+
+        textview.setText((currentitem+1) + "/" + totalitem);
+
         if(images[index] == null)
         {
             //发现如果在UI线程访问图片缓存的话会存在一定卡顿的现象，那就和访问网络数据一样开一个线程吧
@@ -183,8 +189,12 @@ public class ShowImageDialog extends DialogFragment
                 adapter.notifyDataSetChanged();
             }
             viewpager.setCurrentItem(currentitem);
-        }
 
+            AlphaAnimation aAnima = new AlphaAnimation(1.0f, 0.0f);//从全不透明变为全透明
+            aAnima.setDuration(2000);
+            aAnima.setFillAfter(true);
+            textview.startAnimation(aAnima);
+        }
     }
 
     //当ViewPager中页面的状态发生改变时调用

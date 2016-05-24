@@ -60,7 +60,7 @@ public class ClickableTextSpan extends ClickableSpan
                     Toast.makeText(context, "Oops, 网址格式有错误！",Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                //通知原Activity，现在将要开启一个新的Activity，原来的需要注销EventBus
                 EventBus.getDefault().post(new Event.Start_New());
 
                 text = text.substring(0, index1);
@@ -90,6 +90,7 @@ public class ClickableTextSpan extends ClickableSpan
 
                 if(!board_description.equals("null"))
                 {
+                    //通知原Activity，现在将要开启一个新的Activity，原来的需要注销EventBus
                     EventBus.getDefault().post(new Event.Start_New());
 
                     Intent intent = new Intent(context, BoardArticleListActivity.class);

@@ -174,7 +174,9 @@ public class Event
         }
     }
 
-
+    /**
+     * 附件中的图片信息，图片大小：中等
+     */
     public static class Attachment_Images
     {
         private int article_index;
@@ -212,6 +214,9 @@ public class Event
         public Start_New() {}
     }
 
+    /**
+     * 附件及站外大图
+     */
     public static class Bitmap_HD
     {
         private String url;
@@ -219,6 +224,35 @@ public class Event
 
         public Bitmap_HD(String url, Bitmap image_hd)
         {
+            this.url = url;
+            this.image_hd = image_hd;
+        }
+
+
+        public String getUrl()
+        {
+            return url;
+        }
+
+        public Bitmap getImage_hd()
+        {
+            return image_hd;
+        }
+
+    }
+
+    /**
+     * 站外图片
+     */
+    public static class Bitmap_Outside
+    {
+        private int article_index;
+        private String url;
+        private Bitmap image_hd;
+
+        public Bitmap_Outside(int article_index, String url, Bitmap image_hd)
+        {
+            this.article_index = article_index;
             this.url = url;
             this.image_hd = image_hd;
         }
@@ -231,6 +265,11 @@ public class Event
         public Bitmap getImage_hd()
         {
             return image_hd;
+        }
+
+        public int getArticle_index()
+        {
+            return article_index;
         }
     }
 }

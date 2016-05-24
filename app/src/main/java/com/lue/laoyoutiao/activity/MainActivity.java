@@ -40,6 +40,39 @@ public class MainActivity extends AppCompatActivity
         favoriteHelper.getFavoriteBoards();
     }
 
+    //以下两个方法测试改变状态栏的颜色，发现如果不要自定义状态栏的话是正常的，但是如果自定义状态栏了之后就会有问题
+//    public static void initSystemBar(Activity activity)
+//    {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+//        {
+//            setTranslucentStatus(activity, true);
+//        }
+//        SystemBarTintManager tintManager = new SystemBarTintManager(activity);
+//        tintManager.setStatusBarTintEnabled(true);
+//        // 使用颜色资源
+//        tintManager.setStatusBarTintResource(R.color.my_default_theme_color);
+//
+//    }
+//
+//    @TargetApi(19)
+//    private static void setTranslucentStatus(Activity activity, boolean on)
+//    {
+//        Window win = activity.getWindow();
+//        WindowManager.LayoutParams winParams = win.getAttributes();
+//
+//        final int bits = WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+//
+//        if (on)
+//        {
+//            winParams.flags |= bits;
+//        }
+//        else
+//        {
+//            winParams.flags &= ~bits;
+//        }
+//        win.setAttributes(winParams);
+//    }
+
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState)
     {
@@ -66,44 +99,6 @@ public class MainActivity extends AppCompatActivity
             oncreateview-in-fragment-is-not-called-immediately-even-after-fragmentmanager#  解决的 */
         initView();
     }
-
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-//        startService(new Intent(this, BYR_BBS_API.class));
-        Log.v(TAG, "onResume");
-    }
-
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        Log.v(TAG, "onDestroy");
-    }
-
-    @Override
-    public void onPause()
-    {
-        super.onPause();
-        Log.v(TAG, "onPause");
-    }
-
-    @Override
-    protected void onRestart()
-    {
-        super.onRestart();
-        Log.v(TAG, "onRestart");
-    }
-
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        Log.v(TAG, "onStop");
-    }
-
 
 
     /**
@@ -144,6 +139,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * 显隐藏所有的fragment，再显示本次需要显示的，使用“隐藏-显示”可以保存切换之前该fragment的状态
+     *
      * @param id
      */
     public void showFragment(int id)
@@ -156,11 +152,10 @@ public class MainActivity extends AppCompatActivity
         switch (id)
         {
             case 0:
-                if(toptenFragment != null)
+                if (toptenFragment != null)
                 {
                     fragmentTransaction.show(toptenFragment);
-                }
-                else
+                } else
                 {
                     toptenFragment = new ToptenFragment();
                     fragmentTransaction.add(R.id.main_content, toptenFragment);
@@ -171,8 +166,7 @@ public class MainActivity extends AppCompatActivity
                 {
                     fragmentTransaction.show(boardFragment);
 
-                }
-                else
+                } else
                 {
                     boardFragment = new BoardFragment();
                     fragmentTransaction.add(R.id.main_content, boardFragment);
@@ -183,8 +177,7 @@ public class MainActivity extends AppCompatActivity
                 if (mineFragment != null)
                 {
                     fragmentTransaction.show(mineFragment);
-                }
-                else
+                } else
                 {
                     mineFragment = new MineFragment();
                     fragmentTransaction.add(R.id.main_content, mineFragment);
@@ -200,18 +193,19 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * 隐藏所有的fragment
+     *
      * @param fragmentTransaction
      */
     public void hideFragments(FragmentTransaction fragmentTransaction)
     {
         if (toptenFragment != null)
-          fragmentTransaction.hide(toptenFragment);
+            fragmentTransaction.hide(toptenFragment);
 
         if (boardFragment != null)
-          fragmentTransaction.hide(boardFragment);
+            fragmentTransaction.hide(boardFragment);
 
         if (mineFragment != null)
-           fragmentTransaction.hide(mineFragment);
+            fragmentTransaction.hide(mineFragment);
     }
 
     /**

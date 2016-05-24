@@ -1,7 +1,6 @@
 package com.lue.laoyoutiao.view.span;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -14,11 +13,7 @@ import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.activity.ReadArticleActivity;
-import com.lue.laoyoutiao.activity.ShowImageActivity;
 import com.lue.laoyoutiao.dialog.ShowImageDialog;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Lue on 2016/5/13.
@@ -28,8 +23,6 @@ public class CenteredImageSpan extends ImageSpan implements View.OnClickListener
     private ReadArticleActivity context;
     private int tv_width;
     private String url;
-    //高清大图
-    private Bitmap bitmap_hd;
 
     public CenteredImageSpan(Context context, Bitmap b, int verticalAlignment, int tv_width, String url)
     {
@@ -79,7 +72,6 @@ public class CenteredImageSpan extends ImageSpan implements View.OnClickListener
     @Override
     public void onClick(View v)
     {
-//        Context context = ContextApplication.getAppContext();
 
         int id = v.getId();
         if(id == R.id.textview_article_content)
@@ -89,10 +81,7 @@ public class CenteredImageSpan extends ImageSpan implements View.OnClickListener
             SpannableString spannableString = new SpannableString(charSequence);
             CenteredImageSpan[] spans = spannableString.getSpans(0, spannableString.length(), CenteredImageSpan.class);
 
-            Intent intent = new Intent(context, ShowImageActivity.class);
             String[] urls = new String[spans.length];
-//            Bitmap[] images = new Bitmap[spans.length];
-            List<Bitmap> images = new ArrayList<>();
 
             int index = 0;
             for(int i=0; i<spans.length; i++)
@@ -100,19 +89,11 @@ public class CenteredImageSpan extends ImageSpan implements View.OnClickListener
                 urls[i] = spans[i].url;
                 if(url.equals(spans[i].url))
                 {
-//                    intent.putExtra("index", i);
                     index = i;
                 }
-
-//                images.add(context.images_hd.get(urls[i]));
             }
-//            intent.putExtra("urls", urls);
-//            intent.putParcelableArrayListExtra("images", (ArrayList<? extends Parcelable>) images);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            context.startActivity(intent);
 
-
-            ShowImageDialog dialog = ShowImageDialog.getInstance(context, urls, index);
+            ShowImageDialog dialog = ShowImageDialog.getInstance(urls, index);
             dialog.show(context.getFragmentManager(), "");
         }
     }
