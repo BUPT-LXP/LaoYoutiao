@@ -368,11 +368,11 @@ public class ZoomImageView extends ImageView implements OnGlobalLayoutListener, 
             case MotionEvent.ACTION_DOWN:
                 if (rectF.width() > getWidth() + 0.01 || rectF.height() > getHeight() + 0.01)
                 {
-//                    if (getParent() instanceof ViewPager)
-//                    {
-//                        //请求父控件不被允许拦截当前的控件
-//                        getParent().requestDisallowInterceptTouchEvent(true);
-//                    }
+                    if (getParent() instanceof ViewPager)
+                    {
+                        //请求父控件不被允许拦截当前的控件
+                        getParent().requestDisallowInterceptTouchEvent(true);
+                    }
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -395,6 +395,15 @@ public class ZoomImageView extends ImageView implements OnGlobalLayoutListener, 
                     //在这里面完成图片的移动
                     if (getDrawable() != null)
                     {
+                        //下面两个判断是关键，解决了图片的滑动与viewpager的冲突问题
+                        if (getMatrixRectF().left == 0 && deltaX > 0)
+                        {
+                            getParent().requestDisallowInterceptTouchEvent(false);
+                        }
+                        if (getMatrixRectF().right == getWidth() && deltaX < 0)
+                        {
+                            getParent().requestDisallowInterceptTouchEvent(false);
+                        }
                         isCheckLeftAndRight = true;
                         isCheckTopAndBottom = true;
                         if (rectF.width() < getWidth())
