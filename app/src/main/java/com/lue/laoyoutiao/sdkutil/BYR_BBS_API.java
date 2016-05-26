@@ -24,15 +24,14 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
-import com.lue.laoyoutiao.helper.AttachmentHelper;
 import com.lue.laoyoutiao.metadata.Attachment;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
+import com.lue.laoyoutiao.network.PicassoHelper;
 import com.lue.laoyoutiao.view.span.CenteredImageSpan;
 import com.lue.laoyoutiao.view.span.ClickableTextSpan;
 import com.lue.laoyoutiao.view.span.GifCallback;
-import com.squareup.okhttp.Response;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -50,6 +49,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.greenrobot.event.EventBus;
+import okhttp3.Response;
 import pl.droidsonroids.gif.GifDrawable;
 
 /**
@@ -718,7 +718,6 @@ public class BYR_BBS_API
         //包含附件
         if(attachment.getRemain_count() < 20 )
         {
-            final AttachmentHelper attachmentHelper = new AttachmentHelper();
             new Thread()
             {
                 public void run()
@@ -732,7 +731,7 @@ public class BYR_BBS_API
                                 || attachmentFile.getName().endsWith(".gif") || attachmentFile.getName().endsWith(".jpeg"))
                         {
                             final String img_url = attachmentFile.getThumbnail_middle() + returnFormat + appkey;
-                            Bitmap bitmap = attachmentHelper.get_Attachment_Image(img_url);
+                            Bitmap bitmap = PicassoHelper.getPicassoHelper().getBitmap(img_url);
                             attachment_images.add(bitmap);
                             urls.add(attachmentFile.getUrl());
                         }

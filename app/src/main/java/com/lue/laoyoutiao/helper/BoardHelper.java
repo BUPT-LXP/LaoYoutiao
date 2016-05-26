@@ -8,13 +8,13 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
+import okhttp3.Response;
 
 /**
  * Created by Lue on 2016/4/19.
@@ -35,7 +35,6 @@ public class BoardHelper
         HashMap<String, String> params = new HashMap<>();
         params.put("page", String.valueOf(page));
         final String url = BYR_BBS_API.buildGETUrl(params, BYR_BBS_API.STRING_BOARD, board_name);
-//        final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_BOARD, board_name) + "&page=" + page;
         new Thread()
         {
             public void run()

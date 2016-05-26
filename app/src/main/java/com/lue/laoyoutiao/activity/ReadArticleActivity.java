@@ -245,7 +245,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     }
 
     /**
-     * 响应 AttachmentHelper 发布的图片附件信息，并将其展现
+     * 响应 发布的图片附件信息，并将其展现
      * 需要注意的是，此处只需要响应一次（主贴），后续发布的在Adapter中响应(暂时无法实现)
      * @param attachment_images 图片附件
      */

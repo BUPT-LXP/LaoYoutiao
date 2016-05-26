@@ -1,23 +1,21 @@
 package com.lue.laoyoutiao.network;
 
-import android.graphics.Bitmap;
-
-import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
+import okhttp3.Authenticator;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.Route;
 
 /**
  * Created by Lue on 2016/1/9.
@@ -36,12 +34,24 @@ public class OkHttpHelper
 
     private OkHttpHelper()
     {
-        okHttpClient = new OkHttpClient();
-        okHttpClient.setReadTimeout(2, TimeUnit.SECONDS);
-        okHttpClient.setConnectTimeout(5, TimeUnit.SECONDS);
-        okHttpClient.setWriteTimeout(3, TimeUnit.SECONDS);
-
         byr_bbs_api = BYR_BBS_API.getM_byr_bbs_api();
+
+        OkHttpClient.Builder  builder= new OkHttpClient.Builder()
+                .readTimeout(2, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .writeTimeout(3, TimeUnit.SECONDS)
+                .authenticator(new Authenticator()
+                {
+                    @Override
+                    public Request authenticate(Route route, Response response) throws IOException
+                    {
+                        return response.request().newBuilder()
+                                .header("Authorization", "Basic " + byr_bbs_api.getAuth())
+                                .build();
+                    }
+                });
+
+        okHttpClient = builder.build();
     }
 
 
@@ -64,6 +74,14 @@ public class OkHttpHelper
         return m_OkHttpHelper;
     }
 
+    /**
+     * 获取Client
+     * @return okHttpClient
+     */
+    public OkHttpClient getOkHttpClient()
+    {
+        return okHttpClient;
+    }
 
     /**
      * 注意，如果调用该方法，该方法在子线程中返回一个String类型的值。在使用EventBus的时候，会造成很多地方的EventBus
@@ -76,20 +94,20 @@ public class OkHttpHelper
     {
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Authorization", "Basic " + byr_bbs_api.getAuth())
+//                .addHeader("Authorization", "Basic " + byr_bbs_api.getAuth())
                 .build();
         Call call = okHttpClient.newCall(request);
 
         call.enqueue(new Callback()
         {
             @Override
-            public void onFailure(Request request, IOException e)
+            public void onFailure(Call call, IOException e)
             {
                 e.printStackTrace();
             }
 
             @Override
-            public void onResponse(Response response) throws IOException
+            public void onResponse(Call call, Response response) throws IOException
             {
                 response_result = response.body().string();
 
@@ -111,7 +129,7 @@ public class OkHttpHelper
     {
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("Authorization", "Basic " + byr_bbs_api.getAuth())
+//                .addHeader("Authorization", "Basic " + byr_bbs_api.getAuth())
                 .build();
         return okHttpClient.newCall(request).execute();
     }
@@ -126,43 +144,19 @@ public class OkHttpHelper
      */
     public Response postExecute(String url, HashMap<String, String> params) throws IOException
     {
-        FormEncodingBuilder builder = new FormEncodingBuilder();
+        FormBody.Builder builder = new FormBody.Builder();
         for(String key : params.keySet())
         {
             builder.add(key, params.get(key));
         }
         RequestBody body = builder.build();
-        Request request = new Request.Builder().url(url).addHeader("Authorization", "Basic " + byr_bbs_api.getAuth()).post(body).build();
+        Request request = new Request.Builder().url(url)
+//                .addHeader("Authorization", "Basic " + byr_bbs_api.getAuth())
+                .post(body)
+                .build();
 
         return okHttpClient.newCall(request).execute();
     }
 
-    /**
-     * 下载外站大图
-     * @param url 链接
-     * @return 图片
-     */
-    public Bitmap downloadOutsideImage(String url)
-    {
-        try
-        {
-//            Request request = new Request.Builder()
-//                    .url(url)
-//                    .build();
-//            Response response = okHttpClient.newCall(request).execute();
-//
-//            //将 Response 转换成输入流
-//            InputStream inputStream = response.body().byteStream();
-//            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-//            inputStream.close();
-            Bitmap bitmap = Picasso.with(ContextApplication.getAppContext()).load(url).get();
-
-            return bitmap;
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }
 

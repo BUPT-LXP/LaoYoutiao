@@ -18,10 +18,9 @@ import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.activity.ReadArticleActivity;
-import com.lue.laoyoutiao.cache.ACache;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
-import com.lue.laoyoutiao.helper.AttachmentHelper;
+import com.lue.laoyoutiao.network.PicassoHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ZoomImageView;
 
@@ -30,7 +29,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by Lue on 2016/5/20.
  */
-public class ShowImageDialog extends DialogFragment
+public class ShowImageDialog extends DialogFragment implements ZoomImageView.OnImageClickListner
 {
     private Context context;
     private ViewPager viewpager;
@@ -41,7 +40,6 @@ public class ShowImageDialog extends DialogFragment
     private Bitmap[] images;
     private String[] urls;
     private MyPagerAdapter adapter;
-    private ACache cache;
 
 
     //处理事件
@@ -55,7 +53,6 @@ public class ShowImageDialog extends DialogFragment
                 pageview[currentitem].setImageBitmap(images[currentitem]);
                 adapter.notifyDataSetChanged();
             }
-//            pageview[currentitem].setImage(images[currentitem]);
             viewpager.setCurrentItem(currentitem);
 
             AlphaAnimation aAnima = new AlphaAnimation(1.0f, 0.0f);//从全不透明变为全透明
@@ -118,8 +115,6 @@ public class ShowImageDialog extends DialogFragment
         if (urls.length > 0)
         {
             totalitem = urls.length;
-            //缓存
-            cache = ACache.get(context);
 
             pageview = new ZoomImageView[totalitem];
             images = new Bitmap[totalitem];
@@ -129,6 +124,7 @@ public class ShowImageDialog extends DialogFragment
             for (int i = 0; i < totalitem; i++)
             {
                 ZoomImageView imageView = new ZoomImageView(context);
+                imageView.setOnImageClickListner(this);
                 pageview[i] = imageView;
                 images[i] = activity.images_hd.get(urls[i]);
             }
@@ -157,28 +153,11 @@ public class ShowImageDialog extends DialogFragment
             {
                 public void run()
                 {
-                    Bitmap bitmap_local = cache.getAsBitmap(urls[index]);
-                    if (bitmap_local == null)
-                    {
+                    Bitmap bitmap_remote = PicassoHelper.getPicassoHelper().getBitmap(urls[index] + BYR_BBS_API.returnFormat + BYR_BBS_API.appkey);
+                    images[index] = bitmap_remote;
 
-                        AttachmentHelper helper = new AttachmentHelper();
-                        Bitmap bitmap_remote = helper.get_Attachment_Image(urls[index] + BYR_BBS_API.returnFormat + BYR_BBS_API.appkey);
-                        images[index] = bitmap_remote;
-
-                        //缓存图片两分钟，若在时间内再次点击，则不用再次加载
-                        cache.put(urls[index], bitmap_remote, 120);
-                        handler.obtainMessage().sendToTarget();
-                        EventBus.getDefault().post(new Event.Bitmap_HD(urls[index], bitmap_remote));
-
-                    } else
-                    {
-                        images[index] = bitmap_local;
-                        //缓存图片两分钟，若在时间内再次点击，则不用再次加载
-                        cache.put(urls[index], bitmap_local, 120);
-
-                        handler.obtainMessage().sendToTarget();
-                        EventBus.getDefault().post(new Event.Bitmap_HD(urls[index], bitmap_local));
-                    }
+                    handler.obtainMessage().sendToTarget();
+                    EventBus.getDefault().post(new Event.Bitmap_HD(urls[index], bitmap_remote));
                 }
             }.start();
         }
@@ -189,7 +168,6 @@ public class ShowImageDialog extends DialogFragment
                 pageview[currentitem].setImageBitmap(images[currentitem]);
                 adapter.notifyDataSetChanged();
             }
-//            pageview[currentitem].setImage(images[currentitem]);
             viewpager.setCurrentItem(currentitem);
 
             AlphaAnimation aAnima = new AlphaAnimation(1.0f, 0.0f);//从全不透明变为全透明
@@ -197,6 +175,12 @@ public class ShowImageDialog extends DialogFragment
             aAnima.setFillAfter(true);
             textview.startAnimation(aAnima);
         }
+    }
+
+    @Override
+    public void onClick()
+    {
+        dismiss();
     }
 
     //当ViewPager中页面的状态发生改变时调用
@@ -242,7 +226,6 @@ public class ShowImageDialog extends DialogFragment
         @Override
         public boolean isViewFromObject(View view, Object object)
         {
-//            return view == pageview[Integer.parseInt(object.toString())];
             return view == object;
         }
 

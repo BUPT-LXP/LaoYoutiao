@@ -8,7 +8,6 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import de.greenrobot.event.EventBus;
+import okhttp3.Response;
 
 /**
  * Created by Lue on 2016/1/22.

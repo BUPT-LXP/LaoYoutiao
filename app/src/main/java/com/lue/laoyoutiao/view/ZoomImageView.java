@@ -54,6 +54,8 @@ public class ZoomImageView extends ImageView implements OnGlobalLayoutListener, 
     private boolean isCheckLeftAndRight;
     private boolean isCheckTopAndBottom;
 
+    private OnImageClickListner onImageClickListner;
+
     //--双击放大缩小的成员变量---------------------------------------------------
     private GestureDetector mGestureDetector = null;
     private boolean isAutoScale;
@@ -104,7 +106,13 @@ public class ZoomImageView extends ImageView implements OnGlobalLayoutListener, 
                             postDelayed(new AutoScaleRunnable(mInitScale, x, y), 16);
                             isAutoScale = true;
                         }
+                        return true;
+                    }
 
+                    @Override
+                    public boolean onSingleTapConfirmed(MotionEvent e)
+                    {
+                        onImageClickListner.onClick();
                         return true;
                     }
                 });
@@ -437,6 +445,15 @@ public class ZoomImageView extends ImageView implements OnGlobalLayoutListener, 
         return true;
     }
 
+    public interface OnImageClickListner
+    {
+        void onClick();
+    }
+
+    public void setOnImageClickListner(OnImageClickListner onImageClickListner)
+    {
+        this.onImageClickListner = onImageClickListner;
+    }
 
     /**
      * 控制平移图片的边界

@@ -12,13 +12,13 @@ import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
-import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
+import okhttp3.Response;
 
 /**
  * Created by Lue on 2016/1/23.

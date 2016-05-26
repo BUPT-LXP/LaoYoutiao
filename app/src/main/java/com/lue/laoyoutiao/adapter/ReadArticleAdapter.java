@@ -149,7 +149,7 @@ public class ReadArticleAdapter extends BaseAdapter
     }
 
     /**
-     * 响应 AttachmentHelper 发布的图片附件信息，并将其展现
+     * 响应 发布的图片附件信息，并将其展现
      * @param attachment_images 图片附件
      */
     public void onEventMainThread(final Event.Attachment_Images attachment_images)
