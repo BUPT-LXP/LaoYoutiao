@@ -7,7 +7,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -32,7 +32,6 @@ import com.lue.laoyoutiao.view.emoji.SlidingTabLayout;
 import com.lue.laoyoutiao.view.span.ClickableMovementMethod;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 
 import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
@@ -67,7 +66,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     ArticleHelper articleHelperhelper = null;
     private ReadArticleAdapter adapter = null;
 
-    public Hashtable<String, Bitmap> images_hd = new Hashtable<>();
+//    public Hashtable<String, Bitmap> images_hd = new Hashtable<>();
 
     //表情界面
     private EmotionInputDetector emotionInputDetector;
@@ -78,6 +77,9 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_read_article);
 
+        //注册EventBus
+        EventBus.getDefault().register(this);
+
         Intent intent = getIntent();
         board_name = intent.getStringExtra("board_name");
         article_id = intent.getIntExtra("article_id", 0);
@@ -85,8 +87,9 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
 
         init_view();
 
-        //注册EventBus
-        EventBus.getDefault().register(this);
+        ArticleHelper helper = new ArticleHelper();
+        helper.getThreadsInfo(board_name, article_id, 1);
+
     }
 
     private void init_view()
@@ -181,17 +184,17 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             main_post.textview_title.setVisibility(View.VISIBLE);
 
 
-            String content[] = BYR_BBS_API.SeparateContent(articleList.get(0).getContent());
+            SpannableString content[] = ArticleHelper.SeparateContent(articleList.get(0).getContent());
 
             //若包含表情，则将String 转化成 SpannableString，使之显示动态表情
-            ssb_content = BYR_BBS_API.ParseContent(-1, content[0],
+            ssb_content = ArticleHelper.ParseContent(-1, content[0].toString(),
                     main_post.textview_content, articleList.get(0).getAttachment());
             main_post.textview_content.setText(ssb_content);
             main_post.textview_content.setMovementMethod(ClickableMovementMethod.getInstance());
 
             if(content[2] != null)
             {
-                main_post.textview_post_app.setText(Html.fromHtml(content[2]));
+                main_post.textview_post_app.setText(content[2]);
                 main_post.textview_post_app.setVisibility(View.VISIBLE);
                 int padding = (int)getResources().getDimension(R.dimen.article_content_textpadding_top);
                 main_post.textview_post_app.setPadding(0, 0, 0, padding);
@@ -235,17 +238,10 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
 
         loading_dialog.dismiss();
 
-//        if(page_number > 1)
-//        {
-//            int position = (page_number -1)*count_per_page + 1;
-//            lv_Reply_List.setSelection(position);
-//
-//            Log.d("ReadArticle: ", "SET selection at " + position);
-//        }
     }
 
     /**
-     * 响应 AttachmentHelper 发布的图片附件信息，并将其展现
+     * 响应 发布的图片附件信息，并将其展现
      * 需要注意的是，此处只需要响应一次（主贴），后续发布的在Adapter中响应(暂时无法实现)
      * @param attachment_images 图片附件
      */
@@ -254,8 +250,8 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         int article_index = attachment_images.getArticle_index();
         if(-1 == article_index)
         {
-            ssb_content = BYR_BBS_API.Show_Attachments(ssb_content, attachment_images.getImages(),
-                    main_post.textview_content.getWidth(), attachment_images.getUrls(), this);
+            ssb_content = ArticleHelper.Show_Attachments(ssb_content, attachment_images.getImages(),
+                    main_post.textview_content.getWidth(), attachment_images.getUrls(), this, attachment_images.getSizes());
             main_post.textview_content.setText(ssb_content);
         }
     }
@@ -274,13 +270,13 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
      * 接收附件高清大图
      * @param bitmap_hd 图片信息
      */
-    public void onEventBackgroundThread(final Event.Bitmap_HD bitmap_hd)
-    {
-        String url = bitmap_hd.getUrl();
-        Bitmap image = bitmap_hd.getImage_hd();
-
-        images_hd.put(url, image);
-    }
+//    public void onEventBackgroundThread(final Event.Bitmap_HD bitmap_hd)
+//    {
+//        String url = bitmap_hd.getUrl();
+//        Bitmap image = bitmap_hd.getImage_hd();
+//
+//        images_hd.put(url, image);
+//    }
 
     /**
      * 接收站外高清大图
@@ -290,14 +286,23 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     {
         String url = bitmap_outside.getUrl();
         Bitmap image = bitmap_outside.getImage_hd();
-        images_hd.put(url, image);
 
         if(bitmap_outside.getArticle_index() == -1)
         {
-            ssb_content = BYR_BBS_API.Show_Outside_Images(ssb_content, image,
+            ssb_content = ArticleHelper.Show_Outside_Images(ssb_content, image,
                     main_post.textview_content.getWidth(), url, this);
             main_post.textview_content.setText(ssb_content);
         }
+    }
+
+    /**
+     * 站内链接错误，指定的文章不存在或链接错误
+     * @param NotExist 错误信息
+     */
+    public void onEventMainThread(final Event.Article_Not_Exist NotExist)
+    {
+        Toast.makeText(this, NotExist.getError_info(), Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     /**
@@ -364,7 +369,6 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     {
         if (!emotionInputDetector.interceptBackPress())
         {
-
             //为adapter注销EventBus
             if (adapter != null)
             {
@@ -378,17 +382,19 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
                 if (article.getSsb_content() != null)
                     article.getSsb_content().clear();
             }
-            for (Bitmap bitmap : user_faces)
+            if(user_faces != null)
             {
-                if(bitmap != null)
-                    bitmap.recycle();
+                for (Bitmap bitmap : user_faces)
+                {
+                    if (bitmap != null)
+                        bitmap.recycle();
+                }
             }
             for (Article article : articleList)
             {
                 article = null;
             }
 
-            images_hd.clear();
 
             articleList.clear();
             System.gc();

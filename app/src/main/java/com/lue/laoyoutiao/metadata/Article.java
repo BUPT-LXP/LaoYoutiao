@@ -2,6 +2,7 @@ package com.lue.laoyoutiao.metadata;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 
 /** Article元数据
@@ -58,7 +59,10 @@ public class Article implements Parcelable
     //该文章回复内容的SpannableString，仅限回复内容，不包括引用别人的内容
     private SpannableStringBuilder ssb_content;
     private String str_reference;
+    private SpannableString ss_reference;
     private String str_app;
+    private SpannableString ss_app;
+
     private boolean is_content_separated = false;
 
     @Override
@@ -393,5 +397,25 @@ public class Article implements Parcelable
     public void setStr_app(String str_app)
     {
         this.str_app = str_app;
+    }
+
+    public SpannableString getSs_reference()
+    {
+        return ss_reference;
+    }
+
+    public SpannableString getSs_app()
+    {
+        return ss_app;
+    }
+
+    public void setSs_reference(SpannableString ss_reference)
+    {
+        this.ss_reference = ss_reference;
+    }
+
+    public void setSs_app(SpannableString ss_app)
+    {
+        this.ss_app = ss_app;
     }
 }

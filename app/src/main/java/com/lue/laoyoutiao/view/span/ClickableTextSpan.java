@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.Uri;
 import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.view.View;
@@ -12,7 +13,6 @@ import android.widget.Toast;
 import com.lue.laoyoutiao.activity.BoardArticleListActivity;
 import com.lue.laoyoutiao.activity.ReadArticleActivity;
 import com.lue.laoyoutiao.eventtype.Event;
-import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 
 import de.greenrobot.event.EventBus;
@@ -23,14 +23,17 @@ import de.greenrobot.event.EventBus;
 public class ClickableTextSpan extends ClickableSpan
 {
     private Context context;
-    private String text;
+    private final String text;
+    private final String url;
 
-    public ClickableTextSpan(Context context, String text)
+    public ClickableTextSpan(Context context, String text, String url)
     {
         super();
         this.context = context;
         this.text = text;
+        this.url = url;
     }
+    
 
     @Override
     public void updateDrawState(TextPaint ds)
@@ -42,33 +45,27 @@ public class ClickableTextSpan extends ClickableSpan
     @Override
     public void onClick(View widget)
     {
-        if(text.contains("http://bbs.byr.cn/"))
+        if(url.contains("bbs.byr.cn/"))
         {
-            text = text.replace("http://bbs.byr.cn/", "");
-            text = text.replace("#!", "");
-
-            if(text.contains("article"))
+            if (url.contains("article"))
             {
-                int index1 = text.lastIndexOf("/");
-                String id = text.substring(index1+1);
+                int index1 = url.lastIndexOf("/");
+                String id = url.substring(index1 + 1);
                 int article_id;
                 try
                 {
                     article_id = Integer.parseInt(id);
-                }catch (NumberFormatException e)
+                } catch (NumberFormatException e)
                 {
-                    Toast.makeText(context, "Oops, 网址格式有错误！",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Oops, 网址格式有错误！", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 //通知原Activity，现在将要开启一个新的Activity，原来的需要注销EventBus
                 EventBus.getDefault().post(new Event.Start_New());
 
-                text = text.substring(0, index1);
-                int index2 = text.lastIndexOf("/");
-                String board_name = text.substring(index2+1);
-
-                ArticleHelper helper = new ArticleHelper();
-                helper.getThreadsInfo(board_name, article_id, 1);
+                String text1 = url.substring(0, index1);
+                int index2 = text1.lastIndexOf("/");
+                String board_name = text1.substring(index2 + 1);
 
                 Intent intent = new Intent(context, ReadArticleActivity.class);
                 intent.putExtra("board_name", board_name);
@@ -76,10 +73,10 @@ public class ClickableTextSpan extends ClickableSpan
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
-            else if(text.contains("board"))
+            else if (url.contains("board"))
             {
-                int index = text.lastIndexOf("/");
-                String board_name = text.substring(index+1);
+                int index = url.lastIndexOf("/");
+                String board_name = url.substring(index + 1);
 
                 //本地 SharedPreferences
                 SharedPreferences My_SharedPreferences;
@@ -88,7 +85,7 @@ public class ClickableTextSpan extends ClickableSpan
 
                 String board_description = My_SharedPreferences.getString(board_name, "null");
 
-                if(!board_description.equals("null"))
+                if (!board_description.equals("null"))
                 {
                     //通知原Activity，现在将要开启一个新的Activity，原来的需要注销EventBus
                     EventBus.getDefault().post(new Event.Start_New());
@@ -102,9 +99,31 @@ public class ClickableTextSpan extends ClickableSpan
                 }
                 else
                 {
-                    Toast.makeText(context, "Oops, 网址格式有错误！",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Oops, 网址格式有错误！", Toast.LENGTH_SHORT).show();
                 }
             }
         }
+        else
+        {
+            Intent intent = null;
+            if (url.contains("http") || url.contains("https") || url.contains("www."))
+            {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            }
+
+            else if (url.contains("@") && url.contains(".com"))
+            {
+                intent = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + url));
+            }
+
+            else
+            {
+                intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+url));
+            }
+
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        }
+
     }
 }

@@ -2,7 +2,7 @@ package com.lue.laoyoutiao.adapter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.text.Html;
+import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.eventtype.Event;
+import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ArticleView;
@@ -35,6 +36,7 @@ public class ReadArticleAdapter extends BaseAdapter
     private List<Article> reply_articles;
     private List<Bitmap> user_faces;
     private ListView listview;
+    private int textview_width;
 
 
     public ReadArticleAdapter(Context context, List<Article> articles, List<Bitmap> faces, ListView listview)
@@ -101,17 +103,20 @@ public class ReadArticleAdapter extends BaseAdapter
 
         if(!article.is_content_separated())
         {
-            String content[] = BYR_BBS_API.SeparateContent(article.getContent());
+            SpannableString content[] = ArticleHelper.SeparateContent(article.getContent());
             article.setIs_content_separated(true);
-            article.setStr_reference(content[1]);
-            article.setStr_app(content[2]);
+            article.setSs_reference(content[1]);
+            article.setSs_app(content[2]);
 
             //若包含表情，则将String 转化成 SpannableString，使之显示动态表情
-            SpannableStringBuilder ssb = BYR_BBS_API.ParseContent(position, content[0],
-                    viewHolder.textview_content, article.getAttachment());
-            article.setSsb_content(ssb);
-            viewHolder.textview_content.setText(ssb);
-            viewHolder.textview_content.setMovementMethod(ClickableMovementMethod.getInstance());
+            if(content[0] != null)
+            {
+                SpannableStringBuilder ssb = ArticleHelper.ParseContent(position, content[0].toString(),
+                        viewHolder.textview_content, article.getAttachment());
+                article.setSsb_content(ssb);
+                viewHolder.textview_content.setText(ssb);
+                viewHolder.textview_content.setMovementMethod(ClickableMovementMethod.getInstance());
+            }
         }
         else
         {
@@ -119,9 +124,9 @@ public class ReadArticleAdapter extends BaseAdapter
             viewHolder.textview_content.setMovementMethod(ClickableMovementMethod.getInstance());
         }
 
-        if (article.getStr_reference() != null)
+        if (article.getSs_reference() != null)
         {
-            viewHolder.textview_content_reply.setText(article.getStr_reference());
+            viewHolder.textview_content_reply.setText(article.getSs_reference());
             viewHolder.textview_content_reply.setVisibility(View.VISIBLE);
             int padding = (int) context.getResources().getDimension(R.dimen.article_content_textpadding_top);
             viewHolder.textview_content_reply.setPadding(0, 0, 0, padding);
@@ -130,9 +135,9 @@ public class ReadArticleAdapter extends BaseAdapter
         {
             viewHolder.textview_content_reply.setVisibility(View.GONE);
         }
-        if (article.getStr_app() != null)
+        if (article.getSs_app() != null)
         {
-            viewHolder.textview_post_app.setText(Html.fromHtml(article.getStr_app()));
+            viewHolder.textview_post_app.setText(article.getSs_app());
             viewHolder.textview_post_app.setVisibility(View.VISIBLE);
             int padding = (int) context.getResources().getDimension(R.dimen.article_content_textpadding_top);
             viewHolder.textview_post_app.setPadding(0, 0, 0, padding);
@@ -149,7 +154,7 @@ public class ReadArticleAdapter extends BaseAdapter
     }
 
     /**
-     * 响应 AttachmentHelper 发布的图片附件信息，并将其展现
+     * 响应 发布的图片附件信息，并将其展现
      * @param attachment_images 图片附件
      */
     public void onEventMainThread(final Event.Attachment_Images attachment_images)
@@ -159,12 +164,17 @@ public class ReadArticleAdapter extends BaseAdapter
         {
             int child_index = article_index - listview.getFirstVisiblePosition() + listview.getHeaderViewsCount();
             View view = listview.getChildAt(child_index);
+
+            if(textview_width == 0)
+                textview_width = listview.getWidth();
+
+            SpannableStringBuilder ssb = ArticleHelper.Show_Attachments(reply_articles.get(article_index).getSsb_content(),
+                    attachment_images.getImages(), textview_width, attachment_images.getUrls(), context, attachment_images.getSizes());
+            reply_articles.get(article_index).setSsb_content(ssb);
             try
             {
                 TextView textview_content = (TextView) view.findViewById(R.id.textview_article_content);
-                SpannableStringBuilder ssb = BYR_BBS_API.Show_Attachments(reply_articles.get(article_index).getSsb_content(),
-                        attachment_images.getImages(), textview_content.getWidth(), attachment_images.getUrls(), context);
-                reply_articles.get(article_index).setSsb_content(ssb);
+
                 textview_content.setText(ssb);
             }
             catch (NullPointerException | IndexOutOfBoundsException e)
@@ -186,17 +196,20 @@ public class ReadArticleAdapter extends BaseAdapter
             int child_index = article_index - listview.getFirstVisiblePosition() + listview.getHeaderViewsCount();
             View view = listview.getChildAt(child_index);
 
+            if(textview_width == 0)
+                textview_width = listview.getWidth();
+
+            String url = bitmap_outside.getUrl();
+            Bitmap image = bitmap_outside.getImage_hd();
+
+            SpannableStringBuilder ssb  = ArticleHelper.Show_Outside_Images(reply_articles.get(article_index).getSsb_content()
+                    , image, textview_width, url, context);
+            reply_articles.get(article_index).setSsb_content(ssb);
+
             try
             {
                 TextView textview_content = (TextView) view.findViewById(R.id.textview_article_content);
 
-                String url = bitmap_outside.getUrl();
-                Bitmap image = bitmap_outside.getImage_hd();
-
-
-                SpannableStringBuilder ssb  = BYR_BBS_API.Show_Outside_Images(reply_articles.get(article_index).getSsb_content()
-                        , image, textview_content.getWidth(), url, context);
-                reply_articles.get(article_index).setSsb_content(ssb);
                 textview_content.setText(ssb);
             }
             catch (NullPointerException | IndexOutOfBoundsException e)

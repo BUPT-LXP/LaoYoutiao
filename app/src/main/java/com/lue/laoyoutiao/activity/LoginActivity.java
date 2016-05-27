@@ -19,6 +19,9 @@ import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.helper.SectionHelper;
 import com.lue.laoyoutiao.helper.UserHelper;
+import com.lue.laoyoutiao.threadpool.ThreadPool;
+
+import java.util.concurrent.ExecutorService;
 
 import de.greenrobot.event.EventBus;
 
@@ -192,9 +195,18 @@ public class LoginActivity extends AppCompatActivity
 
             Toast.makeText(getApplicationContext(), "登陆成功", Toast.LENGTH_SHORT).show();
 
-            //获取所有根分区
-            SectionHelper sectionHelper = new SectionHelper();
-            sectionHelper.getRootSections();
+            ExecutorService singleThreadExecutor = ThreadPool.getSingleTaskExecutor();
+            singleThreadExecutor.execute(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    //获取所有根分区
+                    SectionHelper sectionHelper = new SectionHelper();
+                    sectionHelper.getRootSections();
+                }
+            });
+
 
             finish();
         }

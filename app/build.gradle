@@ -26,10 +26,11 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.github.paper777:BBSSDK:1.3@aar'
-    compile 'com.squareup.okhttp:okhttp:2.5.0'
-    compile 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
+    compile 'com.squareup.okhttp3:okhttp:3.3.0'
+//    compile 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
     compile 'com.android.support:design:23.2.0'
     compile 'com.google.code.gson:gson:2.4'
     compile 'de.greenrobot:eventbus:2.4.0'
@@ -39,4 +40,6 @@ dependencies {
     compile 'cn.bingoogolapple:bga-refreshlayout:1.1.4@aar'
     compile 'pl.droidsonroids.gif:android-gif-drawable:1.1.15'
     compile 'com.squareup.picasso:picasso:2.5.2'
+//    compile 'cn.kejin.ximageview:XImageView:1.0.1'
+    compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
 }
