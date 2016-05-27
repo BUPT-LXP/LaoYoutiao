@@ -20,7 +20,6 @@ import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.adapter.BoardCommonArticleListAdapter;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
-import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.helper.BoardHelper;
 import com.lue.laoyoutiao.helper.FavoriteHelper;
 import com.lue.laoyoutiao.metadata.Article;
@@ -147,8 +146,6 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
         Article article = articleList.get(position);
-        ArticleHelper helper = new ArticleHelper();
-        helper.getThreadsInfo(board_name, article.getId(), 1);
 
         Intent intent = new Intent(this, ReadArticleActivity.class);
         intent.putExtra("board_name", board_name);

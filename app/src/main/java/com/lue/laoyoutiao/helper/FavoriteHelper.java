@@ -12,10 +12,12 @@ import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
+import com.lue.laoyoutiao.threadpool.ThreadPool;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import de.greenrobot.event.EventBus;
 import okhttp3.Response;
@@ -30,10 +32,12 @@ public class FavoriteHelper
     private List<Board> boards;
 
     private static final String TAG = "FavoriteHelper";
+    private static ExecutorService singleTaskExecutor;
 
     public FavoriteHelper()
     {
         okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
+        singleTaskExecutor = ThreadPool.getSingleTaskExecutor();
     }
 
     /**
@@ -43,8 +47,9 @@ public class FavoriteHelper
     {
         final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_FAVORITE, "0");
 
-        new Thread()
+        singleTaskExecutor.execute(new Runnable()
         {
+            @Override
             public void run()
             {
                 try
@@ -69,7 +74,8 @@ public class FavoriteHelper
                     e.printStackTrace();
                 }
             }
-        }.start();
+        });
+
     }
 
 
@@ -81,8 +87,9 @@ public class FavoriteHelper
      */
     public void postFavorite(final String url, final HashMap<String, String> params_map , final boolean is_favorite)
     {
-        new Thread()
+        singleTaskExecutor.execute(new Runnable()
         {
+            @Override
             public void run()
             {
                 try
@@ -118,6 +125,7 @@ public class FavoriteHelper
                     e.printStackTrace();
                 }
             }
-        }.start();
+        });
+
     }
 }

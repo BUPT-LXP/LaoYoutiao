@@ -9,10 +9,12 @@ import com.lue.laoyoutiao.metadata.User;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.network.PicassoHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
+import com.lue.laoyoutiao.threadpool.ThreadPool;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
 
 import de.greenrobot.event.EventBus;
 import okhttp3.Response;
@@ -23,6 +25,7 @@ import okhttp3.Response;
 public class UserHelper
 {
     private OkHttpHelper okHttpHelper;
+    private ExecutorService singleTaskExecutor;
 
     private static final String TAG = "UserHelper";
 
@@ -30,6 +33,7 @@ public class UserHelper
     public UserHelper()
     {
         okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
+        singleTaskExecutor = ThreadPool.getSingleTaskExecutor();
     }
 
 
@@ -40,8 +44,9 @@ public class UserHelper
     {
         final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_USER, BYR_BBS_API.STRING_LOGIN);
 
-        new Thread()
+        singleTaskExecutor.execute(new Runnable()
         {
+            @Override
             public void run()
             {
                 try
@@ -61,7 +66,7 @@ public class UserHelper
                     e.printStackTrace();
                 }
             }
-        }.start();
+        });
     }
 
     /**
@@ -71,20 +76,14 @@ public class UserHelper
      */
     public void save_UserFace_to_Local(final String face_url)
     {
-        new Thread()
+        singleTaskExecutor.execute(new Runnable()
         {
+            @Override
             public void run()
             {
                 try
                 {
-                    //获取 Response
-//                    Response response = okHttpHelper.getExecute(face_url);
-//
-//                    //将 Response 转换成输入流
-//                    InputStream inputStream = response.body().byteStream();
-//                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-//                    inputStream.close();
-                    Bitmap bitmap = PicassoHelper.getPicassoHelper().getBitmap(face_url);
+                    Bitmap bitmap = PicassoHelper.getPicassoHelper().getBitmap(face_url, 1);
 
                     //创建本地储存文件夹及对应文件
                     String root_dic = BYR_BBS_API.LOCAL_FILEPATH;
@@ -103,44 +102,6 @@ public class UserHelper
                     e.printStackTrace();
                 }
             }
-        }.start();
-    }
-
-
-    public Bitmap get_UserFace(final String user_id, final String face_url)
-    {
-        Bitmap user_face = null;
-        user_face = PicassoHelper.getPicassoHelper().getBitmap(face_url);
-//        try
-//        {
-//            //获取 Response
-//
-//            Response response = okHttpHelper.getExecute(face_url);
-//
-//            //将 Response 转换成输入流
-//            InputStream inputStream = response.body().byteStream();
-//
-//            BitmapFactory.Options options = new BitmapFactory.Options();
-////            options.inJustDecodeBounds = true;
-////            user_face = BitmapFactory.decodeStream(inputStream, null, options);
-//
-////            final int REQUIRED_SIZE = (int) ContextApplication.getAppContext().getResources().getDimension(R.dimen.user_face_scale);
-////            int insamplesize = (options.outWidth / REQUIRED_SIZE);
-////            if(insamplesize <= 0)
-////                insamplesize = 1;
-//
-//            //为什么先把图片的高度和宽度解析出来之后然后按比例缩放有问题。。。暂时只能按固定比例缩放了。。。
-//            options.inSampleSize = 2;
-//
-//
-//            options.inJustDecodeBounds = false;
-//            user_face = BitmapFactory.decodeStream(inputStream, null, options);
-//            inputStream.close();
-//
-//        } catch (IOException e)
-//        {
-//            e.printStackTrace();
-//        }
-        return user_face;
+        });
     }
 }

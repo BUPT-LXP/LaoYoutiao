@@ -182,12 +182,14 @@ public class Event
         private int article_index;
         private List<Bitmap> images = new ArrayList<>();
         private List<String> urls = new ArrayList<>();
+        private List<Float> sizes = new ArrayList<>();
 
-        public Attachment_Images(int article_index, List<Bitmap> images, List<String> urls)
+        public Attachment_Images(int article_index, List<Bitmap> images, List<String> urls, List<Float> sizes)
         {
             this.article_index = article_index;
             this.images = images;
             this.urls = urls;
+            this.sizes = sizes;
         }
 
         public List<Bitmap> getImages()
@@ -203,6 +205,11 @@ public class Event
         public List<String> getUrls()
         {
             return urls;
+        }
+
+        public List<Float> getSizes()
+        {
+            return sizes;
         }
     }
 
@@ -270,6 +277,24 @@ public class Event
         public int getArticle_index()
         {
             return article_index;
+        }
+
+    }
+
+    /**
+     * 站内链接错误，指定的文章不存在或链接错误
+     */
+    public static class Article_Not_Exist
+    {
+        private String error_info;
+        public Article_Not_Exist(String error_info)
+        {
+            this.error_info = error_info;
+        }
+
+        public String getError_info()
+        {
+            return error_info;
         }
     }
 }

@@ -8,9 +8,11 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
+import com.lue.laoyoutiao.threadpool.ThreadPool;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import de.greenrobot.event.EventBus;
 import okhttp3.Response;
@@ -21,6 +23,7 @@ import okhttp3.Response;
 public class WidgetHelper
 {
     private OkHttpHelper okHttpHelper;
+    private ExecutorService singleTaskExecutor;
 
     private List<Article> articleList;
 
@@ -29,6 +32,7 @@ public class WidgetHelper
     public WidgetHelper()
     {
         okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
+        singleTaskExecutor = ThreadPool.getSingleTaskExecutor();
     }
 
 
@@ -40,8 +44,9 @@ public class WidgetHelper
     {
         final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_WIDGET, BYR_BBS_API.STRING_TOPTEN);
 
-        new Thread()
+        singleTaskExecutor.execute(new Runnable()
         {
+            @Override
             public void run()
             {
                 try
@@ -62,7 +67,7 @@ public class WidgetHelper
                     e.printStackTrace();
                 }
             }
-        }.start();
+        });
     }
 
 }

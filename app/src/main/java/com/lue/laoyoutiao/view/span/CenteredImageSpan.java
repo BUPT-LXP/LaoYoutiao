@@ -23,14 +23,18 @@ public class CenteredImageSpan extends ImageSpan implements View.OnClickListener
     private ReadArticleActivity context;
     private int tv_width;
     private String url;
+    private float memory_size;
 
-    public CenteredImageSpan(Context context, Bitmap b, int verticalAlignment, int tv_width, String url)
+    public CenteredImageSpan(Context context, Bitmap b, int verticalAlignment, int tv_width, String url, float memory_size)
     {
         super(context, b, verticalAlignment);
         this.tv_width = tv_width;
         this.url = url;
         this.context = (ReadArticleActivity) context;
+        this.memory_size = memory_size;
     }
+
+
 
     public int getSize(Paint paint, CharSequence text, int start, int end,
                        Paint.FontMetricsInt fm)
@@ -82,18 +86,20 @@ public class CenteredImageSpan extends ImageSpan implements View.OnClickListener
             CenteredImageSpan[] spans = spannableString.getSpans(0, spannableString.length(), CenteredImageSpan.class);
 
             String[] urls = new String[spans.length];
+            float[] sizes = new float[spans.length];
 
             int index = 0;
             for(int i=0; i<spans.length; i++)
             {
                 urls[i] = spans[i].url;
+                sizes[i] = spans[i].memory_size;
                 if(url.equals(spans[i].url))
                 {
                     index = i;
                 }
             }
 
-            ShowImageDialog dialog = ShowImageDialog.getInstance(urls, index);
+            ShowImageDialog dialog = ShowImageDialog.getInstance(urls, index, sizes);
             dialog.show(context.getFragmentManager(), "");
         }
     }

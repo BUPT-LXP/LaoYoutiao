@@ -76,7 +76,6 @@
         android:textColor="@color/black"
         android:textSize="16sp"
         android:lineSpacingExtra="3dp"
-        android:autoLink="web|email|phone"
         android:textIsSelectable="true"/>
 
     <TextView
