@@ -3,17 +3,21 @@ package com.lue.laoyoutiao.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.lue.laoyoutiao.R;
@@ -46,6 +50,8 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
     private ListView mListView_Articles;
     private static Context mContext;
     private Menu menu;
+    private CoordinatorLayout coordinatorLayout;
+    private ProgressBar progressBar;
 
     private boolean is_favorite = false;
     private int page_number = 1;  //当前页码
@@ -140,6 +146,21 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
         mBGARefreshLayout.setRefreshViewHolder(refreshViewHolder);
 
         mListView_Articles.setOnItemClickListener(this);
+
+
+        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.coordinatorlayout);
+        // 给progressbar准备一个FrameLayout的LayoutParams
+        CoordinatorLayout.LayoutParams lp = new CoordinatorLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        // 设置对其方式为：屏幕居中对其
+        lp.gravity = Gravity.CENTER_HORIZONTAL;
+
+        progressBar = new ProgressBar(this);
+
+        progressBar.setLayoutParams(lp);
+
+        coordinatorLayout.addView(progressBar);
     }
 
     @Override
@@ -160,6 +181,9 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
 
     public void onEventMainThread(final Event.Specified_Board_Articles articles)
     {
+        if(progressBar.getVisibility() == View.VISIBLE)
+            progressBar.setVisibility(View.GONE);
+
         List<Article> top_Articles = new ArrayList<>();
         List<Article> common_Articles = new ArrayList<>();
 
@@ -179,6 +203,7 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
 
         for(Article article : common_Articles)
         {
+
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("title", article.getTitle());
             map.put("post_time", article.getPost_time());
@@ -186,8 +211,21 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
             map.put("reply_count", article.getReply_count());
             listItems.add(map);
 
-
             articleList.add(article);
+//            String title = article.getTitle();
+//            String userid = article.getUser().getId();
+//            if(!title.contains("【猿辅导】") && (!userid.contains("bineon") || !userid.contains("ytkHR")))
+//            {
+//                //傻逼猿题库！！！非要老子屏蔽你！
+//                Map<String, Object> map = new HashMap<String, Object>();
+//                map.put("title", article.getTitle());
+//                map.put("post_time", article.getPost_time());
+//                map.put("last_reply_time", article.getLast_reply_time());
+//                map.put("reply_count", article.getReply_count());
+//                listItems.add(map);
+//
+//                articleList.add(article);
+//            }
         }
 
         if(page_number ==1)

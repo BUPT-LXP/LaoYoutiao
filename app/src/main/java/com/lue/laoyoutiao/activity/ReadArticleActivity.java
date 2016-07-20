@@ -346,7 +346,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             }
             else
             {
-                Toast.makeText(this, "已经到最后一页啦", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "已经到最后一页啦", Toast.LENGTH_SHORT).show();
                 mBGARefreshLayout.endRefreshing();
                 return false;
             }

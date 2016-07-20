@@ -10,10 +10,13 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.lue.laoyoutiao.R;
@@ -44,6 +47,9 @@ public class ShowImageDialog extends DialogFragment implements ZoomImageView.OnI
     private static ExecutorService singleTaskExecutor;
     private ACache cache;
 
+    private FrameLayout framecontainer;
+    private ProgressBar progressBar;
+
 
     //处理事件
     private Handler handler = new Handler()
@@ -56,6 +62,7 @@ public class ShowImageDialog extends DialogFragment implements ZoomImageView.OnI
                 pageview[currentitem].setImageBitmap(images[currentitem]);
                 adapter.notifyDataSetChanged();
             }
+            progressBar.setVisibility(View.GONE);
             viewpager.setCurrentItem(currentitem);
 
             AlphaAnimation aAnima = new AlphaAnimation(1.0f, 0.0f);//从全不透明变为全透明
@@ -99,8 +106,22 @@ public class ShowImageDialog extends DialogFragment implements ZoomImageView.OnI
         context = ContextApplication.getAppContext();
 
         View view = inflater.inflate(R.layout.dialog_showimage, container);
+
+        framecontainer = (FrameLayout)view.findViewById(R.id.container);
         viewpager = (ViewPager) view.findViewById(R.id.viewpager);
         textview = (TextView) view.findViewById(R.id.textview);
+
+        // 给progressbar准备一个FrameLayout的LayoutParams
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        // 设置对其方式为：屏幕居中对其
+        lp.gravity = Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
+
+        progressBar = new ProgressBar(this.getActivity());
+        progressBar.setVisibility(View.GONE);
+        progressBar.setLayoutParams(lp);
+        framecontainer.addView(progressBar);
 
         cache = ACache.get(context);
 
@@ -153,21 +174,25 @@ public class ShowImageDialog extends DialogFragment implements ZoomImageView.OnI
 
         if(images[index] == null)
         {
+            progressBar.setVisibility(View.VISIBLE);
             singleTaskExecutor.execute(new Runnable()
             {
                 @Override
                 public void run()
                 {
                     int zoom;
-                    if(sizes[index] > 200.0f)
-                    {
-                        //图片较大
-                        zoom = 3;
-                    }
-                    else
-                    {
-                        zoom = 1;
-                    }
+                    float f = sizes[index] / 200.0f;
+                    zoom = (int)f + 1;
+
+//                    if(sizes[index] > 200.0f)
+//                    {
+//                        //图片较大
+//                        zoom = 3;
+//                    }
+//                    else
+//                    {
+//                        zoom = 1;
+//                    }
 
 
                     Bitmap bitmap = cache.getAsBitmap(urls[index]);
@@ -221,7 +246,6 @@ public class ShowImageDialog extends DialogFragment implements ZoomImageView.OnI
         @Override
         public void onPageSelected(final int position)
         {
-//            showImage(position);
             showImage(position);
         }
 

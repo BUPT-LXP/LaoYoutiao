@@ -89,7 +89,7 @@ public class ArticleHelper
                     List<Bitmap> faces = new ArrayList<Bitmap>();
                     for(Article article : articles)
                     {
-                        Bitmap face = PicassoHelper.getPicassoHelper().getBitmap(article.getUser().getFace_url(), 4);
+                        Bitmap face = PicassoHelper.getPicassoHelper().getBitmap(article.getUser().getFace_url(), 2);
                         faces.add(face);
                     }
                     int reply_count = jsonObject.getInteger("reply_count");
@@ -479,8 +479,10 @@ public class ArticleHelper
                             String img_url;
                             Bitmap bitmap;
 
+                            int zoom = (int)(size / 100.0f) + 1;
+
                             img_url = attachmentFile.getThumbnail_middle() + BYR_BBS_API.returnFormat + BYR_BBS_API.appkey;
-                            bitmap = PicassoHelper.getPicassoHelper().getBitmap(img_url, 1);
+                            bitmap = PicassoHelper.getPicassoHelper().getBitmap(img_url, zoom);
 
 
 //                            if(size > 50.0f)

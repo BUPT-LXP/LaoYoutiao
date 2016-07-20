@@ -16,7 +16,6 @@ import com.lue.laoyoutiao.activity.ReadArticleActivity;
 import com.lue.laoyoutiao.adapter.ToptenArticleListAdapter;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
-import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.helper.WidgetHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
@@ -134,8 +133,6 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
     public void onItemClick(AdapterView<?> parent, View view, int position, long id)
     {
         Article article = articleList.get(position);
-        ArticleHelper helper = new ArticleHelper();
-        helper.getThreadsInfo(article.getBoard_name(), article.getId(), 1);
 
         Intent intent = new Intent(getActivity(), ReadArticleActivity.class);
         intent.putExtra("board_name", article.getBoard_name());
