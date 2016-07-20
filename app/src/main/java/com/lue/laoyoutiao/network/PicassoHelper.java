@@ -7,13 +7,11 @@ import com.jakewharton.picasso.OkHttp3Downloader;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
+import com.squareup.picasso.Transformation;
 
 import java.io.IOException;
 
 import okhttp3.OkHttpClient;
-
-import static com.squareup.picasso.MemoryPolicy.NO_CACHE;
-import static com.squareup.picasso.MemoryPolicy.NO_STORE;
 
 /**
  * Created by Lue on 2016/5/26.
@@ -57,7 +55,7 @@ public class PicassoHelper
      * @param zoom 缩小的比例
      * @return 图片
      */
-    public Bitmap getBitmap(String url, int zoom)
+    public Bitmap getBitmap(String url, final int zoom)
     {
         if(url == null)
         {
@@ -65,31 +63,50 @@ public class PicassoHelper
         }
 
         Bitmap bitmap_large = null;
+
+        if(zoom == 1)
+        {
+            try
+            {
+                bitmap_large = picasso.load(url).get();
+                return bitmap_large;
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+
+
+        Transformation transformation = new Transformation()
+        {
+            @Override
+            public Bitmap transform(Bitmap source)
+            {
+                int targetwidth = source.getWidth() / zoom;
+                int targetheight = source.getHeight() / zoom;
+
+                Bitmap result = Bitmap.createScaledBitmap(source, targetwidth, targetheight, false);
+                if(result != source)
+                    source.recycle();
+                return result;
+            }
+
+            @Override
+            public String key()
+            {
+                return "transformation" + " desiredWidth";
+            }
+        };
+
         try
         {
-            bitmap_large = picasso.load(url).memoryPolicy(NO_CACHE, NO_STORE).get();
+            bitmap_large = picasso.load(url).transform(transformation).get();
         } catch (IOException e)
         {
             e.printStackTrace();
         }
 
-        if (bitmap_large != null)
-        {
-            if (zoom > 1)
-            {
-                Bitmap bitmap_small = Bitmap.createScaledBitmap(bitmap_large,
-                        bitmap_large.getWidth() / zoom, bitmap_large.getHeight() / zoom, true);
-                if (!bitmap_large.isRecycled())
-                    bitmap_large.recycle();
-
-                return bitmap_small;
-            }
-            else
-            {
-                return bitmap_large;
-            }
-        }
-        return null;
+        return bitmap_large;
     }
 
 
