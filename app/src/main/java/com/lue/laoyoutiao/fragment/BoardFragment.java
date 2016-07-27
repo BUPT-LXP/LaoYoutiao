@@ -3,6 +3,7 @@ package com.lue.laoyoutiao.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,21 +55,46 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     private FavoriteBoardListAdapter favoriteBoardListAdapter = null;
     private SectionListAdapter sectionListAdapter = null;
 
+    //为了避免Fragment之间切换时每次都会调用onCreateView方法，导致每次Fragment的布局都重绘，因此设置一个变量保存状态
+    private boolean loaded_flag = false;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    public void onCreate(@Nullable Bundle savedInstanceState)
     {
+        super.onCreate(savedInstanceState);
+
         //创建或者填充Fragment的UI，并且返回它。如果这个Fragment没有UI， 返回null
-        view = inflater.inflate(R.layout.fragment_board, container, false);
+        view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_board, null);
 
         //初始化显示界面
         initRadioGroup();
 
-        //展示收藏版面列表
-        Show_Favorites();
+        Map<String, Object> map = new HashMap<>();
+        map.put("description", "+");
+        map.put("threads_today_count", "添加收藏版面");
+        listItems.add(map);
+
+
 
         //注册EventBus
         EventBus.getDefault().register(this);
-        return view;
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+
+        if(!loaded_flag)
+        {
+            //展示收藏版面列表
+            Show_Favorites();
+
+            loaded_flag = true;
+
+            return view;
+        }
+        else
+            return null;
     }
 
     /**
@@ -281,12 +307,19 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id)
             {
-                String description = (String) listItems.get(position).get("description");
-                Intent intent = new Intent(getActivity(), BoardArticleListActivity.class);
-                intent.putExtra("Board_Description", description);
-                boolean is_favorite = !(BYR_BBS_API.Favorite_Boards.get(description) == null);
-                intent.putExtra("Is_Favorite", is_favorite);
-                startActivity(intent);
+                if(position > 0)
+                {
+                    String description = (String) listItems.get(position).get("description");
+                    Intent intent = new Intent(getActivity(), BoardArticleListActivity.class);
+                    intent.putExtra("Board_Description", description);
+                    boolean is_favorite = !(BYR_BBS_API.Favorite_Boards.get(description) == null);
+                    intent.putExtra("Is_Favorite", is_favorite);
+                    startActivity(intent);
+                }
+                else
+                {
+                    viewGroup.check(R.id.radiobutton_all_sections);
+                }
             }
         });
     }

@@ -90,22 +90,36 @@ public class FavoriteBoardListAdapter extends BaseAdapter
 
         description = description.substring(0, 1);
 
-        listItemView.board_first_char.setText(description);
+        if(position > 0)
+        {
 
-        Random random = new Random();
-        int r = random.nextInt(256);
-        int g= random.nextInt(256);
-        int b = random.nextInt(256);
-        int mColor = Color.rgb(r, g, b);                    // 随机生成颜色
+            listItemView.board_first_char.setText(description);
 
-        GradientDrawable drawable = (GradientDrawable)listItemView.board_first_char.getBackground();
-        drawable.setColor(mColor);
+            Random random = new Random();
+            int r = random.nextInt(256);
+            int g = random.nextInt(256);
+            int b = random.nextInt(256);
+            int mColor = Color.rgb(r, g, b);                    // 随机生成颜色
+
+            GradientDrawable drawable = (GradientDrawable) listItemView.board_first_char.getBackground();
+            drawable.setColor(mColor);
 
 
-        int threads_today_count = (int)listItems.get(position).get("threads_today_count");
-        String string_threads_today_count = "今日有" + threads_today_count + "个新帖";
+            int threads_today_count = (int) listItems.get(position).get("threads_today_count");
+            String string_threads_today_count = "今日有" + threads_today_count + "个新帖";
 
-        listItemView.board_replynum.setText(string_threads_today_count);
+            listItemView.board_replynum.setText(string_threads_today_count);
+        }
+        else
+        {
+            int mColor = Color.rgb(169, 169, 169);
+            GradientDrawable drawable = (GradientDrawable) listItemView.board_first_char.getBackground();
+            drawable.setColor(mColor);
+
+            listItemView.board_replynum.setVisibility(View.GONE);
+            listItemView.board_description.setText("添加收藏版面");
+            listItemView.board_first_char.setText("＋");
+        }
 
         return convertView;
     }

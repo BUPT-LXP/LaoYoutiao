@@ -7,7 +7,7 @@
     android:paddingEnd="4dp"
     android:paddingTop="4dp"
     android:paddingBottom="4dp"
-    android:paddingStart="0dp">
+    android:paddingStart="4dp">
 
     <TextView
         android:id="@+id/textview_board_first_char"
@@ -20,10 +20,11 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:orientation="vertical"
         android:paddingEnd="0dp"
-        android:paddingStart="8dp">
+        android:paddingStart="8dp"
+        android:gravity="center_vertical">
 
         <TextView
             android:id="@+id/textview_borad_description"
@@ -34,7 +35,8 @@
             android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceListItem"
             android:textColor="@color/black"
-            android:textSize="16sp"/>
+            android:textSize="16sp"
+            android:text="@string/board_description"/>
 
         <TextView
             android:id="@+id/textview_board_replynum"
@@ -45,7 +47,8 @@
             android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceListItem"
             android:textColor="@color/black"
-            android:textSize="12sp"/>
+            android:textSize="12sp"
+            android:text="@string/article_numbers_today"/>
 
     </LinearLayout>
 

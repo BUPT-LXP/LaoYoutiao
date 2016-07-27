@@ -16,22 +16,44 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:background="@color/white">
+        android:background="@color/white"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <ImageView
             android:id="@+id/my_face"
-            android:layout_height="80sp"
-            android:layout_width="80sp"
+            android:layout_height="60sp"
+            android:layout_width="60sp"
             android:layout_marginStart="15sp"
             android:contentDescription="@string/my_face_description"/>
-        <TextView
-            android:id="@+id/my_username"
+
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="@color/black"
-            android:textSize="20sp"
-            android:layout_marginStart="15dp"
-            android:layout_gravity="center_vertical|start"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/my_userid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:layout_marginStart="15dp"
+                android:layout_gravity="start"/>
+
+            <TextView
+                android:id="@+id/my_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/black"
+                android:textSize="20sp"
+                android:layout_marginStart="15dp"
+                android:layout_gravity="start"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
 

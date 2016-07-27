@@ -59,6 +59,8 @@ public class UserHelper
 
                     save_UserFace_to_Local(user_me.getFace_url());
 
+                    BYR_BBS_API.Me = user_me;
+
                     EventBus.getDefault().post(new Event.My_User_Info(user_me));
 
                 } catch (IOException e)

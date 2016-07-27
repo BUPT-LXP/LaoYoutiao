@@ -19,6 +19,7 @@ import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.helper.SectionHelper;
 import com.lue.laoyoutiao.helper.UserHelper;
+import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.threadpool.ThreadPool;
 
 import java.util.concurrent.ExecutorService;
@@ -192,6 +193,8 @@ public class LoginActivity extends AppCompatActivity
             //存储 Login_Success
             editor.putBoolean("Login_Success", true);
             editor.apply();
+
+            BYR_BBS_API.Me = user_me.getMe();
 
             Toast.makeText(getApplicationContext(), "登陆成功", Toast.LENGTH_SHORT).show();
 

@@ -17,6 +17,7 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.metadata.Board;
 import com.lue.laoyoutiao.metadata.Section;
+import com.lue.laoyoutiao.metadata.User;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 
 import java.io.File;
@@ -108,6 +109,8 @@ public class BYR_BBS_API
     public static final List<Section> ROOT_SECTIONS = new ArrayList<>();
 
     public static final Hashtable<String, Board> Favorite_Boards = new Hashtable<>();
+
+    public static User Me;
 
 
     //是否所有分区及版面信息均以获取完毕，用以提示显示分区目录

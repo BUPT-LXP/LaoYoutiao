@@ -269,6 +269,9 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
             case R.id.action_search:
 //                openSettings();
                 break;
+            case android.R.id.home:
+                finish();
+                return true;
             default:
                 break;
         }

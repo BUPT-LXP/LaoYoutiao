@@ -1,9 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
+    android:id="@+id/linear_container"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
+    <!--<ProgressBar-->
+    <!--android:id="@+id/progressbar"-->
+    <!--style="?android:attr/progressBarStyleHorizontal"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="10dp"/>-->
+
+    <!--<TextView-->
+        <!--android:id="@+id/textview_loading"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="正在奋力加载中，请稍后..."-->
+        <!--android:textSize="16dp"-->
+        <!--android:layout_gravity="center_horizontal"/>-->
 
     <cn.bingoogolapple.refreshlayout.BGARefreshLayout
         android:id="@+id/layout_topten_article_list"
@@ -16,7 +31,10 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:scrollbars="none">
+            android:scrollbars="none"
+            android:divider="@color/my_default_theme_color"
+            android:dividerHeight="1sp"
+            android:fadingEdge="none">
         </ListView>
 
     </cn.bingoogolapple.refreshlayout.BGARefreshLayout>

@@ -9,7 +9,9 @@ import android.view.Window;
 
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.FavoriteHelper;
 import com.lue.laoyoutiao.helper.SectionHelper;
+import com.lue.laoyoutiao.helper.UserHelper;
 import com.lue.laoyoutiao.threadpool.ThreadPool;
 
 import java.util.concurrent.ExecutorService;
@@ -26,7 +28,8 @@ public class WelcomeActivity extends Activity
         setContentView(R.layout.activity_welcome);
 
         ExecutorService singleTaskExecutor = ThreadPool.getSingleTaskExecutor();
-        singleTaskExecutor.execute(new Runnable()
+//        singleTaskExecutor.execute(new Runnable()
+        new Thread()
         {
             @Override
             public void run()
@@ -40,14 +43,21 @@ public class WelcomeActivity extends Activity
 
                 if(login_success)
                 {
+                    UserHelper userHelper = new UserHelper();
+                    userHelper.user_Login();
+
                     //获取所有根分区
                     SectionHelper sectionHelper = new SectionHelper();
                     sectionHelper.getRootSections();
+
+                    //获取所有收藏的版面
+                    FavoriteHelper favoriteHelper = new FavoriteHelper();
+                    favoriteHelper.getFavoriteBoards();
                 }
 
                 try
                 {
-                    Thread.sleep(3000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e)
                 {
                     e.printStackTrace();
@@ -70,7 +80,7 @@ public class WelcomeActivity extends Activity
                 }
                 finish();
             }
-        });
+        }.start();
 
 //        new Thread()
 //        {

@@ -3,12 +3,16 @@ package com.lue.laoyoutiao.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lue.laoyoutiao.R;
@@ -41,14 +45,24 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
     private List<Article> articleList = new ArrayList<>();
     private ToptenArticleListAdapter adapter ;
 
+    private LinearLayout containter;
+    private ProgressBar progressBar;
+    private TextView loading_textview;
+
+    //为了避免Fragment之间切换时每次都会调用onCreateView方法，导致每次Fragment的布局都重绘，因此设置一个变量保存状态
+    private boolean loaded_flag = false;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    public void onCreate(@Nullable Bundle savedInstanceState)
     {
+        super.onCreate(savedInstanceState);
+
         //创建或者填充Fragment的UI，并且返回它。如果这个Fragment没有UI， 返回null
-        view = inflater.inflate(R.layout.fragment_topten, container, false);
+        view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_topten, null);
 
         mBGARefreshLayout = (BGARefreshLayout)view.findViewById(R.id.layout_topten_article_list);
         listview_topten = (ListView)view.findViewById(R.id.topten_list);
+        containter = (LinearLayout)view.findViewById(R.id.linear_container);
 
         // 为BGARefreshLayout设置代理
         mBGARefreshLayout.setDelegate(this);
@@ -58,11 +72,26 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
 
         listview_topten.setOnItemClickListener(this);
 
-        getTopten();
-
         //注册EventBus
         EventBus.getDefault().register(this);
 
+        getTopten();
+
+
+
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+//        if(!loaded_flag)
+//        {
+//            loaded_flag = true;
+//            return view;
+//        }
+//
+//        else
+//            return null;
         return view;
     }
 
@@ -147,5 +176,12 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
 
         //注销EventBus
         EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+        ((ViewGroup)view.getParent()).removeView(view);
     }
 }

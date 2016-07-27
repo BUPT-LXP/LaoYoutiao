@@ -11,6 +11,7 @@ import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -90,6 +91,18 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         ArticleHelper helper = new ArticleHelper();
         helper.getThreadsInfo(board_name, article_id, 1);
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        // TODO Auto-generated method stub
+        if(item.getItemId() == android.R.id.home)
+        {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void init_view()

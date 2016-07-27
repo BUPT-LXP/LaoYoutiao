@@ -35,6 +35,8 @@
     <string name="emoji_tuzki">兔斯基</string>
     <string name="emoji_yoci">悠嘻猴</string>
     <string name="emoji_onion">洋葱头</string>
+    <string name="board_description">版面描述</string>
+    <string name="article_numbers_today">今日有几个新帖</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
