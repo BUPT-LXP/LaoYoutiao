@@ -24,6 +24,7 @@ public class WidgetHelper
 {
     private OkHttpHelper okHttpHelper;
     private ExecutorService singleTaskExecutor;
+    private ExecutorService fixedTaskExcutor;
 
     private List<Article> articleList;
 
@@ -33,6 +34,7 @@ public class WidgetHelper
     {
         okHttpHelper = OkHttpHelper.getM_OkHttpHelper();
         singleTaskExecutor = ThreadPool.getSingleTaskExecutor();
+        fixedTaskExcutor = ThreadPool.getFixedTaskExecutor();
     }
 
 
@@ -60,7 +62,7 @@ public class WidgetHelper
                     //为了得到包含在[]中的Article数组，不然使用Gson.fromJson时会报错。后续会看看有没有优化的方法。
                     articleList = new Gson().fromJson(response_result, new TypeToken<List<Article>>(){}.getType());
 
-                    EventBus.getDefault().post(new Event.Topten_ArticleList(articleList));
+                    EventBus.getDefault().post(new Event.Topten_ArticleList(articleList, false));
                 }
                 catch (IOException e)
                 {

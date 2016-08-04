@@ -124,17 +124,14 @@ public class MainActivity extends AppCompatActivity
                 switch (checkedId)
                 {
                     case R.id.topten:
-//                        showFragment(0);
                         viewPager.setCurrentItem(0, true);
                         checked_id = 0;
                         break;
                     case R.id.borad:
-//                        showFragment(1);
                         viewPager.setCurrentItem(1, true);
                         checked_id = 1;
                         break;
                     case R.id.mine:
-//                        showFragment(2);
                         viewPager.setCurrentItem(2, true);
                         checked_id = 2;
                         break;

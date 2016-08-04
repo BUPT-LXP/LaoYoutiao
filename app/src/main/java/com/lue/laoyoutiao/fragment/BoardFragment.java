@@ -55,8 +55,9 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     private FavoriteBoardListAdapter favoriteBoardListAdapter = null;
     private SectionListAdapter sectionListAdapter = null;
 
-    //为了避免Fragment之间切换时每次都会调用onCreateView方法，导致每次Fragment的布局都重绘，因此设置一个变量保存状态
-    private boolean loaded_flag = false;
+    //收藏版面列表是否正确展示
+    private boolean isFavoriteShown = false;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
@@ -74,8 +75,6 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         map.put("threads_today_count", "添加收藏版面");
         listItems.add(map);
 
-
-
         //注册EventBus
         EventBus.getDefault().register(this);
     }
@@ -83,19 +82,9 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-
-        if(!loaded_flag)
-        {
-            //展示收藏版面列表
-            Show_Favorites();
-
-            loaded_flag = true;
-
-            return view;
-        }
-        else
-            return null;
+        return view;
     }
+
 
     /**
      * 初始化显示界面
@@ -153,6 +142,16 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         if(loading_dialog.isShowing())
             loading_dialog.dismiss();
         ShowSections();
+    }
+
+
+    /**
+     * 获取由 BYR_BBS_API 在获取所有收藏版面之后发送的消息，然后展示收藏版面列表
+     * @param favorite_boards
+     */
+    public void onEventMainThread(final Event.My_Favorite_Boards favorite_boards)
+    {
+        Show_Favorites();
     }
 
 
@@ -297,6 +296,9 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
             map.put("threads_today_count", BYR_BBS_API.Favorite_Boards.get(key).getThreads_today_count());
             listItems.add(map);
         }
+
+        if(listItems.size() > 1)
+            isFavoriteShown = true;
 
         favoriteBoardListAdapter = new FavoriteBoardListAdapter(ContextApplication.getAppContext(), listItems);
 

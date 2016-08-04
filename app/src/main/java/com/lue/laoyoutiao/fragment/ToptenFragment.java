@@ -15,11 +15,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.activity.ReadArticleActivity;
 import com.lue.laoyoutiao.adapter.ToptenArticleListAdapter;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
+import com.lue.laoyoutiao.helper.MyDataBaseHelper;
 import com.lue.laoyoutiao.helper.WidgetHelper;
 import com.lue.laoyoutiao.metadata.Article;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
@@ -49,6 +51,8 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
     private ProgressBar progressBar;
     private TextView loading_textview;
 
+    private MyDataBaseHelper dataBaseHelper;
+
     //为了避免Fragment之间切换时每次都会调用onCreateView方法，导致每次Fragment的布局都重绘，因此设置一个变量保存状态
     private boolean loaded_flag = false;
 
@@ -73,25 +77,15 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
         listview_topten.setOnItemClickListener(this);
 
         //注册EventBus
-        EventBus.getDefault().register(this);
+        EventBus.getDefault().registerSticky(this);
 
-        getTopten();
-
-
+        mBGARefreshLayout.beginRefreshing();
 
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-//        if(!loaded_flag)
-//        {
-//            loaded_flag = true;
-//            return view;
-//        }
-//
-//        else
-//            return null;
         return view;
     }
 
@@ -132,8 +126,18 @@ public class ToptenFragment extends Fragment implements BGARefreshLayout.BGARefr
         else
             adapter.notifyDataSetChanged();
 
-        if(mBGARefreshLayout.getCurrentRefreshStatus() == BGARefreshLayout.RefreshStatus.REFRESHING)
-            mBGARefreshLayout.endRefreshing();
+        //判断传入的数据是从本地读取的还是从网络获取的
+        boolean is_Local = topten_article_list.isLocal();
+        if(!is_Local)
+        {
+            //将本次获取到的十大内容存在数据库中，以便下次打开的时候先从本地读取
+            Gson gson = new Gson();
+            String json = gson.toJson(articleList);
+            MyDataBaseHelper.getInstance().SaveTopTen(json);
+
+            if (mBGARefreshLayout.getCurrentRefreshStatus() == BGARefreshLayout.RefreshStatus.REFRESHING)
+                mBGARefreshLayout.endRefreshing();
+        }
     }
 
     @Override

@@ -21,15 +21,22 @@ public class Event
     public static class Topten_ArticleList
     {
         private List<Article> topten_list;
+        private boolean isLocal = false;
 
-        public Topten_ArticleList(List<Article> topten_list)
+        public Topten_ArticleList(List<Article> topten_list, boolean isLocal)
         {
             this.topten_list = topten_list;
+            this.isLocal = isLocal;
         }
 
         public List<Article> getTopten_list()
         {
             return topten_list;
+        }
+
+        public boolean isLocal()
+        {
+            return isLocal;
         }
     }
 

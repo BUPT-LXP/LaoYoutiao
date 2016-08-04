@@ -8,9 +8,11 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.metadata.Section;
 import com.lue.laoyoutiao.network.OkHttpHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
+import com.lue.laoyoutiao.threadpool.ThreadPool;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import de.greenrobot.event.EventBus;
 import okhttp3.Response;
@@ -38,23 +40,31 @@ public class SectionHelper
     public void getRootSections()
     {
         final String url = BYR_BBS_API.buildUrl(BYR_BBS_API.STRING_SECTION);
-
-        try
+        ExecutorService singleThreadExecutor = ThreadPool.getSingleTaskExecutor();
+        singleThreadExecutor.execute(new Runnable()
         {
-            Response response = okHttpHelper.getExecute(url);
-            String response_result = response.body().string();
-            JSONObject jsonObject = JSON.parseObject(response_result);
-            response_result = jsonObject.getString("section");
-            sections = new Gson().fromJson(response_result, new TypeToken<List<Section>>() {}.getType());
+            @Override
+            public void run()
+            {
+                try
+                {
+                    Response response = okHttpHelper.getExecute(url);
+                    String response_result = response.body().string();
+                    JSONObject jsonObject = JSON.parseObject(response_result);
+                    response_result = jsonObject.getString("section");
+                    sections = new Gson().fromJson(response_result, new TypeToken<List<Section>>() {}.getType());
 
-            for(Section section : sections)
-                BYR_BBS_API.ROOT_SECTIONS.add(section);
+                    for(Section section : sections)
+                        BYR_BBS_API.ROOT_SECTIONS.add(section);
 
-            EventBus.getDefault().post(new Event.All_Root_Sections(sections));
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
+                    EventBus.getDefault().post(new Event.All_Root_Sections(sections));
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
     }
 
