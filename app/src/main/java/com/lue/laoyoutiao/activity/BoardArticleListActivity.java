@@ -1,5 +1,6 @@
 package com.lue.laoyoutiao.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -64,6 +65,9 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
 
     public BoardCommonArticleListAdapter adapter;
 
+    public static final int RESULT_OK = 1;
+    public static final int RESULT_GIVEUP = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -99,6 +103,10 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
             {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                Intent intent1 = new Intent(BoardArticleListActivity.this, PostArticleActivity.class);
+                intent1.putExtra("board_name", board_name);
+                startActivityForResult(intent1, Activity.RESULT_FIRST_USER);
             }
         });
 
@@ -338,6 +346,16 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
             return false;
         }
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if(resultCode == RESULT_OK)
+        {
+            mBGARefreshLayout.beginRefreshing();
+        }
+    }
+
 
     @Override
     protected void onPause()

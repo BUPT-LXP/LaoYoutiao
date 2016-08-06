@@ -304,4 +304,37 @@ public class Event
             return error_info;
         }
     }
+
+
+    /**
+     * 回复或者发表新的帖子后服务器返回的数据
+     */
+    public static class Send_Article
+    {
+        private Article article;
+        private boolean failed;
+        private String failed_info;
+
+        public Send_Article(Article article, boolean failed, String failed_info)
+        {
+            this.article = article;
+            this.failed = failed;
+            this.failed_info = failed_info;
+        }
+
+        public Article getArticle()
+        {
+            return article;
+        }
+
+        public boolean isFailed()
+        {
+            return failed;
+        }
+
+        public String getFailed_info()
+        {
+            return failed_info;
+        }
+    }
 }

@@ -6,7 +6,6 @@ import android.graphics.Bitmap;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Transformation;
 
 import java.io.IOException;
@@ -82,8 +81,9 @@ public class PicassoHelper
             @Override
             public Bitmap transform(Bitmap source)
             {
-                int targetwidth = source.getWidth() / zoom;
-                int targetheight = source.getHeight() / zoom;
+                double z = Math.log(zoom+1)/Math.log(2);
+                int targetwidth = (int)(source.getWidth() / z);
+                int targetheight = (int)(source.getHeight() / z);
 
                 Bitmap result = Bitmap.createScaledBitmap(source, targetwidth, targetheight, false);
                 if(result != source)
@@ -107,16 +107,5 @@ public class PicassoHelper
         }
 
         return bitmap_large;
-    }
-
-
-    /**
-     * 加载图片
-     * @param url 链接
-     * @return 图片
-     */
-    public RequestCreator loadurl(String url)
-    {
-        return picasso.load(url);
     }
 }

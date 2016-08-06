@@ -14,11 +14,13 @@ import com.lue.laoyoutiao.R;
 public class LoadingDialog extends Dialog
 {
     private TextView textview_loading;
+    private String text_loading;
 
 
-    public LoadingDialog(Context context)
+    public LoadingDialog(Context context, String text_loading)
     {
         super(context, R.style.Transparent);
+        this.text_loading = text_loading;
         setOwnerActivity((Activity)context);
     }
 
@@ -37,6 +39,6 @@ public class LoadingDialog extends Dialog
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dialog_loading);
         textview_loading = (TextView)this.findViewById(R.id.loading_textview);
-        textview_loading.setText("正在获取内容，请稍侯...");
+        textview_loading.setText(text_loading);
     }
 }

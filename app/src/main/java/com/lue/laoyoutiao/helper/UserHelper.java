@@ -53,9 +53,7 @@ public class UserHelper
                 {
                     Response response = okHttpHelper.getExecute(url);
                     String response_result = response.body().string();
-                    User user_me = new Gson().fromJson(response_result, new TypeToken<User>()
-                    {
-                    }.getType());
+                    User user_me = new Gson().fromJson(response_result, new TypeToken<User>() {}.getType());
 
                     save_UserFace_to_Local(user_me.getFace_url());
 
@@ -86,6 +84,7 @@ public class UserHelper
                 try
                 {
                     Bitmap bitmap = PicassoHelper.getPicassoHelper().getBitmap(face_url, 1);
+                    BYR_BBS_API.My_Face = bitmap;
 
                     //创建本地储存文件夹及对应文件
                     String root_dic = BYR_BBS_API.LOCAL_FILEPATH;

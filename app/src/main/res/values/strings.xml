@@ -37,6 +37,10 @@
     <string name="emoji_onion">洋葱头</string>
     <string name="board_description">版面描述</string>
     <string name="article_numbers_today">今日有几个新帖</string>
+    <string name="reply_main_article">回复楼主：</string>
+    <string name="post_article_title">帖子标题</string>
+    <string name="post_article_content">帖子内容</string>
+    <string name="write_article">撰写帖子</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>

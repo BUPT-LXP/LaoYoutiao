@@ -4,16 +4,22 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Build;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+
+import com.lue.laoyoutiao.R;
 
 /**
  * Created by Lue on 2016/5/16.
@@ -31,6 +37,7 @@ public class EmotionInputDetector
     private EditText mEditText;
     private View mContentView;
     private View mPlusLayout;
+    private Button sendButton;
 
     private EmotionInputDetector()
     {
@@ -83,6 +90,39 @@ public class EmotionInputDetector
                     }
                 }
                 return false;
+            }
+        });
+        mEditText.addTextChangedListener(new TextWatcher()
+        {
+            boolean send_button_shown = false;
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                int count = s.length();
+                if(count > 0)
+                {
+                    if(!send_button_shown)
+                    {
+                        sendButton.setTextColor(Color.WHITE);
+                        sendButton.setBackgroundColor(mActivity.getResources().getColor(R.color.my_default_theme_color));
+                    }
+                }
+                if(count == 0)
+                {
+                    sendButton.setTextColor(mActivity.getResources().getColor(R.color.reply_button_text_disable));
+                    sendButton.setBackgroundColor(mActivity.getResources().getColor(R.color.reply_button_disable));
+                }
             }
         });
         return this;
@@ -151,6 +191,12 @@ public class EmotionInputDetector
             }
         });
 
+        return this;
+    }
+
+    public EmotionInputDetector bindSendButton(Button sendButton)
+    {
+        this.sendButton = sendButton;
         return this;
     }
 
@@ -247,7 +293,7 @@ public class EmotionInputDetector
         });
     }
 
-    private void hideSoftInput()
+    public void hideSoftInput()
     {
         mInputManager.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }

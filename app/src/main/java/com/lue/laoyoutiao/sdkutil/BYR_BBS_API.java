@@ -79,6 +79,7 @@ public class BYR_BBS_API
     //文章接口
     public static final String STRING_ARTICLE = "article";
     public static final String STRING_THREADS = "threads";
+    public static final String STRING_POST = "post";
 
     //老邮条在本地的储存目录
     public static final String ROOT_FOLDER = "/LaoYouTiao";
@@ -111,6 +112,7 @@ public class BYR_BBS_API
     public static final Hashtable<String, Board> Favorite_Boards = new Hashtable<>();
 
     public static User Me;
+    public static Bitmap My_Face;
 
 
     //是否所有分区及版面信息均以获取完毕，用以提示显示分区目录
@@ -257,7 +259,6 @@ public class BYR_BBS_API
 
     public void onEventBackgroundThread(final Event.All_Root_Sections Root_Sections)
     {
-
         try
         {
             for (Section section : Root_Sections.getSections())

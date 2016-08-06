@@ -484,20 +484,6 @@ public class ArticleHelper
                             img_url = attachmentFile.getThumbnail_middle() + BYR_BBS_API.returnFormat + BYR_BBS_API.appkey;
                             bitmap = PicassoHelper.getPicassoHelper().getBitmap(img_url, zoom);
 
-
-//                            if(size > 50.0f)
-//                            {
-//                                //图片大于50KB的时候使用小缩略图，防止发生OOM
-//                                img_url = attachmentFile.getThumbnail_small() + BYR_BBS_API.returnFormat + BYR_BBS_API.appkey;
-//                                bitmap = PicassoHelper.getPicassoHelper().getBitmap(img_url, 2);
-//                            }
-//                            else
-//                            {
-//                                img_url = attachmentFile.getThumbnail_middle() + BYR_BBS_API.returnFormat + BYR_BBS_API.appkey;
-//                                bitmap = PicassoHelper.getPicassoHelper().getBitmap(img_url, 1);
-//                            }
-
-
                             sizes.add(size);
                             attachment_images.add(bitmap);
                             urls.add(attachmentFile.getUrl());
@@ -663,6 +649,44 @@ public class ArticleHelper
         }
 
         return content;
+    }
+
+
+    /**
+     * 发布帖子或者回复
+     * @param url 发布链接
+     * @param params_map 携带的参数
+     */
+    public void postArticle(final String url, final HashMap<String, String> params_map)
+    {
+        singleTaskExecutor.execute(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    Response response = okHttpHelper.postExecute(url, params_map);
+                    if(response.isSuccessful())
+                    {
+                        String response_result = response.body().string();
+                        if(response_result.contains("\"code\":\"0301\",\"msg\":\"错误的 Re 文编号\""))
+                        {
+                            EventBus.getDefault().post(new Event.Send_Article(null, true, "Error:301,错误的Re文编号,服务器返回的就这样,别怪我"));
+                        }
+                        else
+                        {
+                            Article reply_article = new Gson().fromJson(response_result, new TypeToken<Article>() {}.getType());
+                            EventBus.getDefault().post(new Event.Send_Article(reply_article, false, ""));
+                        }
+
+                    }
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
 }

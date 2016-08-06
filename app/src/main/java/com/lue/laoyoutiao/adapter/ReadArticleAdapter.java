@@ -35,16 +35,19 @@ public class ReadArticleAdapter extends BaseAdapter
     private LayoutInflater listContainer;
     private List<Article> reply_articles;
     private List<Bitmap> user_faces;
+    private List<String> floors;
     private ListView listview;
     private int textview_width;
 
 
-    public ReadArticleAdapter(Context context, List<Article> articles, List<Bitmap> faces, ListView listview)
+    public ReadArticleAdapter(Context context, List<Article> articles,
+                              List<Bitmap> faces, List<String> floors, ListView listview)
     {
         this.context = context;
         listContainer = LayoutInflater.from(context);
         this.reply_articles = articles;
         this.user_faces = faces;
+        this.floors = floors;
         this.listview = listview;
 
         //注册EventBus
@@ -93,12 +96,13 @@ public class ReadArticleAdapter extends BaseAdapter
         viewHolder.imageview_face.setImageBitmap(user_faces.get(position));
         viewHolder.textview_username.setText(article.getUser().getId());
         viewHolder.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(article.getPost_time(), true));
-        if(position == 0)
-            viewHolder.textview_floor.setText(R.string.first_floor);
-        else if(position == 1)
-            viewHolder.textview_floor.setText(R.string.second_floor);
-        else
-            viewHolder.textview_floor.setText(position + 1 + "楼");
+        viewHolder.textview_floor.setText(floors.get(position));
+//        if(position == 0)
+//            viewHolder.textview_floor.setText(R.string.first_floor);
+//        else if(position == 1)
+//            viewHolder.textview_floor.setText(R.string.second_floor);
+//        else
+//            viewHolder.textview_floor.setText(floors.get(position));
 
 
         if(!article.is_content_separated())

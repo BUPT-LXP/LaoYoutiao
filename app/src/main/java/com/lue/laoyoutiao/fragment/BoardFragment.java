@@ -47,7 +47,7 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
     private boolean is_sectionlist_showed = false ;
     private boolean is_in_background = false;
 
-    //显示正在加载分区的对话框
+//    //显示正在加载分区的对话框
     private LoadingDialog loading_dialog;
 
     //收藏分区列表的数据源
@@ -96,7 +96,7 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
 
         listview_all_sections.setOnGroupExpandListener(this);
 
-        loading_dialog = new LoadingDialog(getActivity());
+        loading_dialog = new LoadingDialog(getActivity(), "正在获取内容，请稍侯...");
         loading_dialog.setCanceledOnTouchOutside(false);
 
         viewGroup = (RadioGroup)view.findViewById(R.id.borad_show_model);

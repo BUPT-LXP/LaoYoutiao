@@ -9,18 +9,17 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission  android:name="android.permission.CALL_PHONE" />
-
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
 
     <application
         android:name=".global.ContextApplication"
         android:allowBackup="true"
         android:icon="@mipmap/logo"
-        android:logo="@mipmap/logo_white"
         android:label="@string/app_name"
+        android:logo="@mipmap/logo_white"
+        android:screenOrientation="portrait"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:screenOrientation="portrait">
+        android:theme="@style/AppTheme">
         <activity
             android:name=".activity.LoginActivity"
             android:label="@string/app_name">
@@ -49,7 +48,9 @@
             android:name=".activity.SeniorReplyActivity"
             android:label="@string/title_activity_senior_reply">
         </activity>
-
+        <activity android:name=".activity.PostArticleActivity"
+            android:label="@string/write_article">
+        </activity>
     </application>
 
 </manifest>

@@ -70,7 +70,7 @@ public class EmojiFragment extends Fragment
 
         GridView grid = (GridView) view.findViewById(R.id.grid);
         grid.setAdapter(adapter);
-        grid.setOnItemClickListener(EmojiClickManager.getInstance().getOnItemClickListener(0));
+        grid.setOnItemClickListener(EmojiClickManager.getInstance().getOnItemClickListener(emoji_category));
         return view;
     }
 }
