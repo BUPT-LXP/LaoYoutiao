@@ -42,4 +42,5 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
 //    compile 'cn.kejin.ximageview:XImageView:1.0.1'
     compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
+    compile 'com.jph.takephoto:takephoto_library:2.0.1'
 }
