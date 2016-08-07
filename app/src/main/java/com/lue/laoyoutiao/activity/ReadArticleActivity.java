@@ -30,6 +30,7 @@ import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.metadata.Article;
+import com.lue.laoyoutiao.network.PicassoHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ArticleView;
 import com.lue.laoyoutiao.view.emoji.EmojiClickManager;
@@ -70,10 +71,10 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
     private SpannableStringBuilder ssb_content;
 
     private List<Article> articleList = new ArrayList<>();
-    private List<Bitmap> user_faces = new ArrayList<>();
+    private List<String> user_faces = new ArrayList<>();
     private List<String> floors = new ArrayList<>();
     private Article main_post_article;
-    private Bitmap main_post_face;
+    private String main_post_face;
 
     private int page_number = 1;
     private int reply_count = -1;
@@ -285,7 +286,9 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             }
 
             //展示主贴
-            main_post.imageview_face.setImageBitmap(main_post_face);
+
+            PicassoHelper.getPicassoHelper().loadImage(main_post_face, 2).into(main_post.imageview_face);
+
             main_post.textview_username.setText(main_post_article.getUser().getId());
             main_post.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(main_post_article.getPost_time(), true));
             main_post.textview_floor.setText(R.string.main_floor);
@@ -396,7 +399,7 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
         emotionInputDetector.hideSoftInput();
 
         articleList.add(article.getArticle());
-        user_faces.add(BYR_BBS_API.My_Face.copy(Bitmap.Config.RGB_565, true));
+        user_faces.add(BYR_BBS_API.Me.getFace_url());
         floors.add(reply_count + "楼");
         adapter.notifyDataSetChanged();
         //将焦点移到最后回复的地方
@@ -517,24 +520,21 @@ public class ReadArticleActivity extends AppCompatActivity implements BGARefresh
             if (article.getSsb_content() != null)
                 article.getSsb_content().clear();
         }
-        if(user_faces != null)
-        {
-            for (Bitmap bitmap : user_faces)
-            {
-                if (bitmap != null)
-                    bitmap.recycle();
-            }
-        }
         for (Article article : articleList)
         {
             article = null;
         }
 
-        ssb_content = null;
-        emotionInputDetector = null;
-
+        if(ssb_content != null)
+        {
+            ssb_content.clear();
+            ssb_content = null;
+        }
+        if(emotionInputDetector != null)
+            emotionInputDetector = null;
 
         articleList.clear();
+
         System.gc();
     }
 

@@ -16,6 +16,7 @@ import com.lue.laoyoutiao.R;
 import com.lue.laoyoutiao.eventtype.Event;
 import com.lue.laoyoutiao.helper.ArticleHelper;
 import com.lue.laoyoutiao.metadata.Article;
+import com.lue.laoyoutiao.network.PicassoHelper;
 import com.lue.laoyoutiao.sdkutil.BYR_BBS_API;
 import com.lue.laoyoutiao.view.ArticleView;
 import com.lue.laoyoutiao.view.span.ClickableMovementMethod;
@@ -34,14 +35,14 @@ public class ReadArticleAdapter extends BaseAdapter
     private Context context;
     private LayoutInflater listContainer;
     private List<Article> reply_articles;
-    private List<Bitmap> user_faces;
+    private List<String> user_faces;
     private List<String> floors;
     private ListView listview;
     private int textview_width;
 
 
     public ReadArticleAdapter(Context context, List<Article> articles,
-                              List<Bitmap> faces, List<String> floors, ListView listview)
+                              List<String> faces, List<String> floors, ListView listview)
     {
         this.context = context;
         listContainer = LayoutInflater.from(context);
@@ -92,17 +93,13 @@ public class ReadArticleAdapter extends BaseAdapter
         }
 
         Article article = reply_articles.get(position);
+        PicassoHelper.getPicassoHelper().loadImage(user_faces.get(position), 1).into(viewHolder.imageview_face);
 
-        viewHolder.imageview_face.setImageBitmap(user_faces.get(position));
+
         viewHolder.textview_username.setText(article.getUser().getId());
         viewHolder.textview_posttime.setText(BYR_BBS_API.timeStamptoDate(article.getPost_time(), true));
         viewHolder.textview_floor.setText(floors.get(position));
-//        if(position == 0)
-//            viewHolder.textview_floor.setText(R.string.first_floor);
-//        else if(position == 1)
-//            viewHolder.textview_floor.setText(R.string.second_floor);
-//        else
-//            viewHolder.textview_floor.setText(floors.get(position));
+
 
 
         if(!article.is_content_separated())

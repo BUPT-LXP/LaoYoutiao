@@ -86,10 +86,10 @@ public class ArticleHelper
                     response_result = jsonObject.getString("article");
                     List<Article> articles = new Gson().fromJson(response_result, new TypeToken<List<Article>>() {}.getType());
 
-                    List<Bitmap> faces = new ArrayList<Bitmap>();
+                    List<String> faces = new ArrayList<>();
                     for(Article article : articles)
                     {
-                        Bitmap face = PicassoHelper.getPicassoHelper().getBitmap(article.getUser().getFace_url(), 2);
+                        String face = article.getUser().getFace_url();
                         faces.add(face);
                     }
                     int reply_count = jsonObject.getInteger("reply_count");

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import com.jakewharton.picasso.OkHttp3Downloader;
 import com.lue.laoyoutiao.global.ContextApplication;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 import com.squareup.picasso.Transformation;
 
 import java.io.IOException;
@@ -107,5 +108,38 @@ public class PicassoHelper
         }
 
         return bitmap_large;
+    }
+
+    /**
+     * 当可以直接使用 load(url).into(ImageView)时，调用此方法
+     * @param url 图片链接
+     * @param zoom 缩小的比例
+     * @return
+     */
+    public RequestCreator loadImage(String url, final int zoom)
+    {
+        Transformation transformation = new Transformation()
+        {
+            @Override
+            public Bitmap transform(Bitmap source)
+            {
+                double z = Math.log(zoom+1)/Math.log(2);
+                int targetwidth = (int)(source.getWidth() / z);
+                int targetheight = (int)(source.getHeight() / z);
+
+                Bitmap result = Bitmap.createScaledBitmap(source, targetwidth, targetheight, false);
+                if(result != source)
+                    source.recycle();
+                return result;
+            }
+
+            @Override
+            public String key()
+            {
+                return "transformation" + " desiredWidth";
+            }
+        };
+
+        return picasso.load(url).transform(transformation);
     }
 }

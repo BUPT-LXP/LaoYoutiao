@@ -155,10 +155,10 @@ public class Event
     public static class Read_Articles_Info
     {
         private List<Article> articles;
-        private List<Bitmap> user_faces = new ArrayList<>();
+        private List<String> user_faces = new ArrayList<>();
         private int reply_count = -1;
 
-        public Read_Articles_Info(List<Article> articles, List<Bitmap> faces, int reply_count)
+        public Read_Articles_Info(List<Article> articles, List<String> faces, int reply_count)
         {
             this.articles = articles;
             this.user_faces = faces;
@@ -170,7 +170,7 @@ public class Event
             return articles;
         }
 
-        public List<Bitmap> getUser_faces()
+        public List<String> getUser_faces()
         {
             return user_faces;
         }
