@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
@@ -101,9 +100,6 @@ public class BoardArticleListActivity extends AppCompatActivity implements BGARe
             @Override
             public void onClick(View view)
             {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
                 Intent intent1 = new Intent(BoardArticleListActivity.this, PostArticleActivity.class);
                 intent1.putExtra("board_name", board_name);
                 startActivityForResult(intent1, Activity.RESULT_FIRST_USER);

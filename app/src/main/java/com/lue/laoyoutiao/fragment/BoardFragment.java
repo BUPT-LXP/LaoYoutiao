@@ -76,7 +76,7 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
         listItems.add(map);
 
         //注册EventBus
-        EventBus.getDefault().register(this);
+        EventBus.getDefault().registerSticky(this);
     }
 
     @Override
@@ -264,12 +264,16 @@ public class BoardFragment extends Fragment implements ExpandableListView.OnGrou
             Toast.makeText(ContextApplication.getAppContext(), R.string.favorite_boards_success, Toast.LENGTH_SHORT).show();
 
         listItems.clear();
+        Map<String, Object> map = new HashMap<>();
+        map.put("description", "+");
+        map.put("threads_today_count", "添加收藏版面");
+        listItems.add(map);
         for (String key : BYR_BBS_API.Favorite_Boards.keySet())
         {
-            Map<String, Object> map = new HashMap<>();
-            map.put("description", key);
-            map.put("threads_today_count", BYR_BBS_API.Favorite_Boards.get(key).getThreads_today_count());
-            listItems.add(map);
+            Map<String, Object> map1 = new HashMap<>();
+            map1.put("description", key);
+            map1.put("threads_today_count", BYR_BBS_API.Favorite_Boards.get(key).getThreads_today_count());
+            listItems.add(map1);
         }
 
         if(favoriteBoardListAdapter == null)

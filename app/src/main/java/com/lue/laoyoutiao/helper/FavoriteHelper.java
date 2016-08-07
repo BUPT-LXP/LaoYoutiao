@@ -67,7 +67,7 @@ public class FavoriteHelper
                         BYR_BBS_API.All_Boards.put(board.getDescription(), board);
                     }
 
-                    EventBus.getDefault().post(new Event.My_Favorite_Boards(boards));
+                    EventBus.getDefault().postSticky(new Event.My_Favorite_Boards(boards));
                 }
                 catch (IOException e)
                 {

@@ -39,21 +39,6 @@
                 android:maxLines="1"
                 android:singleLine="true"/>
 
-            <!--<android.support.design.widget.TextInputLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content">-->
-
-                <!--<AutoCompleteTextView-->
-                    <!--android:id="@+id/email"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:hint="@string/prompt_email"-->
-                    <!--android:inputType="textEmailAddress"-->
-                    <!--android:maxLines="1"-->
-                    <!--android:singleLine="true"/>-->
-
-            <!--</android.support.design.widget.TextInputLayout>-->
-
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -72,7 +57,7 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/button_form"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -83,29 +68,24 @@
                     style="?android:textAppearanceSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:text="@string/action_sign_up"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="47dp"/>
 
                 <Button
                     android:id="@+id/sign_in_button"
                     style="?android:textAppearanceSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:text="@string/action_sign_in"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:layout_alignTop="@+id/sign_up_button"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="45dp"/>
 
-
-                <Button
-                    android:id="@+id/guest_visit_button"
-                    style="?android:textAppearanceSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/guest_visit"
-                    android:textStyle="bold"/>
-            </LinearLayout>
+            </RelativeLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -109,6 +109,7 @@ public class FavoriteBoardListAdapter extends BaseAdapter
             String string_threads_today_count = "今日有" + threads_today_count + "个新帖";
 
             listItemView.board_replynum.setText(string_threads_today_count);
+            listItemView.board_replynum.setVisibility(View.VISIBLE);
         }
         else
         {

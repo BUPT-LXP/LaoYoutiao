@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -79,18 +80,14 @@ public class LoginActivity extends AppCompatActivity
             }
         });
 
-        Button mGuestVisitButton = (Button) findViewById(R.id.guest_visit_button);
-        mGuestVisitButton.setOnClickListener(new OnClickListener()
+        final Button SignUpButton = (Button) findViewById(R.id.sign_up_button);
+        SignUpButton.setOnClickListener(new OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
-
-                editor = My_sharedPreferences.edit();
-                editor.putString("username", "guest");
-                editor.putString("password", "");
-                editor.apply();
+                Snackbar.make(SignUpButton, "暂未开通此功能，请等待更新", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         });
 
